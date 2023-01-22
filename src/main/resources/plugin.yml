@@ -1,9 +1,9 @@
-main: de.greensurvivors.greenplugin.GreenPlugin
-name: GreenPlugin
+main: de.greensurvivors.greenbook.GreenBook
+name: GreenBook
 version: 1.0.0
 api-version: 1.19
 author: GreensurvivorsTeam
 
 commands:
-  greenplugin:
+  greenbook:
     description: A command.

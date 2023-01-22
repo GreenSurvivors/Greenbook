@@ -9,7 +9,7 @@ plugins {
 
 group = "de.greensurvivors"
 version = "1.0.0-SNAPSHOT"
-description = "A Greensurvivors Plugin "
+description = "Like Craftbook, but not a buggy dinosaur"
 //java.sourceCompatibility = JavaVersion.VERSION_17
 
 java {
