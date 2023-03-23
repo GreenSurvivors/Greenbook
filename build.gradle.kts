@@ -4,7 +4,7 @@ plugins {
     `java-library`
     //java
     id("io.papermc.paperweight.userdev") version "1.5.3"
-    id("xyz.jpenilla.run-paper") version "2.0.1" // Adds runServer and runMojangMappedServer tasks for testing
+	id("xyz.jpenilla.run-paper") version "2.0.1" // Adds runServer and runMojangMappedServer tasks for testing
 }
 
 group = "de.greensurvivors"
