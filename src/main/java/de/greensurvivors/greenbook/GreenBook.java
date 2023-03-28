@@ -1,6 +1,7 @@
 package de.greensurvivors.greenbook;
 
 import de.greensurvivors.greenbook.commands.CoinCmd;
+import de.greensurvivors.greenbook.commands.GreenBookCmd;
 import de.greensurvivors.greenbook.config.MainConfig;
 import de.greensurvivors.greenbook.listener.*;
 import org.bukkit.Bukkit;
@@ -14,6 +15,7 @@ import java.util.logging.Level;
 public class GreenBook extends JavaPlugin {
 	private static GreenBook instance;
 	private CoinCmd coinCmd = null;
+	private GreenBookCmd greenBookCmd = null;
 
 	public static GreenBook inst() {
 		return instance;
@@ -37,6 +39,16 @@ public class GreenBook extends JavaPlugin {
 			coinCommand.setTabCompleter(this.coinCmd);
 		} else {
 			GreenLogger.log(Level.SEVERE, "Couldn't register command '" + CoinCmd.getCommand() + "'!");
+		}
+
+		PluginCommand mainCommand = getCommand(GreenBookCmd.getCommand());
+		if (mainCommand != null) {
+			this.greenBookCmd = new GreenBookCmd();
+
+			mainCommand.setExecutor(this.greenBookCmd);
+			mainCommand.setTabCompleter(this.greenBookCmd);
+		} else {
+			GreenLogger.log(Level.SEVERE, "Couldn't register command '" + GreenBookCmd.getCommand() + "'!");
 		}
 
 		// configuration
