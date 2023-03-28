@@ -1,9 +1,11 @@
 main: de.greensurvivors.greenbook.GreenBook
 name: GreenBook
-version: 1.0.0
+version: 0.0.1-Snapshot
 api-version: 1.19
 author: GreensurvivorsTeam
 
 commands:
+  coin:
+    permission-message: Es ist nicht alles Permission, was glänzt.
   greenbook:
     description: A command.

@@ -1,13 +1,19 @@
 package de.greensurvivors.greenbook;
 
+import de.greensurvivors.greenbook.commands.CoinCmd;
 import de.greensurvivors.greenbook.config.MainConfig;
 import de.greensurvivors.greenbook.listener.*;
 import org.bukkit.Bukkit;
+import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.logging.Level;
 
 public class GreenBook extends JavaPlugin {
 	private static GreenBook instance;
+	private CoinCmd coinCmd = null;
 
 	public static GreenBook inst() {
 		return instance;
@@ -22,6 +28,17 @@ public class GreenBook extends JavaPlugin {
 		// set logger
 		GreenLogger.setLogger(getLogger());
 
+		//register commands (must happen before config, because it depens on non null values.)
+		PluginCommand coinCommand = getCommand(CoinCmd.getCommand());
+		if (coinCommand != null) {
+			this.coinCmd = new CoinCmd();
+
+			coinCommand.setExecutor(this.coinCmd);
+			coinCommand.setTabCompleter(this.coinCmd);
+		} else {
+			GreenLogger.log(Level.SEVERE, "Couldn't register command '" + CoinCmd.getCommand() + "'!");
+		}
+
 		// configuration
 		MainConfig.inst().reloadMain();
 
@@ -33,6 +50,10 @@ public class GreenBook extends JavaPlugin {
 		pm.registerEvents(PaintingListener.inst(), this);
 		pm.registerEvents(BridgeListener.inst(), this);
 		pm.registerEvents(GateListener.inst(), this);
+	}
+
+	public @Nullable CoinCmd getCoinCmd() {
+		return coinCmd;
 	}
 
 	@Override

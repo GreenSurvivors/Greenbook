@@ -17,16 +17,21 @@ public enum Lang implements Cons {
 	SIGN_RECEIVER_NAME("Reveiver"),
 	NO_WALLSIGN("You have to place this at a wall."),
 
+	COIN_STOSS_SELF(String.format("&e%s &cdied, by trying to toss themselves a coin.", Lang.PLAYER)),
+	COIN_TOSS_OTHER(String.format("&e%s &2tossed a coin to &e%s&2.", Lang.PLAYER, Lang.PLAYER2)),
+	COIN_SET(String.format("&2Set coin item successfully to &6'&e%s&6'", VALUE)),
+	COIN_NOT_ENOUGH("&cYou have not enough coins."),
 
-	NO_PLAYER("&cYou have to be a player."),
+	NOT_PLAYER_SELF("&cYou have to be a player."),
 	NO_NUMBER(String.format("&6'&e%s&6' &cis not a valid number.", VALUE)),
 	NO_BOOL(String.format("&6'&e%s&6' &cis not a valid boolean.", VALUE)),
 	NO_PERMISSION_COMMAND("&cYou have no permission to perform this command."),
 	NO_PERMISSION_SOMETHING("&cYou have no permission to do that."),
-	NO_SUCH_PLAYER(String.format("&cCould not get a valid player from %s", VALUE)),
+	NO_SUCH_PLAYER(String.format("&cCould not get a valid player named %s", VALUE)),
 	UNKNOWN_ARGUMENT(String.format("&cUnknown or wrong argument '%s'.", VALUE)),
 	UNKNOWN_ERROR("&cUnknown Error. What happened?"),
 	NOT_ENOUGH_ARGS("&cNot enough arguments."),
+	NO_ITEM_HOLDING("&cYou are holding no item."),
 
 	FORMAT_LOCATION(String.format("&f%s&6, &f%s&e, &f%s&e, &f%s", WORLD, X, Y, Z)),
 

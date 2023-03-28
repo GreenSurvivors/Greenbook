@@ -2,6 +2,8 @@ package de.greensurvivors.greenbook.language;
 
 public interface Cons {
     String
+            PLAYER = "-player-",
+            PLAYER2 = "-player2-",
             X = "-x-",
             Y = "-y-",
             Z = "-z-",

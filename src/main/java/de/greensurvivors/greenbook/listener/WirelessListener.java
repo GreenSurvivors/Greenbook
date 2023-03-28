@@ -1,6 +1,6 @@
 package de.greensurvivors.greenbook.listener;
 
-import de.greensurvivors.greenbook.config.MainConfig;
+import de.greensurvivors.greenbook.config.WireLessConfig;
 import de.greensurvivors.greenbook.language.Lang;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -28,7 +28,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class WirelessListener implements Listener {
-    Pattern pattern = Pattern.compile("\\[(.*?)\\]S?");
+    Pattern signPattern = Pattern.compile("\\[(.*?)\\]S?");
 
     private final HashMap<Component, HashSet<Location>> knownReceiverLocations = new HashMap<>();
     private final HashMap<Location, Boolean> lastPowerState = new HashMap<>();
@@ -74,7 +74,7 @@ public class WirelessListener implements Listener {
 
             String line2 = plainSerializer.serialize(transmitterSign.line(1)).trim();
 
-            Matcher matcher = pattern.matcher(line2);
+            Matcher matcher = signPattern.matcher(line2);
             // clear line 2 of square brackets []
             if (matcher.matches()) {
                 line2 = matcher.group(1);
@@ -95,7 +95,7 @@ public class WirelessListener implements Listener {
                         String transmitterPlayerUUIDStr = plainSerializer.serialize(transmitterSign.line(3));
 
                         if (receiverLocations == null) {
-                            receiverLocations = MainConfig.inst().loadReceiverLocations(transmitterChannel, usePlayerSpecificChannels ? transmitterPlayerUUIDStr : null);
+                            receiverLocations = WireLessConfig.inst().loadReceiverLocations(transmitterChannel, usePlayerSpecificChannels ? transmitterPlayerUUIDStr : null);
                             knownReceiverLocations.put(transmitterChannel, receiverLocations);
                         }
 
@@ -113,7 +113,7 @@ public class WirelessListener implements Listener {
 
                                         // test if the second line is stating the sign is a receiver
                                         line2 = plainSerializer.serialize(receiverSign.line(1)).trim();
-                                        matcher = pattern.matcher(line2);
+                                        matcher = signPattern.matcher(line2);
 
                                         if (matcher.matches()) {
                                             line2 = matcher.group(1);
@@ -168,7 +168,7 @@ public class WirelessListener implements Listener {
     private void onSignPlace(SignChangeEvent event) {
         PlainTextComponentSerializer plainSerializer = PlainTextComponentSerializer.plainText();
         String line2 = plainSerializer.serialize(event.line(1)).trim();
-        Matcher matcher = pattern.matcher(line2);
+        Matcher matcher = signPattern.matcher(line2);
 
         //clear line 2 of square brackets []
         if (matcher.matches()) {
@@ -195,7 +195,7 @@ public class WirelessListener implements Listener {
                     //cache the new receiver
                     this.addReceiver(event.getBlock().getLocation(), channel);
 
-                    MainConfig.inst().saveReceiverLocations(event.line(2), knownReceiverLocations.get(event.line(2)), playerUUIDStr);
+                    WireLessConfig.inst().saveReceiverLocations(event.line(2), knownReceiverLocations.get(event.line(2)), playerUUIDStr);
                 } else {
                     event.getPlayer().sendMessage(Lang.build(Lang.NO_WALLSIGN.get()));
                     event.getBlock().setType(Material.AIR);
@@ -222,7 +222,7 @@ public class WirelessListener implements Listener {
                 if ((state instanceof Sign sign)) {
                     PlainTextComponentSerializer plainSerializer = PlainTextComponentSerializer.plainText();
                     String line2 = plainSerializer.serialize(sign.line(1)).trim();
-                    Matcher matcher = pattern.matcher(line2);
+                    Matcher matcher = signPattern.matcher(line2);
 
                     //clear line 2 of square brackets []
                     if (matcher.matches()) {
@@ -236,7 +236,7 @@ public class WirelessListener implements Listener {
                                 this.addReceiver(state.getLocation(), channel);
 
                                 String playerUUIDStr = plainSerializer.serialize(sign.line(3));
-                                MainConfig.inst().saveReceiverLocations(sign.line(2), knownReceiverLocations.get(sign.line(2)), usePlayerSpecificChannels ? playerUUIDStr : null);
+                                WireLessConfig.inst().saveReceiverLocations(sign.line(2), knownReceiverLocations.get(sign.line(2)), usePlayerSpecificChannels ? playerUUIDStr : null);
                             }
                         }
                     }
