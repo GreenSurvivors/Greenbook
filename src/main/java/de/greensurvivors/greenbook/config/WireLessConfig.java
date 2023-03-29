@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
 public class WireLessConfig {
     private static final String
             WIRELESS_NODE = "wireless",
+            //these settings are only accessible via config file
             USE_PLAYER_SPECIFIC_CHANNELS = WIRELESS_NODE + ".usePlayerSpecificChannels",
             COMPATIBILITY_MODE = WIRELESS_NODE + ".compatibilityMode";
 
@@ -68,6 +69,8 @@ public class WireLessConfig {
         // clear cache
         WirelessListener.inst().clear();
 
+        WirelessListener.inst().setCompatibilityMode(cfg.getBoolean(COMPATIBILITY_MODE, DEFAULT_COMPATIBILITY_MODE));
+        WirelessListener.inst().setUsePlayerSpecificChannels(cfg.getBoolean(USE_PLAYER_SPECIFIC_CHANNELS, DEFAULT_USE_PLAYER_SPECIFIC_CHANNELS));
     }
 
     protected void save(FileConfiguration cfg) {

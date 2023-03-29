@@ -32,6 +32,7 @@ public class WirelessListener implements Listener {
 
     private final HashMap<Component, HashSet<Location>> knownReceiverLocations = new HashMap<>();
     private final HashMap<Location, Boolean> lastPowerState = new HashMap<>();
+    //these settings are only accessible via config file
     private boolean
             usePlayerSpecificChannels = true,
             compatibilityMode = false;
