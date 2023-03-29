@@ -4,12 +4,19 @@ import org.bukkit.command.CommandSender;
 
 
 public enum PermissionUtils {
-    GREENBOOK_ROOT("greenbook"),
-    GREENBOOK_COIN_PLAYER(GREENBOOK_ROOT.get() + ".coin.player"),
-    GREENBOOK_COIN_ADMIN(GREENBOOK_ROOT.get() + ".coin.admin"),
+    //never use this one, its just the root
+    GREENBOOK_ROOT("greenbook."),
 
-    GREENBOOK_PLUGIN("findme.plugin"),
-    GREENBOOK_RELOAD("findme.reload");
+    GREENBOOK_COIN_PLAYER(GREENBOOK_ROOT.get() + "coin.player"),
+    GREENBOOK_COIN_ADMIN(GREENBOOK_ROOT.get() + "coin.admin"),
+
+    GREENBOOK_LIFT_CREATE (GREENBOOK_ROOT.get() + "lift.create"),
+    GREENBOOK_LIFT_USE (GREENBOOK_ROOT.get() + "lift.use"),
+    GREENBOOK_LIFT_ADMIN (GREENBOOK_ROOT.get() + "lift.admin"),
+
+
+    GREENBOOK_PLUGIN(GREENBOOK_ROOT.get() + "plugin"),
+    GREENBOOK_RELOAD(GREENBOOK_ROOT.get() + "reload");
 
     private final String value;
 

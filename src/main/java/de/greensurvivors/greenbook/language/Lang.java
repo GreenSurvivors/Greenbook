@@ -22,6 +22,14 @@ public enum Lang implements Cons {
 	COIN_SET(String.format("&2Set coin item successfully to &6'&e%s&6'", VALUE)),
 	COIN_NOT_ENOUGH("&cYou have not enough coins."),
 
+	LIFT_CREATE_SUCCESS("&2Lift was successfully created."),
+	LIFT_USED_STOP("&cYou cant depart from this kind of Lift."),
+	LIFT_USED_UP("&6Moved a floor up."),
+	LIFT_USED_DOWN("&6Moved a floor down."),
+	LIFT_USED_FLOOR(String.format("&6Moved to floor %s", VALUE)),
+	LIFT_DESTINATION_OBSTRUCTED("&cThe floor ist obstructed."),
+	LIFT_DESTINATION_UNKNOWN("&cThis lift has no destination."),
+
 	NOT_PLAYER_SELF("&cYou have to be a player."),
 	NO_NUMBER(String.format("&6'&e%s&6' &cis not a valid number.", VALUE)),
 	NO_BOOL(String.format("&6'&e%s&6' &cis not a valid boolean.", VALUE)),

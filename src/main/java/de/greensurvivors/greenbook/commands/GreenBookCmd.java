@@ -34,13 +34,13 @@ public class GreenBookCmd implements CommandExecutor, TabCompleter {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (args.length > 0){
             switch (args[0].toLowerCase()){
-                case ReloadCmd.SUBCOMMAND -> ReloadCmd.handleCommand(sender, args);
+                case ReloadCmd.SUBCOMMAND -> {
+                    return ReloadCmd.handleCommand(sender, args);
+                }
                 default -> {
                     return false;
                 }
             }
-
-            return true;
         }
 
         return false;
@@ -61,9 +61,11 @@ public class GreenBookCmd implements CommandExecutor, TabCompleter {
      */
     @Override
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
-        ArrayList<String> result = new ArrayList<>();
+        List<String> result = new ArrayList<>();
         if (args.length == 1) {
             result.add(ReloadCmd.SUBCOMMAND);
+
+            result = result.stream().filter(s -> s.startsWith(args[0].toLowerCase())).toList();
         } else if (args.length > 1){
             //tapcompleate of subcommands
         }
