@@ -1,6 +1,5 @@
 package de.greensurvivors.greenbook.listener;
 
-import de.greensurvivors.greenbook.GreenLogger;
 import de.greensurvivors.greenbook.PermissionUtils;
 import de.greensurvivors.greenbook.language.Lang;
 import de.greensurvivors.greenbook.utils2.LocationUtil;
@@ -9,9 +8,11 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Location;
+import org.bukkit.Tag;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
+import org.bukkit.block.data.Directional;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -24,7 +25,6 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -107,17 +107,12 @@ public class LiftListener implements Listener {
         } //no 2nd line
     }
 
-    private Sign getDestination(@NotNull Sign origionSign, @NotNull LiftType type,  @NotNull Location interactionPoint){
+    private Sign getDestination(@NotNull Sign origionSign, @NotNull LiftType type,  boolean useBothUp){
         int direction;
         switch (type) {
             case UP -> direction = 1;
             case DOWN -> direction = -1;
-            case BOTH -> {
-                double relativeHeight = interactionPoint.getY();
-                relativeHeight -= (int) relativeHeight;
-
-                direction = relativeHeight >= 0.5 ? 1 : -1;
-            }
+            case BOTH -> direction = useBothUp ? 1 : -1;
             default -> {//stop or unknown
                 return null;
             }
@@ -187,6 +182,63 @@ public class LiftListener implements Listener {
         }
     }
 
+    private void useLift(Sign origionSign, Player player, boolean useBothUp){
+
+            LiftType type = LiftType.fromLabel(origionSign.line(1));
+
+            if (type != null){
+                //user clicked on a lift.
+                //event.setCancelled(true); //we are monitoring the event, we shouldn't cancel it. it's probably fine anyway.
+
+                if (type == LiftType.STOP){
+                    //you can only arrive at stops
+                    player.sendMessage(Lang.build(Lang.LIFT_USED_STOP.get()));
+                    return;
+                }
+
+                //check permission
+                if (PermissionUtils.hasPermission(player, PermissionUtils.GREENBOOK_LIFT_ADMIN, PermissionUtils.GREENBOOK_LIFT_USE)) {
+                    Sign destinationSign = getDestination(origionSign, type, useBothUp);
+
+                    if (destinationSign != null) {
+                        double dy = destinationSign.getLocation().getY() - origionSign.getLocation().getY();
+
+                        //finally teleport the player
+                        liftTeleport(player, dy, LegacyComponentSerializer.legacyAmpersand().serialize(destinationSign.line(0)));
+                    } else {
+                        player.sendMessage(Lang.build(Lang.LIFT_DESTINATION_UNKNOWN.get()));
+                        return;
+                    } //no destination
+                } else {
+                    player.sendMessage(Lang.build(Lang.NO_PERMISSION_SOMETHING.get()));
+                    return;
+                }
+            } //not interacted with a lift
+
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    private void onRightUseButton(PlayerInteractEvent event) {
+        Block eBlock = event.getClickedBlock();
+        Player ePlayer = event.getPlayer();
+
+        //!elevatorEnabled todo
+
+        //don't fire for offhand
+        if (event.getHand() == EquipmentSlot.HAND &&
+                //right-clicked a block. Should ensure the getBlock() is not null
+                event.getAction() == Action.RIGHT_CLICK_BLOCK){
+
+            if (eBlock != null && Tag.BUTTONS.isTagged(eBlock.getType())){
+                Block block = eBlock.getRelative(((Directional)eBlock.getBlockData()).getFacing().getOppositeFace(), 2);
+
+                if (block.getState() instanceof Sign origionSign){
+                    useLift(origionSign, ePlayer, false); //default: teleport down if a bidirectional sign is powert
+                }
+            } //not interacted with a button
+        }
+    }
+
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     private void onRightClickSign(PlayerInteractEvent event) {
         Block eBlock = event.getClickedBlock();
@@ -200,47 +252,18 @@ public class LiftListener implements Listener {
                 event.getAction() == Action.RIGHT_CLICK_BLOCK){
 
             if (eBlock != null && eBlock.getState() instanceof Sign origionSign){
-                LiftType type = LiftType.fromLabel(origionSign.line(1));
 
-                if (type != null){
-                    //user clicked on a lift.
-                    //event.setCancelled(true); //we are monitoring the event, we shouldn't cancel it. it's probably fine anyway.
+                //determine if teleport should go up or down, in case of a bidirectional lift
+                boolean useBothUp;
+                if (event.getInteractionPoint() == null){
+                    useBothUp = false;
+                } else {
+                    double relativeHeight = event.getInteractionPoint().getY();
+                    useBothUp = (relativeHeight - (int) relativeHeight) >= 0.5;
+                }
 
-                    if (type == LiftType.STOP){
-                        //you can only arrive at stops
-                        ePlayer.sendMessage(Lang.build(Lang.LIFT_USED_STOP.get()));
-                        return;
-                    }
-
-                    //check permission
-                    if (PermissionUtils.hasPermission(ePlayer, PermissionUtils.GREENBOOK_LIFT_ADMIN, PermissionUtils.GREENBOOK_LIFT_USE)) {
-                        Location interactLoc = event.getInteractionPoint();
-
-                        if (interactLoc != null) {
-                            Sign destinationSign = getDestination(origionSign, type, interactLoc);
-
-                            if (destinationSign != null) {
-                                double dy = destinationSign.getLocation().getY() - eBlock.getLocation().getY();
-
-                                //finally teleport the player
-                                liftTeleport(ePlayer, dy, LegacyComponentSerializer.legacyAmpersand().serialize(destinationSign.line(0)));
-                            } else {
-                                ePlayer.sendMessage(Lang.build(Lang.LIFT_DESTINATION_UNKNOWN.get()));
-                                return;
-                            } //no destination
-                        } else { //no interaction loc (should never be null)
-                            GreenLogger.log(Level.WARNING, ePlayer.getName() + "used lift but had no interaction point.");
-                            return;
-                        }
-                    } else {
-                        ePlayer.sendMessage(Lang.build(Lang.NO_PERMISSION_SOMETHING.get()));
-                        return;
-                    }
-                } //not interacted with a lift
+                useLift(origionSign, ePlayer, useBothUp);
             } //not interacted with a sign
         }
     }
-
-
-
 }

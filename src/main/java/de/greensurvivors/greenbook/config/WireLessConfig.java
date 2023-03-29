@@ -76,6 +76,5 @@ public class WireLessConfig {
     protected void save(FileConfiguration cfg) {
         cfg.addDefault(USE_PLAYER_SPECIFIC_CHANNELS, DEFAULT_USE_PLAYER_SPECIFIC_CHANNELS);
         cfg.addDefault(COMPATIBILITY_MODE, DEFAULT_COMPATIBILITY_MODE);
-
     }
 }

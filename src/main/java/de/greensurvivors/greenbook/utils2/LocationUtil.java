@@ -1,9 +1,9 @@
 package de.greensurvivors.greenbook.utils2;
 
-import com.destroystokyo.paper.MaterialTags;
 import de.greensurvivors.greenbook.GreenLogger;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Tag;
 import org.bukkit.World;
 import org.jetbrains.annotations.Nullable;
 
@@ -88,7 +88,7 @@ public final class LocationUtil {
     private static boolean isBlockHollowSafe(final World world, final int x, final int y, final int z) { //todo accept open doors and alike via hitbox
         final Material material = world.getBlockAt(x, y, z).getType();
 
-        if (DAMAGING_TYPES.contains(material) || LAVA_TYPES.contains(material) || MaterialTags.BEDS.isTagged(material)) {
+        if (DAMAGING_TYPES.contains(material) || LAVA_TYPES.contains(material) || Tag.BEDS.isTagged(material)) {
             return false;
         }
 
@@ -142,7 +142,7 @@ public final class LocationUtil {
 
         //check if the block is unsafe to stand on
         final Material material = world.getBlockAt(x, y-1, z).getType();
-        if (DAMAGING_TYPES.contains(material) || LAVA_TYPES.contains(material) || MaterialTags.BEDS.isTagged(material) || material == PORTAL) {
+        if (DAMAGING_TYPES.contains(material) || LAVA_TYPES.contains(material) || Tag.BEDS.isTagged(material) || material == PORTAL) {
             return null;
         }
 
