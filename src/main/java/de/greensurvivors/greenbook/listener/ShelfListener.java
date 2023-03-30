@@ -20,7 +20,9 @@ import java.util.concurrent.ThreadLocalRandom;
 //zitate
 public class ShelfListener implements Listener {
     private static ShelfListener instance;
+
     private List<String> books = new ArrayList<>();
+    private boolean requireShift = true, requireEmptyHand = false;
 
     public static ShelfListener inst() {
         if (instance == null) {
@@ -29,8 +31,24 @@ public class ShelfListener implements Listener {
         return instance;
     }
 
+    public void setRequireSneak(boolean requireShift){
+        this.requireShift = requireShift;
+    }
+
+    public void setRequireEmptyHand(boolean requireEmptyHand){
+        this.requireEmptyHand = requireEmptyHand;
+    }
+
     public void setBooks(List<String> books) {
         this.books = books;
+    }
+
+    public List<String> getBooks(){
+        return books;
+    }
+
+    public String getBook (int i){
+        return books.get(i);
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
@@ -46,6 +64,13 @@ public class ShelfListener implements Listener {
                 event.getAction() == Action.RIGHT_CLICK_BLOCK){
 
             if (eBlock != null && eBlock.getType() == Material.BOOKSHELF){
+
+                //check conditions
+                if ((requireEmptyHand && !ePlayer.getInventory().getItemInMainHand().getType().isAir()) ||
+                        (requireShift && !ePlayer.isSneaking())) {
+                    return;
+                }
+
                 if (PermissionUtils.hasPermission(ePlayer, PermissionUtils.GREENBOOK_SHELF_ADMIN, PermissionUtils.GREENBOOK_SHELF_USE)){
                     if (books.size() > 0){
                         ePlayer.sendMessage(
@@ -59,6 +84,5 @@ public class ShelfListener implements Listener {
                 }
             }
         }
-
     }
 }

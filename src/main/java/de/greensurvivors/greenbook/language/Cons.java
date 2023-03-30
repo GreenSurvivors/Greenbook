@@ -9,6 +9,7 @@ public interface Cons {
             Z = "-z-",
             TYPE = "-type-",
             VALUE = "-value-",
+            MAX = "-max-",
             UUID = "-uuid-",
             WORLD = "-world-",
             LOCATION = "-location-",

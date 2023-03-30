@@ -30,7 +30,14 @@ public enum Lang implements Cons {
 	LIFT_DESTINATION_OBSTRUCTED("&cThe floor ist obstructed."),
 	LIFT_DESTINATION_UNKNOWN("&cThis lift has no destination."),
 
-	SHELF_USE("You take a book."),
+	SHELF_USE("&7You took a book."),
+	SHELF_ADD_BOOK("&2Successfully added a Book to the library:"),
+	SHELF_REMOVED_BOOK("&2Successfully removed Book:"),
+	SHELF_NO_BOOK(String.format("&2No Book with the id of &e%s&2 exists", VALUE)),
+	SHELF_LIST_HEADER(String.format("&6-----------{Books &e%s&6/&e%s}-----------", VALUE, MAX)),
+	SHELF_LIST_FOOTER("&6-------------------------------"),
+	SHELF_SET_EMPTYHAND(String.format("&2Reading books requires empty hand: &e%s", VALUE)),
+	SHELF_SET_SNEAK(String.format("&2Reading books requires sneaking: &e%s", VALUE)),
 
 	NOT_PLAYER_SELF("&cYou have to be a player."),
 	NO_NUMBER(String.format("&6'&e%s&6' &cis not a valid number.", VALUE)),
