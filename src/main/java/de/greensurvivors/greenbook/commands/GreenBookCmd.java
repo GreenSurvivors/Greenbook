@@ -37,6 +37,9 @@ public class GreenBookCmd implements CommandExecutor, TabCompleter {
                 case ReloadCmd.SUBCOMMAND -> {
                     return ReloadCmd.handleCommand(sender, args);
                 }
+                case ShelfCmd.SUBCOMMAND -> {
+                    return ShelfCmd.handleCommand(sender, args);
+                }
                 default -> {
                     return false;
                 }
@@ -64,9 +67,15 @@ public class GreenBookCmd implements CommandExecutor, TabCompleter {
         List<String> result = new ArrayList<>();
         if (args.length == 1) {
             result.add(ReloadCmd.SUBCOMMAND);
+            result.add(ShelfCmd.SUBCOMMAND);
 
             result = result.stream().filter(s -> s.startsWith(args[0].toLowerCase())).toList();
         } else if (args.length > 1){
+            switch (args[0]){
+                case ShelfCmd.SUBCOMMAND -> {
+                    return ShelfCmd.handleTabComplete(sender, args);
+                }
+            }
             //tapcompleate of subcommands
         }
 

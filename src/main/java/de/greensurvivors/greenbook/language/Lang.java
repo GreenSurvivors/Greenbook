@@ -30,6 +30,8 @@ public enum Lang implements Cons {
 	LIFT_DESTINATION_OBSTRUCTED("&cThe floor ist obstructed."),
 	LIFT_DESTINATION_UNKNOWN("&cThis lift has no destination."),
 
+	SHELF_USE("You take a book."),
+
 	NOT_PLAYER_SELF("&cYou have to be a player."),
 	NO_NUMBER(String.format("&6'&e%s&6' &cis not a valid number.", VALUE)),
 	NO_BOOL(String.format("&6'&e%s&6' &cis not a valid boolean.", VALUE)),

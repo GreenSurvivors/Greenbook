@@ -2,7 +2,7 @@ package de.greensurvivors.greenbook.listener;
 
 import de.greensurvivors.greenbook.PermissionUtils;
 import de.greensurvivors.greenbook.language.Lang;
-import de.greensurvivors.greenbook.utils2.LocationUtil;
+import de.greensurvivors.greenbook.utils.LocationUtil;
 import io.papermc.paper.entity.TeleportFlag;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -146,7 +146,7 @@ public class LiftListener implements Listener {
      * @param player
      * @param dy
      */
-    private void liftTeleport(@NotNull Player player, double dy, @NotNull String floorName){//todo safe tp
+    private void liftTeleport(@NotNull Player player, double dy, @NotNull String floorName){
         Location relative = player.getLocation().add(0, dy, 0);
 
         Location destination = LocationUtil.getSafeLiftDestination(player.getLocation(), dy > 0, relative);
@@ -183,7 +183,6 @@ public class LiftListener implements Listener {
     }
 
     private void useLift(Sign origionSign, Player player, boolean useBothUp){
-
             LiftType type = LiftType.fromLabel(origionSign.line(1));
 
             if (type != null){
@@ -222,7 +221,7 @@ public class LiftListener implements Listener {
         Block eBlock = event.getClickedBlock();
         Player ePlayer = event.getPlayer();
 
-        //!elevatorEnabled todo
+        //!liftEnabled todo
 
         //don't fire for offhand
         if (event.getHand() == EquipmentSlot.HAND &&
@@ -244,7 +243,7 @@ public class LiftListener implements Listener {
         Block eBlock = event.getClickedBlock();
         Player ePlayer = event.getPlayer();
 
-        //!elevatorEnabled todo
+        //!liftEnabled todo
 
         //don't fire for offhand
         if (event.getHand() == EquipmentSlot.HAND &&

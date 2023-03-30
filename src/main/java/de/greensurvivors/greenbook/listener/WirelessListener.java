@@ -1,11 +1,13 @@
 package de.greensurvivors.greenbook.listener;
 
+import de.greensurvivors.greenbook.GreenBook;
 import de.greensurvivors.greenbook.config.WireLessConfig;
 import de.greensurvivors.greenbook.language.Lang;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
@@ -20,6 +22,7 @@ import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -28,7 +31,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class WirelessListener implements Listener {
-    Pattern signPattern = Pattern.compile("\\[(.*?)\\]S?");
+    private static final Pattern signPattern = Pattern.compile("\\[(.*?)\\]S?");
+    private static final NamespacedKey CHANNEL_UUID_KEY = new NamespacedKey(GreenBook.inst(), "channelUUID");
 
     private final HashMap<Component, HashSet<Location>> knownReceiverLocations = new HashMap<>();
     private final HashMap<Location, Boolean> lastPowerState = new HashMap<>();
@@ -81,6 +85,9 @@ public class WirelessListener implements Listener {
                 line2 = matcher.group(1);
 
                 if (line2.equalsIgnoreCase(Lang.SIGN_TRANSMITTER_ID.get())) {
+                    //todo: maybe use a lectern as receiver to transmit all possible redstone signal strengths (optional)
+                    //but than the reading of the components is to slow.
+
                     // test if the power-level has changed from off to on or reverse.
                     // this is an imported check, for not only makes it all the following checks and updates obsolete,
                     // but also reading the component lines form a sign is not fast enough to compete against a redstone wire signal
@@ -93,7 +100,7 @@ public class WirelessListener implements Listener {
                         Component transmitterChannel = transmitterSign.line(2);
 
                         HashSet<Location> receiverLocations = knownReceiverLocations.get(transmitterChannel);
-                        String transmitterPlayerUUIDStr = plainSerializer.serialize(transmitterSign.line(3));
+                        String transmitterPlayerUUIDStr = transmitterSign.getPersistentDataContainer().get(CHANNEL_UUID_KEY, PersistentDataType.STRING);
 
                         if (receiverLocations == null) {
                             receiverLocations = WireLessConfig.inst().loadReceiverLocations(transmitterChannel, usePlayerSpecificChannels ? transmitterPlayerUUIDStr : null);
@@ -120,10 +127,10 @@ public class WirelessListener implements Listener {
                                             line2 = matcher.group(1);
                                             if (line2.equalsIgnoreCase(Lang.SIGN_RECEIVER_ID.get())) {
 
-                                                String receiverPlayerUUIDStr = plainSerializer.serialize(receiverSign.line(3));
+                                                String receiverPlayerUUIDStr = transmitterSign.getPersistentDataContainer().get(CHANNEL_UUID_KEY, PersistentDataType.STRING);
 
                                                 // if user specific channels is turned on, compare the two uuid lines
-                                                if (usePlayerSpecificChannels && !receiverPlayerUUIDStr.equals(transmitterPlayerUUIDStr)) {
+                                                if (usePlayerSpecificChannels && receiverPlayerUUIDStr != null && !receiverPlayerUUIDStr.equals(transmitterPlayerUUIDStr)) {
                                                     return;
                                                 }
 
@@ -169,6 +176,7 @@ public class WirelessListener implements Listener {
     private void onSignPlace(SignChangeEvent event) {
         PlainTextComponentSerializer plainSerializer = PlainTextComponentSerializer.plainText();
         String line2 = plainSerializer.serialize(event.line(1)).trim();
+        Sign changedSign = (Sign) event.getBlock().getState();
         Matcher matcher = signPattern.matcher(line2);
 
         //clear line 2 of square brackets []
@@ -184,7 +192,8 @@ public class WirelessListener implements Listener {
                     String playerUUIDStr = null;
                     if (usePlayerSpecificChannels) {
                         playerUUIDStr = event.getPlayer().getUniqueId().toString();
-                        event.line(3, Lang.build(playerUUIDStr));
+
+                        changedSign.getPersistentDataContainer().set(CHANNEL_UUID_KEY, PersistentDataType.STRING, playerUUIDStr);
                     }
 
                     Component channel = event.line(2);
@@ -210,7 +219,7 @@ public class WirelessListener implements Listener {
 
                 //set the uuid of the player if needed
                 if (usePlayerSpecificChannels) {
-                    event.line(3, Lang.build(event.getPlayer().getUniqueId().toString()));
+                    changedSign.getPersistentDataContainer().set(CHANNEL_UUID_KEY, PersistentDataType.STRING, event.getPlayer().getUniqueId().toString());
                 }
             }
         }

@@ -1,4 +1,4 @@
-package de.greensurvivors.greenbook.utils2;
+package de.greensurvivors.greenbook.utils;
 
 import de.greensurvivors.greenbook.GreenLogger;
 import org.bukkit.Location;

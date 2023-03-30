@@ -75,6 +75,7 @@ public class MainConfig {
     private void saveMain() {
         FileConfiguration cfg = GreenBook.inst().getConfig();
         WireLessConfig.inst().save(cfg);
+        ShelfConfig.inst().saveBooks();
 
         cfg.options().setHeader(List.of(GreenBook.inst().getName() + " " + GreenBook.inst().getDescription().getVersion()));
         cfg.options().copyDefaults(true);
@@ -90,6 +91,7 @@ public class MainConfig {
             FileConfiguration cfg = GreenBook.inst().getConfig();
 
             WireLessConfig.inst().load(cfg);
+            ShelfConfig.inst().loadBooks();
         });
     }
 }

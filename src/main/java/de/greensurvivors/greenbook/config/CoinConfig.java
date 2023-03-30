@@ -4,28 +4,24 @@ import de.greensurvivors.greenbook.GreenBook;
 import de.greensurvivors.greenbook.GreenLogger;
 import org.bukkit.Material;
 import org.bukkit.configuration.MemorySection;
-import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.inventory.ItemStack;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 
 public class CoinConfig {
-    private static final String COIN_ITEM_KEY = "coin_item";
+    private static final String COIN_KEY = "coin.";
+    private static final String COIN_ITEM_KEY = COIN_KEY + "coin_item";
     private static final ItemStack DEFAULT_COIN_ITEM = new ItemStack(Material.GOLD_NUGGET);
 
     private static CoinConfig instance;
 
-    private final File file;
-    private final YamlConfiguration configuration;
+    private final FileConfiguration configuration;
 
     private CoinConfig() {
-        this.file = new File(GreenBook.inst().getDataFolder(), "coinConfig.yml");
-        this.configuration = YamlConfiguration.loadConfiguration(this.file);
+        this.configuration = GreenBook.inst().getConfig();
 
         this.configuration.addDefault(COIN_ITEM_KEY, DEFAULT_COIN_ITEM);
     }
@@ -41,22 +37,11 @@ public class CoinConfig {
     public void saveCoinItem(ItemStack newCoin) {
         this.configuration.set(COIN_ITEM_KEY, newCoin.serialize());
 
-        // save modified configuration
-        this.configuration.options().setHeader(Collections.singletonList(String.format(
-                "Coin config file for %s (%s)",
-                GreenBook.inst().getName(),
-                GreenBook.inst().getDescription().getVersion())));
-        this.configuration.options().parseComments(true);
-
-        try {
-            this.configuration.save(file);
-        } catch (IOException e) {
-            GreenLogger.log(Level.SEVERE, "Could not save coin config file.", e);
-        }
+        GreenBook.inst().saveConfig();
     }
 
     public ItemStack loadCoinItem() {
-        Object obj = this.configuration.get("coin_item", DEFAULT_COIN_ITEM);
+        Object obj = this.configuration.get(COIN_ITEM_KEY, DEFAULT_COIN_ITEM);
 
         if (obj instanceof ItemStack itemStack) {
             return itemStack;

@@ -14,6 +14,8 @@ public enum PermissionUtils {
     GREENBOOK_LIFT_USE (GREENBOOK_ROOT.get() + "lift.use"),
     GREENBOOK_LIFT_ADMIN (GREENBOOK_ROOT.get() + "lift.admin"),
 
+    GREENBOOK_SHELF_USE (GREENBOOK_ROOT.get() + ".shelf.use"),
+    GREENBOOK_SHELF_ADMIN (GREENBOOK_ROOT.get() + ".shelf.admin"),
 
     GREENBOOK_PLUGIN(GREENBOOK_ROOT.get() + "plugin"),
     GREENBOOK_RELOAD(GREENBOOK_ROOT.get() + "reload");
