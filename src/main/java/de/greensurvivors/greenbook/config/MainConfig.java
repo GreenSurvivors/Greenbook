@@ -74,7 +74,6 @@ public class MainConfig {
 
     private void saveMain() {
         FileConfiguration cfg = GreenBook.inst().getConfig();
-        WireLessConfig.inst().save(cfg);
         ShelfConfig.inst().saveShelfConfig();
 
         cfg.options().setHeader(List.of(GreenBook.inst().getName() + " " + GreenBook.inst().getDescription().getVersion()));
@@ -88,9 +87,9 @@ public class MainConfig {
      */
     private void loadMainSave() {
         Bukkit.getScheduler().runTask(GreenBook.inst(), () -> {
-            FileConfiguration cfg = GreenBook.inst().getConfig();
 
-            WireLessConfig.inst().load(cfg);
+            WireLessConfig.inst().load();
+            PaintingConfig.inst().load();
             ShelfConfig.inst().loadShelfs();
         });
     }

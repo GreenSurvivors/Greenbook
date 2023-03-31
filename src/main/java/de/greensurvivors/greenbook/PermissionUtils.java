@@ -24,6 +24,7 @@ public enum PermissionUtils {
     GREENBOOK_SHELF_ADMIN (GREENBOOK_ROOT.get() + ".shelf.admin"),
 
     GREENBOOK_PAINTING_EDIT(GREENBOOK_ROOT.get() + "painting.edit"),
+    GREENBOOK_PAINTING_RANGE(GREENBOOK_ROOT.get() + "painting.set.range"),
 
     GREENBOOK_PLUGIN(GREENBOOK_ROOT.get() + "plugin"),
     GREENBOOK_RELOAD(GREENBOOK_ROOT.get() + "reload");

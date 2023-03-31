@@ -43,6 +43,7 @@ public enum Lang implements Cons {
 	PAINTING_EDITING_STOPPED("&6Stopped editing the painting."),
 	PAINTING_EDITING_STARTED("&2Started editing a painting."),
 	PAINTING_EDITING_INUSE("&cYou can't edit this painting, while another player is already modifying it."),
+	PAINTING_SET_RANGE(String.format("&2Range successfully set to &6'&e%s&6'&2 Blocks.", VALUE)),
 
 	NOT_PLAYER_SELF("&cYou have to be a player."),
 	NO_NUMBER(String.format("&6'&e%s&6' &cis not a valid number.", VALUE)),

@@ -155,10 +155,8 @@ public class LiftListener implements Listener {
 
             if (player.getVehicle() == null){
                 teleported = player.teleport(destination, PlayerTeleportEvent.TeleportCause.PLUGIN,
-                        TeleportFlag.Relative.X, TeleportFlag.Relative.Y, TeleportFlag.Relative.Z,
                         TeleportFlag.Relative.PITCH, TeleportFlag.Relative.YAW,
-                        TeleportFlag.EntityState.RETAIN_PASSENGERS, TeleportFlag.EntityState.RETAIN_VEHICLE,
-                        TeleportFlag.EntityState.RETAIN_OPEN_INVENTORY);
+                        TeleportFlag.EntityState.RETAIN_PASSENGERS);
             } else {
                 teleported = player.getVehicle().teleport(destination, PlayerTeleportEvent.TeleportCause.PLUGIN,
                         TeleportFlag.EntityState.RETAIN_PASSENGERS, TeleportFlag.EntityState.RETAIN_VEHICLE);
@@ -221,8 +219,6 @@ public class LiftListener implements Listener {
         Block eBlock = event.getClickedBlock();
         Player ePlayer = event.getPlayer();
 
-        //!liftEnabled todo
-
         //don't fire for offhand
         if (event.getHand() == EquipmentSlot.HAND &&
                 //right-clicked a block. Should ensure the getBlock() is not null
@@ -242,8 +238,6 @@ public class LiftListener implements Listener {
     private void onRightClickSign(PlayerInteractEvent event) {
         Block eBlock = event.getClickedBlock();
         Player ePlayer = event.getPlayer();
-
-        //!liftEnabled todo
 
         //don't fire for offhand
         if (event.getHand() == EquipmentSlot.HAND &&

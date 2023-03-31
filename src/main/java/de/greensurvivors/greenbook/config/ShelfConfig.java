@@ -13,7 +13,7 @@ import java.util.logging.Level;
 
 public class ShelfConfig {
     private static final String SHELF_KEY = "shelf.";
-    private static final String Books_KEY = SHELF_KEY + "books";
+    private static final String BOOKS_KEY = SHELF_KEY + "books";
     private static final String REQUIRE_EMPTY_HAND_KEY = SHELF_KEY + "require_empty_hand";
     private static final String REQUIRE_SNEAKING = SHELF_KEY + "require_sneaking";
 
@@ -65,8 +65,8 @@ public class ShelfConfig {
     }
 
     public void saveShelfConfig() {
-        if(this.configuration.getStringList(Books_KEY).isEmpty()){
-            this.configuration.set(Books_KEY, DEFAULT_BOOKS);
+        if(this.configuration.getStringList(BOOKS_KEY).isEmpty()){
+            this.configuration.set(BOOKS_KEY, DEFAULT_BOOKS);
         }
 
         // save modified configuration
@@ -85,25 +85,25 @@ public class ShelfConfig {
     }
 
     public void addBook(String newBook) {
-        List<String> books = this.configuration.getStringList(Books_KEY);
+        List<String> books = this.configuration.getStringList(BOOKS_KEY);
         books.add(newBook);
-        this.configuration.set(Books_KEY, books);
+        this.configuration.set(BOOKS_KEY, books);
         ShelfListener.inst().setBooks(books);
 
         saveShelfConfig();
     }
 
     public void removeBook(String oldBook) {
-        List<String> books = this.configuration.getStringList(Books_KEY);
+        List<String> books = this.configuration.getStringList(BOOKS_KEY);
         books.remove(oldBook);
-        this.configuration.set(Books_KEY, books);
+        this.configuration.set(BOOKS_KEY, books);
         ShelfListener.inst().setBooks(books);
 
         saveShelfConfig();
     }
 
     public void loadShelfs() {
-        ShelfListener.inst().setBooks(this.configuration.getStringList(Books_KEY));
+        ShelfListener.inst().setBooks(this.configuration.getStringList(BOOKS_KEY));
 
         loadRequireSneak();
         loadRequireEmptyHand();

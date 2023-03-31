@@ -1,5 +1,6 @@
 package de.greensurvivors.greenbook.config;
 
+import de.greensurvivors.greenbook.GreenBook;
 import de.greensurvivors.greenbook.listener.WirelessListener;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -27,6 +28,15 @@ public class WireLessConfig {
 
 
     private static WireLessConfig instance;
+
+    private final FileConfiguration configuration;
+
+    private WireLessConfig() {
+        this.configuration = GreenBook.inst().getConfig();
+
+        this.configuration.addDefault(USE_PLAYER_SPECIFIC_CHANNELS, DEFAULT_USE_PLAYER_SPECIFIC_CHANNELS);
+        this.configuration.addDefault(COMPATIBILITY_MODE, DEFAULT_COMPATIBILITY_MODE);
+    }
 
     public static WireLessConfig inst() {
         if (instance == null) {
@@ -65,16 +75,11 @@ public class WireLessConfig {
         config.saveCfg(locations);
     }
 
-    protected void load(FileConfiguration cfg) {
+    protected void load() {
         // clear cache
         WirelessListener.inst().clear();
 
-        WirelessListener.inst().setCompatibilityMode(cfg.getBoolean(COMPATIBILITY_MODE, DEFAULT_COMPATIBILITY_MODE));
-        WirelessListener.inst().setUsePlayerSpecificChannels(cfg.getBoolean(USE_PLAYER_SPECIFIC_CHANNELS, DEFAULT_USE_PLAYER_SPECIFIC_CHANNELS));
-    }
-
-    protected void save(FileConfiguration cfg) {
-        cfg.addDefault(USE_PLAYER_SPECIFIC_CHANNELS, DEFAULT_USE_PLAYER_SPECIFIC_CHANNELS);
-        cfg.addDefault(COMPATIBILITY_MODE, DEFAULT_COMPATIBILITY_MODE);
+        WirelessListener.inst().setCompatibilityMode(this.configuration.getBoolean(COMPATIBILITY_MODE, DEFAULT_COMPATIBILITY_MODE));
+        WirelessListener.inst().setUsePlayerSpecificChannels(this.configuration.getBoolean(USE_PLAYER_SPECIFIC_CHANNELS, DEFAULT_USE_PLAYER_SPECIFIC_CHANNELS));
     }
 }

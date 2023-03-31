@@ -55,6 +55,7 @@ public class GreenBook extends JavaPlugin {
 		MainConfig.inst().reloadMain();
 
 		// listener
+		//todo (dis)able Listeners, depending on enabled config value
 		PluginManager pm = Bukkit.getPluginManager();
 		pm.registerEvents(WirelessListener.inst(), this);
 		pm.registerEvents(LiftListener.inst(), this);

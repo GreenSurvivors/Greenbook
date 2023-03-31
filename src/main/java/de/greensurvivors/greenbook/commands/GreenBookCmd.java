@@ -1,5 +1,6 @@
 package de.greensurvivors.greenbook.commands;
 
+import de.greensurvivors.greenbook.PermissionUtils;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -40,6 +41,9 @@ public class GreenBookCmd implements CommandExecutor, TabCompleter {
                 case ShelfCmd.SUBCOMMAND -> {
                     return ShelfCmd.handleCommand(sender, args);
                 }
+                case PaintingCmd.SUBCOMMAND -> {
+                    return PaintingCmd.handleCommand(sender, args);
+                }
                 default -> {
                     return false;
                 }
@@ -66,17 +70,28 @@ public class GreenBookCmd implements CommandExecutor, TabCompleter {
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         List<String> result = new ArrayList<>();
         if (args.length == 1) {
-            result.add(ReloadCmd.SUBCOMMAND);
-            result.add(ShelfCmd.SUBCOMMAND);
+            if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_RELOAD)){
+                result.add(ReloadCmd.SUBCOMMAND);
+            }
+            if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_SHELF_ADMIN,
+                    PermissionUtils.GREENBOOK_SHELF_ADD, PermissionUtils.GREENBOOK_SHELF_REMOVE, PermissionUtils.GREENBOOK_SHELF_LIST,
+                    PermissionUtils.GREENBOOK_SHELF_SNEAK, PermissionUtils.GREENBOOK_SHELF_EMPTYHAND)){
+                result.add(ShelfCmd.SUBCOMMAND);
+            }
+            if(PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_PAINTING_RANGE)){
+                result.add(PaintingCmd.SUBCOMMAND);
+            }
 
             result = result.stream().filter(s -> s.startsWith(args[0].toLowerCase())).toList();
         } else if (args.length > 1){
-            switch (args[0]){
+            switch (args[0]){//tapcompleate of subcommands
                 case ShelfCmd.SUBCOMMAND -> {
                     return ShelfCmd.handleTabComplete(sender, args);
                 }
+                case PaintingCmd.SUBCOMMAND -> {
+                    return PaintingCmd.handleTap(sender, args);
+                }
             }
-            //tapcompleate of subcommands
         }
 
         return result;
