@@ -39,6 +39,11 @@ public enum Lang implements Cons {
 	SHELF_SET_EMPTYHAND(String.format("&2Reading books requires empty hand: &e%s", VALUE)),
 	SHELF_SET_SNEAK(String.format("&2Reading books requires sneaking: &e%s", VALUE)),
 
+	PAINTING_EDITING_OUTSIDERANGE("&cYou moved outside editing range and therefore stopped editing the painting."),
+	PAINTING_EDITING_STOPPED("&6Stopped editing the painting."),
+	PAINTING_EDITING_STARTED("&2Started editing a painting."),
+	PAINTING_EDITING_INUSE("&cYou can't edit this painting, while another player is already modifying it."),
+
 	NOT_PLAYER_SELF("&cYou have to be a player."),
 	NO_NUMBER(String.format("&6'&e%s&6' &cis not a valid number.", VALUE)),
 	NO_BOOL(String.format("&6'&e%s&6' &cis not a valid boolean.", VALUE)),

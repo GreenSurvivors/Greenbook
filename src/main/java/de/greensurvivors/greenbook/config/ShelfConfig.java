@@ -17,7 +17,7 @@ public class ShelfConfig {
     private static final String REQUIRE_EMPTY_HAND_KEY = SHELF_KEY + "require_empty_hand";
     private static final String REQUIRE_SNEAKING = SHELF_KEY + "require_sneaking";
 
-    private static final List<String> DEFAULT_BOOKS = List.of("moo!", "fire crackle");
+    private static final List<String> DEFAULT_BOOKS = List.of("moo!", "%cfire crackle");
     private static final boolean
             DEFAULT_REQUIRE_SNEAK = true, DEFAULT_REQUIRE_EMPTY_HAND = false;
 

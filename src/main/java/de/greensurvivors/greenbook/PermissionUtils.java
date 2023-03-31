@@ -1,6 +1,7 @@
 package de.greensurvivors.greenbook;
 
 import org.bukkit.command.CommandSender;
+import org.bukkit.permissions.Permissible;
 
 
 public enum PermissionUtils {
@@ -22,6 +23,8 @@ public enum PermissionUtils {
     GREENBOOK_SHELF_SNEAK(GREENBOOK_ROOT.get() + ".shelf.set.require_sneak"),
     GREENBOOK_SHELF_ADMIN (GREENBOOK_ROOT.get() + ".shelf.admin"),
 
+    GREENBOOK_PAINTING_EDIT(GREENBOOK_ROOT.get() + "painting.edit"),
+
     GREENBOOK_PLUGIN(GREENBOOK_ROOT.get() + "plugin"),
     GREENBOOK_RELOAD(GREENBOOK_ROOT.get() + "reload");
 
@@ -38,13 +41,13 @@ public enum PermissionUtils {
     /**
      * Check if CommandSender has any of the given permissions.
      *
-     * @param cs         CommandSender to check for
+     * @param permissible something with permissions to check for
      * @param permission permissions to check
-     * @return true if cs has at least one of the given permissions.
+     * @return true if permissible has at least one of the given permissions.
      */
-    public static boolean hasPermission(CommandSender cs, PermissionUtils... permission) {
+    public static boolean hasPermission(Permissible permissible, PermissionUtils... permission) {
         for (PermissionUtils p : permission) {
-            if (cs.hasPermission(p.get()))
+            if (permissible.hasPermission(p.get()))
                 return true;
         }
 

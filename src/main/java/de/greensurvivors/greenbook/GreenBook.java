@@ -70,5 +70,6 @@ public class GreenBook extends JavaPlugin {
 
 	@Override
 	public void onDisable() {
+		PaintingListener.inst().clear();
 	}
 }
