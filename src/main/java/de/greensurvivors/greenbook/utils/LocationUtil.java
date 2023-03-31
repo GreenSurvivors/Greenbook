@@ -5,6 +5,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.World;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumSet;
@@ -12,13 +13,17 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
 
+/**
+ * general util for handling location problems
+ * currently used by lift-listener to find a safe location to teleport to
+ */
 public final class LocationUtil {
     // Water types used for TRANSPARENT_MATERIALS and is-water-safe config option
     private static final Set<Material> WATER_TYPES = getAllMatchingMaterials("FLOWING_WATER", "WATER");
     // Types checked by isBlockDamaging
     private static final Set<Material> DAMAGING_TYPES = getAllMatchingMaterials("CACTUS", "CAMPFIRE", "FIRE", "MAGMA_BLOCK", "SOUL_CAMPFIRE", "SOUL_FIRE", "SWEET_BERRY_BUSH", "WITHER_ROSE");
     private static final Set<Material> LAVA_TYPES = getAllMatchingMaterials("FLOWING_LAVA", "LAVA", "STATIONARY_LAVA");
-    private static final Material PORTAL = getMatchingMaterial("NETHER_PORTAL", "PORTAL");
+    private static final Material PORTAL = getMatchingMaterial("NETHER_PORTAL", "PORTAL", "END_PORTAL");
     private static final Material LIGHT = getMatchingMaterial("LIGHT");
 
     // The player can stand inside these materials
@@ -99,8 +104,16 @@ public final class LocationUtil {
         return (y > world.getMaxHeight() || HOLLOW_MATERIALS.contains(world.getBlockAt(x, y, z).getType()));
     }
 
-
-    public static @Nullable Location getSafeLiftDestination(final Location fromLoc, final boolean up, final Location toLoc) {
+    //,
+    //might be null if no was found
+    /**
+     * try to get a safe location to teleport to, up to 5 blocks difference
+     * @param fromLoc location to start from, is imported to not teleport to the same y level
+     * @param up if the from-location gets over or under the end-location into play
+     * @param toLoc the end location we try to get a safe location around
+     * @return safe (no damage will be taken) location to teleport to, will be null, if no was found
+     */
+    public static @Nullable Location getSafeLiftDestination(final @NotNull Location fromLoc, final boolean up, final @Nullable Location toLoc) {
         if (toLoc == null || toLoc.getWorld() == null) {
             GreenLogger.log(Level.WARNING, "couldn't find safe destination for null.");
             return null;

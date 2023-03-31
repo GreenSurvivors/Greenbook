@@ -1,11 +1,10 @@
 package de.greensurvivors.greenbook;
 
-import org.bukkit.command.CommandSender;
 import org.bukkit.permissions.Permissible;
 
 
 public enum PermissionUtils {
-    //never use this one, its just the root
+    //never use this one, it's just the root
     GREENBOOK_ROOT("greenbook."),
 
     GREENBOOK_COIN_PLAYER(GREENBOOK_ROOT.get() + "coin.player"),
@@ -52,20 +51,6 @@ public enum PermissionUtils {
                 return true;
         }
 
-        return false;
-    }
-
-    /**
-     * Check if CommandSender has any permission from this plugin.
-     *
-     * @param cs CommandSender to check for
-     * @return true if cs has at least one permission from this plugin.
-     */
-    public static boolean hasAnyPermission(CommandSender cs) {
-        for (PermissionUtils p : values()) {
-            if (cs.hasPermission(p.get()))
-                return true;
-        }
         return false;
     }
 }

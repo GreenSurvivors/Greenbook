@@ -31,21 +31,33 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class WirelessListener implements Listener {
+    //pattern to identify transmitters and receivers
     private static final Pattern signPattern = Pattern.compile("\\[(.*?)\\]S?");
+    //key to save/load uuids of players owning a wireless transmitter/receiver
+    //used for player specific channels
     private static final NamespacedKey CHANNEL_UUID_KEY = new NamespacedKey(GreenBook.inst(), "channelUUID");
 
-    private final HashMap<Component, HashSet<Location>> knownReceiverLocations = new HashMap<>();
+    //cache of recently used receiver location
+    private final HashMap<String, HashSet<Location>> knownReceiverLocations = new HashMap<>();
+    //cached power states to save time.
+    //this is needed since reading the component of a sign multiple times a tick,
+    //every time redstone level of a redstone line updates is too slow
     private final HashMap<Location, Boolean> lastPowerState = new HashMap<>();
+
     //these settings are only accessible via config file
+    //configurates if every player should have their own channel based on their uuid,
+    //or if everyone should use the global one
+    //also if every freshly loaded chunk should get scanned for receiver channels
     private boolean
             usePlayerSpecificChannels = true,
             compatibilityMode = false;
 
+    //this class keeps track of its own instance, so it's basically static
     private static WirelessListener instance;
 
-    private WirelessListener() {
-    }
-
+    /**
+     * static to instance translator
+     */
     public static WirelessListener inst() {
         if (instance == null) {
             instance = new WirelessListener();
@@ -53,23 +65,47 @@ public class WirelessListener implements Listener {
         return instance;
     }
 
+    /**
+     * clears list of cached receiver locations
+     */
     public void clear() {
         knownReceiverLocations.clear();
     }
 
+    //todo command 4 this
+
+    /**
+     * set if player specific channels should be used.
+     * A channel is the string a transmitter and a receiver share to mark what receiver should activate
+     * @param usePlayerSpecificChannels true, if player specific channels should be used.
+     */
     public void setUsePlayerSpecificChannels(boolean usePlayerSpecificChannels) {
         this.usePlayerSpecificChannels = usePlayerSpecificChannels;
     }
 
+    /**
+     * set if compatibilityMode should be used. If enabled the plugin will scan every loaded chunk for receiver signs
+     * and save them to config files. so you can turn the mode on, load the whole world once and turn it back off
+     * to save cpu circles
+     * @param compatibilityMode true if the mode should turn on
+     */
     public void setCompatibilityMode(boolean compatibilityMode) {
         this.compatibilityMode = compatibilityMode;
     }
 
-    private void addReceiver(@NotNull Location receiverLocation, @NotNull Component channel) {
+    /**
+     * add a receiver to the cached ones
+     * @param receiverLocation the location of the receiver sign
+     * @param channel channel the receiver belongs to
+     */
+    private void addReceiver(@NotNull Location receiverLocation, @NotNull String channel) {
         knownReceiverLocations.computeIfAbsent(channel, k -> new HashSet<>());
         knownReceiverLocations.get(channel).add(receiverLocation.toBlockLocation());
     }
 
+    /**
+     * if a transmitter sign gets powered it turns all the receiver signs of the same channel on (or off if unpowered)
+     */
     @EventHandler(ignoreCancelled = true)
     private void onSignPowered(BlockPhysicsEvent event) {
         Block eBlock = event.getBlock();
@@ -86,6 +122,7 @@ public class WirelessListener implements Listener {
 
                 if (line2.equalsIgnoreCase(Lang.SIGN_TRANSMITTER_ID.get())) {
                     //todo: maybe use a lectern as receiver to transmit all possible redstone signal strengths (optional)
+                    //todo: might cache transmitters for this
                     //but than the reading of the components is to slow.
 
                     // test if the power-level has changed from off to on or reverse.
@@ -97,7 +134,7 @@ public class WirelessListener implements Listener {
                     if (powerLast == null || (powerLast != powerNow)) {
                         lastPowerState.put(eBlock.getLocation(), powerNow);
 
-                        Component transmitterChannel = transmitterSign.line(2);
+                        String transmitterChannel = plainSerializer.serialize(transmitterSign.line(2));
 
                         HashSet<Location> receiverLocations = knownReceiverLocations.get(transmitterChannel);
                         String transmitterPlayerUUIDStr = transmitterSign.getPersistentDataContainer().get(CHANNEL_UUID_KEY, PersistentDataType.STRING);
@@ -135,7 +172,7 @@ public class WirelessListener implements Listener {
                                                 }
 
                                                 // sign is a receiver, check the channel
-                                                Component receiverChannel = receiverSign.line(2);
+                                                String receiverChannel = plainSerializer.serialize(receiverSign.line(2));
                                                 if (transmitterChannel.equals(receiverChannel)) {
                                                     // update lever
                                                     Location leverLoc = receiverLocation.clone().add(wallSign.getFacing().getDirection().multiply(-2));
@@ -172,59 +209,79 @@ public class WirelessListener implements Listener {
         }
     }
 
+    //todo feedback message + sign destroy if no permission
+    //todo add player name on last line to indicate owner visually
+
+    /**
+     * if a reciver gets placed, safe its location to file and cache it
+     */
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     private void onSignPlace(SignChangeEvent event) {
         PlainTextComponentSerializer plainSerializer = PlainTextComponentSerializer.plainText();
-        String line2 = plainSerializer.serialize(event.line(1)).trim();
-        Sign changedSign = (Sign) event.getBlock().getState();
-        Matcher matcher = signPattern.matcher(line2);
+        Component line2Comp = event.line(1);
 
-        //clear line 2 of square brackets []
-        if (matcher.matches()) {
-            line2 = matcher.group(1);
+        if (line2Comp != null){
+            String line2Str = plainSerializer.serialize(line2Comp).trim();
+            Sign changedSign = (Sign) event.getBlock().getState();
+            Matcher matcher = signPattern.matcher(line2Str);
 
-            if (line2.equalsIgnoreCase(Lang.SIGN_RECEIVER_ID.get())) {
-                if (Tag.WALL_SIGNS.isTagged(event.getBlock().getType())) {
+            //clear line 2 of square brackets []
+            if (matcher.matches()) {
+                line2Str = matcher.group(1);
+
+                if (line2Str.equalsIgnoreCase(Lang.SIGN_RECEIVER_ID.get())) {
+                    if (Tag.WALL_SIGNS.isTagged(event.getBlock().getType())) {
+                        //set the name of the ic
+                        event.line(0, Lang.build(Lang.SIGN_RECEIVER_NAME.get()));
+
+                        //set the uuid of the player if needed
+                        String playerUUIDStr = null;
+                        if (usePlayerSpecificChannels) {
+                            playerUUIDStr = event.getPlayer().getUniqueId().toString();
+
+                            changedSign.getPersistentDataContainer().set(CHANNEL_UUID_KEY, PersistentDataType.STRING, playerUUIDStr);
+                        }
+
+                        Component channel = event.line(2);
+                        String channelStr;
+
+                        if (channel == null) {
+                            channelStr = "";
+                        } else {
+                            channelStr = plainSerializer.serialize(channel);
+                        }
+
+                        //cache the new receiver
+                        this.addReceiver(event.getBlock().getLocation(), channelStr);
+
+                        WireLessConfig.inst().saveReceiverLocations(channelStr, knownReceiverLocations.get(channelStr), playerUUIDStr);
+                    } else {
+                        event.getPlayer().sendMessage(Lang.build(Lang.NO_WALLSIGN.get()));
+                        event.getBlock().setType(Material.AIR);
+                        for (ItemStack signItem : event.getBlock().getDrops()) {
+                            event.getBlock().getLocation().getWorld().dropItemNaturally(event.getBlock().getLocation(), signItem);
+                        }
+                    }
+                } else if (line2Str.equalsIgnoreCase(Lang.SIGN_TRANSMITTER_ID.get())) {
                     //set the name of the ic
-                    event.line(0, Lang.build(Lang.SIGN_RECEIVER_NAME.get()));
+                    event.line(0, Lang.build(Lang.SIGN_TRANSMITTER_NAME.get()));
 
                     //set the uuid of the player if needed
-                    String playerUUIDStr = null;
                     if (usePlayerSpecificChannels) {
-                        playerUUIDStr = event.getPlayer().getUniqueId().toString();
-
-                        changedSign.getPersistentDataContainer().set(CHANNEL_UUID_KEY, PersistentDataType.STRING, playerUUIDStr);
+                        changedSign.getPersistentDataContainer().set(CHANNEL_UUID_KEY, PersistentDataType.STRING, event.getPlayer().getUniqueId().toString());
                     }
-
-                    Component channel = event.line(2);
-
-                    if (channel == null) {
-                        channel = Component.empty();
-                    }
-
-                    //cache the new receiver
-                    this.addReceiver(event.getBlock().getLocation(), channel);
-
-                    WireLessConfig.inst().saveReceiverLocations(event.line(2), knownReceiverLocations.get(event.line(2)), playerUUIDStr);
-                } else {
-                    event.getPlayer().sendMessage(Lang.build(Lang.NO_WALLSIGN.get()));
-                    event.getBlock().setType(Material.AIR);
-                    for (ItemStack signItem : event.getBlock().getDrops()) {
-                        event.getBlock().getLocation().getWorld().dropItemNaturally(event.getBlock().getLocation(), signItem);
-                    }
-                }
-            } else if (line2.equalsIgnoreCase(Lang.SIGN_TRANSMITTER_ID.get())) {
-                //set the name of the ic
-                event.line(0, Lang.build(Lang.SIGN_TRANSMITTER_NAME.get()));
-
-                //set the uuid of the player if needed
-                if (usePlayerSpecificChannels) {
-                    changedSign.getPersistentDataContainer().set(CHANNEL_UUID_KEY, PersistentDataType.STRING, event.getPlayer().getUniqueId().toString());
                 }
             }
         }
     }
 
+    //todo load uuid from persistant data storage to restore lost receiver files
+    /**
+     * iterates through all blocks in a freshly loaded chunk to find legacy signs
+     * and signs that where deleted from config but not from world
+     * To work the compatibilityMode have to get turned on
+     * @param event
+     */
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     private void onChunkLoad(final ChunkLoadEvent event) {
         if (compatibilityMode) {
@@ -242,11 +299,13 @@ public class WirelessListener implements Listener {
                             if (Tag.WALL_SIGNS.isTagged(state.getType())) {
                                 Component channel = sign.line(2);
 
+                                String channelStr = plainSerializer.serialize(channel);
+
                                 //cache the new receiver
-                                this.addReceiver(state.getLocation(), channel);
+                                this.addReceiver(state.getLocation(), channelStr);
 
                                 String playerUUIDStr = plainSerializer.serialize(sign.line(3));
-                                WireLessConfig.inst().saveReceiverLocations(sign.line(2), knownReceiverLocations.get(sign.line(2)), usePlayerSpecificChannels ? playerUUIDStr : null);
+                                WireLessConfig.inst().saveReceiverLocations(channelStr, knownReceiverLocations.get(channelStr), usePlayerSpecificChannels ? playerUUIDStr : null);
                             }
                         }
                     }
@@ -255,6 +314,9 @@ public class WirelessListener implements Listener {
         }
     }
 
+    /**
+     * remove cached locations, if the chunk unloads the location is in
+     */
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     private void onChunkUnload(final ChunkUnloadEvent event) {
         //unload cache if not needed

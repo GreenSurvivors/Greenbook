@@ -28,21 +28,29 @@ import org.jetbrains.annotations.Nullable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * teleports a player up / down depending where on a lift sign they click to another lift sign
+ */
 public class LiftListener implements Listener {
     private enum LiftType {
+        //tps up
         UP("[Lift Up]"),
+        //tps down
         DOWN("[Lift Down]"),
+        //tps up or down, depending on where the player looked, defaults to down
         BOTH("[Lift UpDown]"),
+        //just let other signs tp to this floor
         STOP("[Lift]");
 
+        //sting representation
         private final String label;
+        //pattern to easy match the label against a string
         private final Pattern pattern;
 
         LiftType(String label) {
             this.label = label;
             //case-insensitive regex with the square brackets escaped
             this.pattern = Pattern.compile(String.format("(?i)%s", label.replace("[", "\\[")));
-
         }
 
         /**
@@ -56,7 +64,7 @@ public class LiftListener implements Listener {
         /**
          * Get the lift type from this line.
          * @param line The line
-         * @return The lift type, or null
+         * @return The lift type, or null if no with the given component was defined
          */
         public static @Nullable LiftType fromLabel(Component line) {
             for (LiftType liftType : values()) {
@@ -69,10 +77,15 @@ public class LiftListener implements Listener {
         }
     }
 
+    //pattern for signs to specify what floor they should tp to
     private static final Pattern destinationPattern = Pattern.compile("to:(.*)");
 
+    //this class keeps track of its own instance, so it's basically static
     private static LiftListener instance;
 
+    /**
+     * static to instance translator
+     */
     public static LiftListener inst() {
         if (instance == null) {
             instance = new LiftListener();
@@ -81,6 +94,10 @@ public class LiftListener implements Listener {
     }
 
     //todo maybe wax the sign automatically in 1.20
+
+    /**
+     * checks for permission, set case correctly and gives feedback if a lift sign was placed
+     */
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     private void onSignChange(SignChangeEvent event) {
         Component line1 = event.line(1);
@@ -107,27 +124,41 @@ public class LiftListener implements Listener {
         } //no 2nd line
     }
 
-    private Sign getDestination(@NotNull Sign origionSign, @NotNull LiftType type,  boolean useBothUp){
-        int direction;
+    /**
+     * get the destination sign, from an origin sign
+     * @param originSign gives location and matches supposed destination against a found sign
+     * @param type type of the origion sign
+     * @param useBothUp if we search up or down if a bí directional sign was used
+     * @return the found destination or null if non was found
+     */
+    private @Nullable Sign getDestination(@NotNull Sign originSign, @NotNull LiftType type,  boolean useBothUp){
+        //1 means 1 block up, -1 means 1 block down
+        int step;
         switch (type) {
-            case UP -> direction = 1;
-            case DOWN -> direction = -1;
-            case BOTH -> direction = useBothUp ? 1 : -1;
-            default -> {//stop or unknown
+            case UP -> step = 1;
+            case DOWN -> step = -1;
+            case BOTH -> step = useBothUp ? 1 : -1;
+            default -> {//stop or unknown type
                 return null;
             }
         }
 
-        World world = origionSign.getWorld();
-        int x = origionSign.getX(), starty = origionSign.getY() + direction, z = origionSign.getZ();
-        int maxSearchCoord = direction > 0 ? world.getMaxHeight() : world.getMinHeight();
+        //cache world we are in
+        final World world = originSign.getWorld();
+        //get starting coords
+        //lifts only go up / down, so x and z always stay the same
+        final int x = originSign.getX(), starty = originSign.getY() + step, z = originSign.getZ();
+        //is the world max or min height the point to stop for a sign?
+        final int maxSearchCoord = step > 0 ? world.getMaxHeight() : world.getMinHeight();
 
-        Matcher matcher = destinationPattern.matcher(PlainTextComponentSerializer.plainText().serialize(origionSign.line(2)));
+        //try to extract the flor from "to:<floor name>"
+        Matcher matcher = destinationPattern.matcher(PlainTextComponentSerializer.plainText().serialize(originSign.line(2)));
         String destinationStr = matcher.matches() ? matcher.group(1) : null;
 
-        for (int y = starty; y != maxSearchCoord; y += direction){
+        //loop through the blocks in the world, trying to find a sign
+        for (int y = starty; y != maxSearchCoord; y += step){
             if (world.getBlockState(x, y, z) instanceof Sign destinationSign){
-                //destination is lift
+                //is the found sign a lift?
                 if (LiftType.fromLabel(destinationSign.line(1)) != null &&
                         //no destination string was given or it matches
                         (destinationStr == null || PlainTextComponentSerializer.plainText().serialize(destinationSign.line(0)).equalsIgnoreCase(destinationStr))){
@@ -142,17 +173,21 @@ public class LiftListener implements Listener {
     }
 
     /**
-     * teleports a player relative in y direction,
+     * trys to teleports a player relative in y direction, with passager / vehicle
+     * will try to go up/down 5 blocks if the destination was not safe, but never to the height the player is already on
      * @param player
-     * @param dy
+     * @param dy distance in y relative to the player coordinates
+     * @param floorName the name of the floor the player will be teleported to, used in feedback message
      */
     private void liftTeleport(@NotNull Player player, double dy, @NotNull String floorName){
-        Location relative = player.getLocation().add(0, dy, 0);
+        //try to get a safe location to teleport to, up to 5 blocks difference,
+        //might be null if no was found
+        Location destination = LocationUtil.getSafeLiftDestination(player.getLocation(), dy > 0, player.getLocation().add(0, dy, 0));
 
-        Location destination = LocationUtil.getSafeLiftDestination(player.getLocation(), dy > 0, relative);
         if (destination != null){
             boolean teleported;
 
+            //try to teleport
             if (player.getVehicle() == null){
                 teleported = player.teleport(destination, PlayerTeleportEvent.TeleportCause.PLUGIN,
                         TeleportFlag.Relative.PITCH, TeleportFlag.Relative.YAW,
@@ -163,6 +198,7 @@ public class LiftListener implements Listener {
             }
 
             if (teleported){
+                //success! give feedback to the player
                 if (floorName.isBlank()){
                     if (dy > 0){
                         player.sendMessage(Lang.build(Lang.LIFT_USED_UP.get()));
@@ -172,7 +208,7 @@ public class LiftListener implements Listener {
                 } else {
                     player.sendMessage(Lang.build(Lang.LIFT_USED_FLOOR.get().replace(Lang.VALUE, floorName)));
                 }
-            } else {
+            } else { //what?
                 player.sendMessage(Lang.build(Lang.UNKNOWN_ERROR.get()));
             }
         } else {
@@ -180,70 +216,80 @@ public class LiftListener implements Listener {
         }
     }
 
-    private void useLift(Sign origionSign, Player player, boolean useBothUp){
-            LiftType type = LiftType.fromLabel(origionSign.line(1));
+    /**
+     * common part regardless if the lift was directly clicked or a button was used
+     * @param originSign the sign that was activated
+     * @param player the player who was activating a sign
+     * @param useBothUp if the player should teleported up or down, if the lift is a bidirectional lift
+     */
+    private void useLift(Sign originSign, Player player, boolean useBothUp){
+        LiftType type = LiftType.fromLabel(originSign.line(1));
 
-            if (type != null){
-                //user clicked on a lift.
-                //event.setCancelled(true); //we are monitoring the event, we shouldn't cancel it. it's probably fine anyway.
+        //is it a lift?
+        if (type != null){
+            if (type == LiftType.STOP){
+                //you can only arrive at stops
+                player.sendMessage(Lang.build(Lang.LIFT_USED_STOP.get()));
+                return;
+            }
 
-                if (type == LiftType.STOP){
-                    //you can only arrive at stops
-                    player.sendMessage(Lang.build(Lang.LIFT_USED_STOP.get()));
-                    return;
-                }
+            //check permission
+            if (PermissionUtils.hasPermission(player, PermissionUtils.GREENBOOK_LIFT_ADMIN, PermissionUtils.GREENBOOK_LIFT_USE)) {
+                //get destination
+                Sign destinationSign = getDestination(originSign, type, useBothUp);
+                if (destinationSign != null) {
+                    double dy = destinationSign.getLocation().getY() - originSign.getLocation().getY();
 
-                //check permission
-                if (PermissionUtils.hasPermission(player, PermissionUtils.GREENBOOK_LIFT_ADMIN, PermissionUtils.GREENBOOK_LIFT_USE)) {
-                    Sign destinationSign = getDestination(origionSign, type, useBothUp);
-
-                    if (destinationSign != null) {
-                        double dy = destinationSign.getLocation().getY() - origionSign.getLocation().getY();
-
-                        //finally teleport the player
-                        liftTeleport(player, dy, LegacyComponentSerializer.legacyAmpersand().serialize(destinationSign.line(0)));
-                    } else {
-                        player.sendMessage(Lang.build(Lang.LIFT_DESTINATION_UNKNOWN.get()));
-                        return;
-                    } //no destination
+                    //finally teleport the player
+                    liftTeleport(player, dy, LegacyComponentSerializer.legacyAmpersand().serialize(destinationSign.line(0)));
                 } else {
-                    player.sendMessage(Lang.build(Lang.NO_PERMISSION_SOMETHING.get()));
+                    player.sendMessage(Lang.build(Lang.LIFT_DESTINATION_UNKNOWN.get()));
                     return;
-                }
-            } //not interacted with a lift
-
+                } //no destination
+            } else {
+                player.sendMessage(Lang.build(Lang.NO_PERMISSION_SOMETHING.get()));
+                return;
+            }
+        } //not interacted with a lift
     }
 
+    /**
+     * a lift can be indirectly activated via a button
+     */
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     private void onRightUseButton(PlayerInteractEvent event) {
-        Block eBlock = event.getClickedBlock();
-        Player ePlayer = event.getPlayer();
-
         //don't fire for offhand
         if (event.getHand() == EquipmentSlot.HAND &&
                 //right-clicked a block. Should ensure the getBlock() is not null
                 event.getAction() == Action.RIGHT_CLICK_BLOCK){
+            //cache clicked block
+            Block eBlock = event.getClickedBlock();
 
+            //is the block a button?
             if (eBlock != null && Tag.BUTTONS.isTagged(eBlock.getType())){
+                //and the block 2 behind a sign?
                 Block block = eBlock.getRelative(((Directional)eBlock.getBlockData()).getFacing().getOppositeFace(), 2);
-
                 if (block.getState() instanceof Sign origionSign){
-                    useLift(origionSign, ePlayer, false); //default: teleport down if a bidirectional sign is powert
+                    //Then try to handle the sign as a lift
+                    useLift(origionSign, event.getPlayer(), false); //default: teleport down if a bidirectional sign is powert
                 }
             } //not interacted with a button
         }
     }
 
+    /**
+     * a lift can be used by directly clicking a sign
+     */
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     private void onRightClickSign(PlayerInteractEvent event) {
-        Block eBlock = event.getClickedBlock();
-        Player ePlayer = event.getPlayer();
-
         //don't fire for offhand
         if (event.getHand() == EquipmentSlot.HAND &&
                 //right-clicked a block. Should ensure the getBlock() is not null
                 event.getAction() == Action.RIGHT_CLICK_BLOCK){
+            //cache the clicked block
+            Block eBlock = event.getClickedBlock();
 
+            //is the clicked block a sign?
             if (eBlock != null && eBlock.getState() instanceof Sign origionSign){
 
                 //determine if teleport should go up or down, in case of a bidirectional lift
@@ -255,7 +301,8 @@ public class LiftListener implements Listener {
                     useBothUp = (relativeHeight - (int) relativeHeight) >= 0.5;
                 }
 
-                useLift(origionSign, ePlayer, useBothUp);
+                //try to handle the sign as a lift
+                useLift(origionSign, event.getPlayer(), useBothUp);
             } //not interacted with a sign
         }
     }

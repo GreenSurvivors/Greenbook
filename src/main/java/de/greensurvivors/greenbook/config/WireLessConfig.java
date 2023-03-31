@@ -2,42 +2,49 @@ package de.greensurvivors.greenbook.config;
 
 import de.greensurvivors.greenbook.GreenBook;
 import de.greensurvivors.greenbook.listener.WirelessListener;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Location;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashSet;
 import java.util.regex.Pattern;
 
+//todo make it easier to switch between player specific channels and not
 public class WireLessConfig {
     private static final String
-            WIRELESS_NODE = "wireless",
-            //these settings are only accessible via config file
-            USE_PLAYER_SPECIFIC_CHANNELS = WIRELESS_NODE + ".usePlayerSpecificChannels",
-            COMPATIBILITY_MODE = WIRELESS_NODE + ".compatibilityMode";
+            //config key root, never use this directly!
+            WIRELESS_KEY = "wireless.",
+            //todo these settings are only accessible via config file --> make config commands
+            //if every player should have thair own channel or all player activate all other recivers
+            //this means, a transmitter placed by a player only activates receivers placed by the same player.
+            USE_PLAYER_SPECIFIC_CHANNELS = WIRELESS_KEY + "usePlayerSpecificChannels",
+            // config key if we try to load old craftbook signs or if the channel files ever get lost
+            COMPATIBILITY_MODE = WIRELESS_KEY + "compatibilityMode";
 
+    //this pattern contains all chars that are not allowed in a filename
     private final Pattern FILENAME_LIMITATIONS = Pattern.compile("[-\"*/:<>?|+,.;=\\[\\]\\\\ ]");
+    //replacement for limited chars, hopefully it's unique enough, and limited chars are seldom enough
     private final String FILENAME_REPLACEMENT_STR = "%_";
 
+    //default values, in case no or faulty values are in config
     private static final boolean
             DEFAULT_USE_PLAYER_SPECIFIC_CHANNELS = true,
             DEFAULT_COMPATIBILITY_MODE = false;
 
-
+    //this class keeps track of its own instance, so it's basically static
     private static WireLessConfig instance;
 
-    private final FileConfiguration configuration;
-
+    /**
+     * load config the fist time and initialise with default values
+     */
     private WireLessConfig() {
-        this.configuration = GreenBook.inst().getConfig();
-
-        this.configuration.addDefault(USE_PLAYER_SPECIFIC_CHANNELS, DEFAULT_USE_PLAYER_SPECIFIC_CHANNELS);
-        this.configuration.addDefault(COMPATIBILITY_MODE, DEFAULT_COMPATIBILITY_MODE);
+        GreenBook.inst().getConfig().addDefault(USE_PLAYER_SPECIFIC_CHANNELS, DEFAULT_USE_PLAYER_SPECIFIC_CHANNELS);
+        GreenBook.inst().getConfig().addDefault(COMPATIBILITY_MODE, DEFAULT_COMPATIBILITY_MODE);
     }
 
+    /**
+     * static to instance translator
+     */
     public static WireLessConfig inst() {
         if (instance == null) {
             instance = new WireLessConfig();
@@ -46,9 +53,15 @@ public class WireLessConfig {
         return instance;
     }
 
-    public @Nullable HashSet<Location> loadReceiverLocations(@NotNull Component channelComponent, @Nullable String playerUUIDStr) {
-        //don't allow forbidden chars in filenames
-        String channelStr = LegacyComponentSerializer.legacyAmpersand().serialize(channelComponent);
+    /**
+     *
+     * @param channelStr channel, stripped of all color / formatting
+     * <br> a channel connects a transmitter with a receiver with the same channel
+     * @param playerUUIDStr UUID of the player owning this channel. If null global owns it.
+     * @return todo
+     */
+    public @Nullable HashSet<Location> loadReceiverLocations(@NotNull String channelStr, @Nullable String playerUUIDStr) {
+        //don't allow forbidden chars or empty filenames
         if (channelStr.equals("")) {
             channelStr = FILENAME_REPLACEMENT_STR;
         } else {
@@ -61,9 +74,8 @@ public class WireLessConfig {
     }
 
 
-    public void saveReceiverLocations(@NotNull Component channelComponent, @NotNull HashSet<Location> locations, @Nullable String playerUUID) {
-        //don't allow forbidden chars in filenames
-        String channelStr = LegacyComponentSerializer.legacyAmpersand().serialize(channelComponent);
+    public void saveReceiverLocations(@NotNull String channelStr, @NotNull HashSet<Location> locations, @Nullable String playerUUID) {
+        //don't allow forbidden chars or empty filenames
         if (channelStr.equals("")) {
             channelStr = FILENAME_REPLACEMENT_STR;
         } else {
@@ -79,7 +91,7 @@ public class WireLessConfig {
         // clear cache
         WirelessListener.inst().clear();
 
-        WirelessListener.inst().setCompatibilityMode(this.configuration.getBoolean(COMPATIBILITY_MODE, DEFAULT_COMPATIBILITY_MODE));
-        WirelessListener.inst().setUsePlayerSpecificChannels(this.configuration.getBoolean(USE_PLAYER_SPECIFIC_CHANNELS, DEFAULT_USE_PLAYER_SPECIFIC_CHANNELS));
+        WirelessListener.inst().setCompatibilityMode(GreenBook.inst().getConfig().getBoolean(COMPATIBILITY_MODE, DEFAULT_COMPATIBILITY_MODE));
+        WirelessListener.inst().setUsePlayerSpecificChannels(GreenBook.inst().getConfig().getBoolean(USE_PLAYER_SPECIFIC_CHANNELS, DEFAULT_USE_PLAYER_SPECIFIC_CHANNELS));
     }
 }

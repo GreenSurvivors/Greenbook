@@ -19,6 +19,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+/**
+ * /coin command
+ * sets coin item as well tossing one of this item to another player
+ */
 public class CoinCmd implements CommandExecutor, TabCompleter {
     private static final String COMMAND = "coin";
     private static final String SET = "set";
@@ -38,19 +42,24 @@ public class CoinCmd implements CommandExecutor, TabCompleter {
     }
 
     /**
-     * Executes the given command, returning its success.
+     * Executes /coin, tossing a coin to another player or setting the coin item.
+     * <br>
+     * <br> /coin set - set the coin item to the one in main hand
+     * <br> /coin [player] - toss a coin to the other player or kill self if the other player is the command sender
      *
      * @param sender  Source of the command
-     * @param command Command which was executed
-     * @param label   Alias of the command which was used
+     * @param command Command which was executed (ignored)
+     * @param label   Alias of the command which was used (ignored)
      * @param args    Passed command arguments
-     * @return true
+     * @return        default true, but false if no additional args where given
      */
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @Nullable Command command, @NotNull String label, @Nullable String[] args) {
         if (args.length >= 1) {
             if (args[0].equalsIgnoreCase(SET)) {
+                //check permission
                 if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_COIN_ADMIN)) {
+                    //try to get the new item
                     if (sender instanceof Player player) {
                         ItemStack itemStack = player.getInventory().getItemInMainHand();
 
@@ -81,7 +90,9 @@ public class CoinCmd implements CommandExecutor, TabCompleter {
                     sender.sendMessage(Lang.build(Lang.NO_PERMISSION_COMMAND.get()));
                 }
             } else if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_COIN_ADMIN, PermissionUtils.GREENBOOK_COIN_PLAYER)) {
+                //only players can toss a coin
                 if (sender instanceof Player player) {
+                    //check other player
                     Player otherPlayer = Bukkit.getPlayer(args[0]);
                     if (otherPlayer != null) {
                         if (player.getUniqueId() != otherPlayer.getUniqueId()) {
@@ -117,6 +128,7 @@ public class CoinCmd implements CommandExecutor, TabCompleter {
         } else {
             //no arguments where given
             sender.sendMessage(Lang.build(Lang.NOT_ENOUGH_ARGS.get()));
+            return false;
         }
         return true;
     }
@@ -127,15 +139,14 @@ public class CoinCmd implements CommandExecutor, TabCompleter {
      * @param sender  Source of the command.  For players tab-completing a
      *                command inside a command block, this will be the player, not
      *                the command block.
-     * @param command Command which was executed
-     * @param label   Alias of the command which was used
+     * @param command Command which was executed (ignored)
+     * @param label   Alias of the command which was used (ignored)
      * @param args    The arguments passed to the command, including final
      *                partial argument to be completed
-     * @return A List of possible completions for the final argument, or null
-     * to default to the command executor
+     * @return        A List of possible completions for the final argument, or an empty list
      */
     @Override
-    public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+    public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @Nullable Command command, @Nullable String label, @NotNull String[] args) {
         List<String> result = new ArrayList<>();
 
         if (args.length == 1) {

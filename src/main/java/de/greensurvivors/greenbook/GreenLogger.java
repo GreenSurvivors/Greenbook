@@ -1,5 +1,7 @@
 package de.greensurvivors.greenbook;
 
+import org.bukkit.ChatColor;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -24,7 +26,7 @@ public class GreenLogger {
      * @param message The string message (or a key in the message catalog)
      */
     public static void log(Level level, String message) {
-        logger.log(level, message.replaceAll("&", "§"));
+        logger.log(level,  ChatColor.translateAlternateColorCodes('&', message));
     }
 
     /**
@@ -37,7 +39,7 @@ public class GreenLogger {
      * @param thrown  Throwable associated with log message.
      */
     public static void log(Level level, String message, Throwable thrown) {
-        logger.log(level, message.replaceAll("&", "§"), thrown);
+        logger.log(level,  ChatColor.translateAlternateColorCodes('&', message), thrown);
     }
 
 }

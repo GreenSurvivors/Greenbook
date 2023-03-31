@@ -7,21 +7,28 @@ import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public enum Lang implements Cons {
+	//wireless redstone
+	//technical values
 	SIGN_TRANSMITTER_ID("Mc1110"),
 	SIGN_TRANSMITTER_NAME("Transmitter"),
 	SIGN_RECEIVER_ID("Mc1111"),
 	SIGN_RECEIVER_NAME("Reveiver"),
+	//placing feedback
 	NO_WALLSIGN("You have to place this at a wall."),
 
+	// /coin command
 	COIN_STOSS_SELF(String.format("&e%s &cdied, by trying to toss themselves a coin.", Lang.PLAYER)),
 	COIN_TOSS_OTHER(String.format("&e%s &2tossed a coin to &e%s&2.", Lang.PLAYER, Lang.PLAYER2)),
 	COIN_SET(String.format("&2Set coin item successfully to &6'&e%s&6'", VALUE)),
 	COIN_NOT_ENOUGH("&cYou have not enough coins."),
 
+	//lift - elevator
+	//using feedback
 	LIFT_CREATE_SUCCESS("&2Lift was successfully created."),
 	LIFT_USED_STOP("&cYou cant depart from this kind of Lift."),
 	LIFT_USED_UP("&6Moved a floor up."),
@@ -30,7 +37,10 @@ public enum Lang implements Cons {
 	LIFT_DESTINATION_OBSTRUCTED("&cThe floor ist obstructed."),
 	LIFT_DESTINATION_UNKNOWN("&cThis lift has no destination."),
 
+	//readable bookshelfs
+	//usage feedback
 	SHELF_USE("&7You took a book."),
+	//command feedback
 	SHELF_ADD_BOOK("&2Successfully added a Book to the library:"),
 	SHELF_REMOVED_BOOK("&2Successfully removed Book:"),
 	SHELF_NO_BOOK(String.format("&2No Book with the id of &e%s&2 exists", VALUE)),
@@ -39,33 +49,37 @@ public enum Lang implements Cons {
 	SHELF_SET_EMPTYHAND(String.format("&2Reading books requires empty hand: &e%s", VALUE)),
 	SHELF_SET_SNEAK(String.format("&2Reading books requires sneaking: &e%s", VALUE)),
 
+	//painting switcher
+	//usage feedback
 	PAINTING_EDITING_OUTSIDERANGE("&cYou moved outside editing range and therefore stopped editing the painting."),
 	PAINTING_EDITING_STOPPED("&6Stopped editing the painting."),
 	PAINTING_EDITING_STARTED("&2Started editing a painting."),
 	PAINTING_EDITING_INUSE("&cYou can't edit this painting, while another player is already modifying it."),
+	//command feedback
 	PAINTING_SET_RANGE(String.format("&2Range successfully set to &6'&e%s&6'&2 Blocks.", VALUE)),
 
+	//help command
+	HELP_WIKI("&7See more detailed information on the wiki page."),
+
+	//plugin command
+	PLUGIN_HEADER("&a-<(&6GreenTreasure&a)>-"),
+	PLUGIN_VERSION(String.format("&aVersion&6: &e%s", VALUE)),
+
+	//greenbook reload
+	RELOADED("&aReloaded."),
+
+	//misc
 	NOT_PLAYER_SELF("&cYou have to be a player."),
 	NO_NUMBER(String.format("&6'&e%s&6' &cis not a valid number.", VALUE)),
 	NO_BOOL(String.format("&6'&e%s&6' &cis not a valid boolean.", VALUE)),
 	NO_PERMISSION_COMMAND("&cYou have no permission to perform this command."),
 	NO_PERMISSION_SOMETHING("&cYou have no permission to do that."),
 	NO_SUCH_PLAYER(String.format("&cCould not get a valid player named %s", VALUE)),
-	UNKNOWN_ARGUMENT(String.format("&cUnknown or wrong argument '%s'.", VALUE)),
-	UNKNOWN_ERROR("&cUnknown Error. What happened?"),
+	NO_ITEM_HOLDING("&cYou not are holding a item."),
 	NOT_ENOUGH_ARGS("&cNot enough arguments."),
-	NO_ITEM_HOLDING("&cYou are holding no item."),
+	UNKNOWN_ERROR("&cUnknown Error. What happened?");
 
-	FORMAT_LOCATION(String.format("&f%s&6, &f%s&e, &f%s&e, &f%s", WORLD, X, Y, Z)),
-
-	HELP_WIKI("&7See more detailed information on the wiki page."),
-
-	PLUGIN_HEADER("&a-<(&6GreenTreasure&a)>-"),
-	PLUGIN_VERSION(String.format("&aVersion&6: &e%s", VALUE)),
-
-	RELOAD("&aReloaded.");
-
-
+	//the message
 	private String value;
 
 	Lang(String value) {
@@ -73,8 +87,7 @@ public enum Lang implements Cons {
 	}
 
 	/**
-	 * uncolored
-	 *
+	 * get String, colors are expressed via legacy ampersand
 	 * @return value
 	 */
 	public String get() {
@@ -82,8 +95,7 @@ public enum Lang implements Cons {
 	}
 
 	/**
-	 * Set value.
-	 *
+	 * Set value from language file
 	 * @param value to set
 	 */
 	public void set(String value) {
@@ -94,10 +106,10 @@ public enum Lang implements Cons {
 	/**
 	 * Builds a Component from given text.
 	 *
-	 * @param args to build from
+	 * @param args to build from - if null, null is also returned
 	 * @return Component
 	 */
-	public static Component build(String args) {
+	public static Component build(@Nullable String args) {
 		return build(args, null, null, null, null);
 	}
 
@@ -105,13 +117,13 @@ public enum Lang implements Cons {
 	 * Build a Component from given text with properties.
 	 * There can only be one click action.
 	 *
-	 * @param text       to build from
+	 * @param text       to build from - if null, null is also returned
 	 * @param command    to execute on click
 	 * @param hover      to show when mouse hovers over the text
 	 * @param suggestion to show on click
 	 * @return Component
 	 */
-	public static Component build(String text, String command, Object hover, String suggestion) {
+	public static Component build(String text, @Nullable String command, @Nullable Object hover, @Nullable String suggestion) {
 		return build(text, command, hover, suggestion, null);
 	}
 
@@ -119,14 +131,14 @@ public enum Lang implements Cons {
 	 * Build a Component from given text with properties.
 	 * There can only be one click action.
 	 *
-	 * @param text       to build from
+	 * @param text       to build from - if null, null is also returned
 	 * @param command    to execute on click
 	 * @param hover      to show when mouse hovers over the text
 	 * @param suggestion to show on click
 	 * @param link       to open on click
 	 * @return Component
 	 */
-	public static Component build(String text, String command, Object hover, String suggestion, String link) {
+	public static Component build(@Nullable String text, @Nullable String command, @Nullable Object hover, @Nullable String suggestion, @Nullable String link) {
 		if (text != null) {
 			TextComponent tc = rgb(Component.text(text));
 			// command suggestion
@@ -161,7 +173,7 @@ public enum Lang implements Cons {
 	 * @param components to join together
 	 * @return Component
 	 */
-	public static Component join(Iterable<? extends Component> components) {
+	public static Component join(@NotNull Iterable<? extends Component> components) {
 		return Component.join(JoinConfiguration.separator(Component.newline()), components);
 	}
 
@@ -171,7 +183,7 @@ public enum Lang implements Cons {
 	 * @param tc to convert colors
 	 * @return Component with all color codes converted
 	 */
-	private static TextComponent rgb(TextComponent tc) {
+	private static TextComponent rgb(@NotNull TextComponent tc) {
 		String text = tc.content();
 		if (text.contains("&#")) {
 			// find first hexColor
@@ -194,22 +206,5 @@ public enum Lang implements Cons {
 			tc = LegacyComponentSerializer.legacyAmpersand().deserialize(text);
 		}
 		return tc;
-	}
-
-	/**
-	 * formats a location to a string
-	 *
-	 * @param loc location to format
-	 * @return the formatted string or "-" if the locaion was null
-	 */
-	public static String locationToString(Location loc) {
-		if (loc != null) {
-			return FORMAT_LOCATION.get()
-					.replace(Lang.WORLD, loc.getWorld().getName())
-					.replace(Lang.X, Integer.toString(loc.getBlockX()))
-					.replace(Lang.Y, Integer.toString(loc.getBlockY()))
-					.replace(Lang.Z, Integer.toString(loc.getBlockZ()));
-		}
-		return "-";
 	}
 }

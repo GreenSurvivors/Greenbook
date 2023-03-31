@@ -3,7 +3,10 @@ package de.greensurvivors.greenbook;
 import de.greensurvivors.greenbook.commands.CoinCmd;
 import de.greensurvivors.greenbook.commands.GreenBookCmd;
 import de.greensurvivors.greenbook.config.MainConfig;
-import de.greensurvivors.greenbook.listener.*;
+import de.greensurvivors.greenbook.listener.LiftListener;
+import de.greensurvivors.greenbook.listener.PaintingListener;
+import de.greensurvivors.greenbook.listener.ShelfListener;
+import de.greensurvivors.greenbook.listener.WirelessListener;
 import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.PluginManager;
@@ -15,14 +18,11 @@ import java.util.logging.Level;
 public class GreenBook extends JavaPlugin {
 	private static GreenBook instance;
 	private CoinCmd coinCmd = null;
-	private GreenBookCmd greenBookCmd = null;
 
 	public static GreenBook inst() {
 		return instance;
 	}
 
-
-	// aks world guard if using is allowed if clicking on sign is doing something
 	@Override
 	public void onEnable() {
 		// set instance
@@ -30,7 +30,7 @@ public class GreenBook extends JavaPlugin {
 		// set logger
 		GreenLogger.setLogger(getLogger());
 
-		//register commands (must happen before config, because it depens on non null values.)
+		//register commands (must happen before config, because config depend on non-null values.)
 		PluginCommand coinCommand = getCommand(CoinCmd.getCommand());
 		if (coinCommand != null) {
 			this.coinCmd = new CoinCmd();
@@ -43,10 +43,10 @@ public class GreenBook extends JavaPlugin {
 
 		PluginCommand mainCommand = getCommand(GreenBookCmd.getCommand());
 		if (mainCommand != null) {
-			this.greenBookCmd = new GreenBookCmd();
+			GreenBookCmd greenBookCmd = new GreenBookCmd();
 
-			mainCommand.setExecutor(this.greenBookCmd);
-			mainCommand.setTabCompleter(this.greenBookCmd);
+			mainCommand.setExecutor(greenBookCmd);
+			mainCommand.setTabCompleter(greenBookCmd);
 		} else {
 			GreenLogger.log(Level.SEVERE, "Couldn't register command '" + GreenBookCmd.getCommand() + "'!");
 		}
@@ -61,10 +61,11 @@ public class GreenBook extends JavaPlugin {
 		pm.registerEvents(LiftListener.inst(), this);
 		pm.registerEvents(ShelfListener.inst(), this);
 		pm.registerEvents(PaintingListener.inst(), this);
-		pm.registerEvents(BridgeListener.inst(), this);
-		pm.registerEvents(GateListener.inst(), this);
 	}
 
+	/**
+	 * @return handler of the /coin command
+	 */
 	public @Nullable CoinCmd getCoinCmd() {
 		return coinCmd;
 	}
@@ -72,5 +73,6 @@ public class GreenBook extends JavaPlugin {
 	@Override
 	public void onDisable() {
 		PaintingListener.inst().clear();
+		WirelessListener.inst().clear();
 	}
 }

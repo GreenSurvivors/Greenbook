@@ -11,6 +11,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * all config subcommands except of /coin
+ */
 public class GreenBookCmd implements CommandExecutor, TabCompleter {
     private static final String COMMAND = "greenbook";
 
@@ -18,12 +21,10 @@ public class GreenBookCmd implements CommandExecutor, TabCompleter {
         return COMMAND;
     }
 
-
     /**
-     * Executes the given command, returning its success.
+     * Executes the given sub command, returning its success.
      * <br>
-     * If false is returned, then the "usage" plugin.yml entry for this command
-     * (if defined) will be sent to the player.
+     * If false is returned, then the "usage" plugin.yml entry for this command will be sent to the player.
      *
      * @param sender  Source of the command
      * @param command Command which was executed
@@ -33,13 +34,13 @@ public class GreenBookCmd implements CommandExecutor, TabCompleter {
      */
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
-        if (args.length > 0){
+        if (args.length > 0){ //execute subcommand
             switch (args[0].toLowerCase()){
                 case ReloadCmd.SUBCOMMAND -> {
                     return ReloadCmd.handleCommand(sender, args);
                 }
-                case ShelfCmd.SUBCOMMAND -> {
-                    return ShelfCmd.handleCommand(sender, args);
+                case BookCmd.SUBCOMMAND -> {
+                    return BookCmd.handleCommand(sender, args);
                 }
                 case PaintingCmd.SUBCOMMAND -> {
                     return PaintingCmd.handleCommand(sender, args);
@@ -69,6 +70,7 @@ public class GreenBookCmd implements CommandExecutor, TabCompleter {
     @Override
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         List<String> result = new ArrayList<>();
+        //add subcommands if the sender has the permission for it.
         if (args.length == 1) {
             if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_RELOAD)){
                 result.add(ReloadCmd.SUBCOMMAND);
@@ -76,7 +78,7 @@ public class GreenBookCmd implements CommandExecutor, TabCompleter {
             if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_SHELF_ADMIN,
                     PermissionUtils.GREENBOOK_SHELF_ADD, PermissionUtils.GREENBOOK_SHELF_REMOVE, PermissionUtils.GREENBOOK_SHELF_LIST,
                     PermissionUtils.GREENBOOK_SHELF_SNEAK, PermissionUtils.GREENBOOK_SHELF_EMPTYHAND)){
-                result.add(ShelfCmd.SUBCOMMAND);
+                result.add(BookCmd.SUBCOMMAND);
             }
             if(PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_PAINTING_RANGE)){
                 result.add(PaintingCmd.SUBCOMMAND);
@@ -84,12 +86,12 @@ public class GreenBookCmd implements CommandExecutor, TabCompleter {
 
             result = result.stream().filter(s -> s.startsWith(args[0].toLowerCase())).toList();
         } else if (args.length > 1){
-            switch (args[0]){//tapcompleate of subcommands
-                case ShelfCmd.SUBCOMMAND -> {
-                    return ShelfCmd.handleTabComplete(sender, args);
+            switch (args[0]){//tab complete of subcommands
+                case BookCmd.SUBCOMMAND -> {
+                    return BookCmd.handleTabComplete(sender, args);
                 }
                 case PaintingCmd.SUBCOMMAND -> {
-                    return PaintingCmd.handleTap(sender, args);
+                    return PaintingCmd.handleTab(sender, args);
                 }
             }
         }
