@@ -20,7 +20,7 @@ public enum PermissionUtils {
     //you need this and at least one of the following permissions to successfully use the main command.
     //that's because bukkit doesn't allow to check for multiple subcommand permissions when deciding to show
     //a command to a player or not.
-    GREENBOOK_USEMAIN("greenbook.usemain"),
+    GREENBOOK_USEMAIN("greenbook.usemaincmd"),
 
     GREENBOOK_LIFT_WILDCARD(GREENBOOK_ROOT.get() + "lift.*"),
     GREENBOOK_LIFT_CREATE (GREENBOOK_ROOT.get() + "lift.create"),

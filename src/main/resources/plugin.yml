@@ -10,5 +10,5 @@ commands:
     permission: greenbook.coin.use
     permission-message: Es ist nicht alles Permission, was glänzt.
   greenbook:
-    permission: greenbook.usemain
+    permission: greenbook.usemaincmd
     description: The main Command of this plugin.
