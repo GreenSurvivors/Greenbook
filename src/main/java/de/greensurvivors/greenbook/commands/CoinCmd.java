@@ -95,23 +95,23 @@ public class CoinCmd implements CommandExecutor, TabCompleter {
                     //check other player
                     Player otherPlayer = Bukkit.getPlayer(args[0]);
                     if (otherPlayer != null) {
-                        if (player.getUniqueId() != otherPlayer.getUniqueId()) {
-                            if (player.getInventory().removeItemAnySlot(coinItem).isEmpty()) {
-                                //drop items that didn't fit into the other players inventory
-                                for (ItemStack lostCoin : otherPlayer.getInventory().addItem(coinItem).values()) {
-                                    otherPlayer.getWorld().dropItemNaturally(otherPlayer.getLocation(), lostCoin);
-                                }
+                        if (player.getInventory().removeItemAnySlot(coinItem).isEmpty()) {
+                            //drop items that didn't fit into the other players inventory
+                            for (ItemStack lostCoin : otherPlayer.getInventory().addItem(coinItem).values()) {
+                                otherPlayer.getWorld().dropItemNaturally(otherPlayer.getLocation(), lostCoin);
+                            }
 
+                            if (player.getUniqueId() != otherPlayer.getUniqueId()) {
                                 //broadcast success
                                 player.getServer().broadcast(Lang.build(Lang.COIN_TOSS_OTHER.get().replace(Lang.PLAYER, player.getName()).replace(Lang.PLAYER2, otherPlayer.getName())));
                             } else {
-                                //player had not enough coins
-                                sender.sendMessage(Lang.build(Lang.COIN_NOT_ENOUGH.get()));
+                                //kill player that tried to give themselves a coin and announce it
+                                player.setHealth(0.0d);
+                                player.getServer().broadcast(Lang.build(Lang.COIN_STOSS_SELF.get().replace(Lang.PLAYER, player.getName()))); //todo maybe broadcast it across all servers, that share the same inventory
                             }
                         } else {
-                            //kill player that tried to give themselves a coin and announce it
-                            player.setHealth(0.0d);
-                            player.getServer().broadcast(Lang.build(Lang.COIN_STOSS_SELF.get().replace(Lang.PLAYER, player.getName()))); //todo maybe broadcast it across all servers, that share the same inventory
+                            //player had not enough coins
+                            sender.sendMessage(Lang.build(Lang.COIN_NOT_ENOUGH.get()));
                         }
                     } else {
                         //unknown or offline other player
