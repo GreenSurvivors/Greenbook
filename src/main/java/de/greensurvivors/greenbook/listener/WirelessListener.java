@@ -30,6 +30,7 @@ import java.util.HashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+//todo create a command to load signs around the player - a local compatibility mode
 public class WirelessListener implements Listener {
     //pattern to identify transmitters and receivers
     private static final Pattern signPattern = Pattern.compile("\\[(.*?)\\]S?");
@@ -54,6 +55,8 @@ public class WirelessListener implements Listener {
 
     //this class keeps track of its own instance, so it's basically static
     private static WirelessListener instance;
+
+    private WirelessListener(){}
 
     /**
      * static to instance translator

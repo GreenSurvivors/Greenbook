@@ -83,6 +83,8 @@ public class LiftListener implements Listener {
     //this class keeps track of its own instance, so it's basically static
     private static LiftListener instance;
 
+    private LiftListener(){}
+
     /**
      * static to instance translator
      */

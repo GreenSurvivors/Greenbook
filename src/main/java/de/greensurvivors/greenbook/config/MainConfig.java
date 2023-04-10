@@ -22,6 +22,8 @@ public class MainConfig {
     //this class keeps track of its own instance, so it's basically static
     private static MainConfig instance;
 
+    private MainConfig(){}
+
     /**
      * static to instance translator
      */

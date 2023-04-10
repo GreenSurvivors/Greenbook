@@ -33,6 +33,8 @@ public class PaintingListener implements Listener {
     //this class keeps track of its own instance, so it's basically static
     private static PaintingListener instance;
 
+    private PaintingListener(){}
+
     /**
      * static to instance translator
      */

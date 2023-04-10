@@ -58,7 +58,7 @@ public class WireLessConfig {
      * @param channelStr channel, stripped of all color / formatting
      * <br> a channel connects a transmitter with a receiver with the same channel
      * @param playerUUIDStr UUID of the player owning this channel. If null global owns it.
-     * @return todo
+     * @return the set of saved receiver locations or null if no receiver for this channel uuid combination was ever saved
      */
     public @Nullable HashSet<Location> loadReceiverLocations(@NotNull String channelStr, @Nullable String playerUUIDStr) {
         //don't allow forbidden chars or empty filenames
@@ -73,7 +73,12 @@ public class WireLessConfig {
         return config.getSet();
     }
 
-
+    /**
+     * save the used receiver locations to file
+     * @param channelStr
+     * @param locations
+     * @param playerUUID
+     */
     public void saveReceiverLocations(@NotNull String channelStr, @NotNull HashSet<Location> locations, @Nullable String playerUUID) {
         //don't allow forbidden chars or empty filenames
         if (channelStr.equals("")) {

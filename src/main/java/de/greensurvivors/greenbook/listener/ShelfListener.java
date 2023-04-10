@@ -29,6 +29,8 @@ public class ShelfListener implements Listener {
     //this class keeps track of its own instance, so it's basically static
     private static ShelfListener instance;
 
+    private ShelfListener(){}
+
     /**
      * static to instance translator
      */
