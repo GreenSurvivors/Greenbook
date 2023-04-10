@@ -111,7 +111,7 @@ public class LiftListener implements Listener {
             LiftType type = LiftType.fromLabel(line1);
             if (type != null){
                 //
-                if (PermissionUtils.hasPermission(ePlayer, PermissionUtils.GREENBOOK_LIFT_ADMIN, PermissionUtils.GREENBOOK_LIFT_CREATE)){
+                if (PermissionUtils.hasPermission(ePlayer, PermissionUtils.GREENBOOK_LIFT_WILDCARD, PermissionUtils.GREENBOOK_LIFT_CREATE)){
                     //set the line with the right casing, but keep the decorations
                     event.line(1, PlainTextComponentSerializer.plainText().deserialize(type.getLabel()).decorations(line1.decorations()));
 
@@ -236,7 +236,7 @@ public class LiftListener implements Listener {
             }
 
             //check permission
-            if (PermissionUtils.hasPermission(player, PermissionUtils.GREENBOOK_LIFT_ADMIN, PermissionUtils.GREENBOOK_LIFT_USE)) {
+            if (PermissionUtils.hasPermission(player, PermissionUtils.GREENBOOK_LIFT_WILDCARD, PermissionUtils.GREENBOOK_LIFT_USE)) {
                 //get destination
                 Sign destinationSign = getDestination(originSign, type, useBothUp);
                 if (destinationSign != null) {

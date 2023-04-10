@@ -105,7 +105,7 @@ public class CoinCmd implements CommandExecutor, TabCompleter {
                                 //broadcast success
                                 player.getServer().broadcast(Lang.build(Lang.COIN_TOSS_OTHER.get().replace(Lang.PLAYER, player.getName()).replace(Lang.PLAYER2, otherPlayer.getName())));
                             } else {
-                                //player had not enough coins
+                                //player didn't have enough coins
                                 sender.sendMessage(Lang.build(Lang.COIN_NOT_ENOUGH.get()));
                             }
                         } else {

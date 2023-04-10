@@ -75,7 +75,7 @@ public class GreenBookCmd implements CommandExecutor, TabCompleter {
             if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_RELOAD)){
                 result.add(ReloadCmd.SUBCOMMAND);
             }
-            if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_SHELF_ADMIN,
+            if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_SHELF_WILDCARD,
                     PermissionUtils.GREENBOOK_SHELF_ADD, PermissionUtils.GREENBOOK_SHELF_REMOVE, PermissionUtils.GREENBOOK_SHELF_LIST,
                     PermissionUtils.GREENBOOK_SHELF_SNEAK, PermissionUtils.GREENBOOK_SHELF_EMPTYHAND)){
                 result.add(BookCmd.SUBCOMMAND);

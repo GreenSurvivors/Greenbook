@@ -49,7 +49,7 @@ public class BookCmd {
             switch (args[1].toLowerCase()){
                 case ADD -> {//greenbook book add [quote] - add a new quote (aka book)
                     //check permission
-                    if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_SHELF_ADMIN, PermissionUtils.GREENBOOK_SHELF_ADD)){
+                    if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_SHELF_WILDCARD, PermissionUtils.GREENBOOK_SHELF_ADD)){
                         //our book was broken into an array of strings, we have to glue it back together
                         StringBuilder builder = new StringBuilder();
 
@@ -71,7 +71,7 @@ public class BookCmd {
                     }
                 }
                 case REMOVE_SHORT, REMOVE_LONG -> { //greenbook book remove [quote number] - remove a quote (aka book) by its id (important: may change if books are added or removed)
-                    if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_SHELF_ADMIN, PermissionUtils.GREENBOOK_SHELF_REMOVE)){
+                    if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_SHELF_WILDCARD, PermissionUtils.GREENBOOK_SHELF_REMOVE)){
                         //check if the given id was valid
                         if (Misc.isInt(args[2])) {
                             String book = ShelfListener.inst().getBook(Integer.parseInt(args[2]));
@@ -96,7 +96,7 @@ public class BookCmd {
                 //NOTE: The list subbcommand without a page number is down below!
                 case LIST -> { //greenbook book list [page number] - list all known quotes (books) neatly arranged in pages.
                     //check permission
-                    if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_SHELF_ADMIN, PermissionUtils.GREENBOOK_SHELF_LIST)){
+                    if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_SHELF_WILDCARD, PermissionUtils.GREENBOOK_SHELF_LIST)){
                         //get all currently active books
                         List<String> books = ShelfListener.inst().getBooks();
                         //how many books are known. Needed to calculate how many pages there are and
@@ -141,7 +141,7 @@ public class BookCmd {
                 }
                 case EMPTY_HAND_SHORT, EMPTY_HAND_LONG -> { //greenbook book emptyhand [true/false] - set if an empty hand is required for reading books
                     //check permission
-                    if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_SHELF_ADMIN, PermissionUtils.GREENBOOK_SHELF_EMPTYHAND)){
+                    if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_SHELF_WILDCARD, PermissionUtils.GREENBOOK_SHELF_EMPTYHAND)){
                         Boolean shouldQuoteRequireEmptyHand = BooleanUtils.toBooleanObject(args[2]);
 
                         if (shouldQuoteRequireEmptyHand != null) {
@@ -157,7 +157,7 @@ public class BookCmd {
                     }
                 }
                 case SNEAK -> { //greenbook book sneak [true/false] - set if sneaking is required for reading books
-                    if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_SHELF_ADMIN, PermissionUtils.GREENBOOK_SHELF_SNEAK)){
+                    if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_SHELF_WILDCARD, PermissionUtils.GREENBOOK_SHELF_SNEAK)){
                         //try to get a bool from the 3rd argument
                         Boolean shouldRequireSneak = BooleanUtils.toBooleanObject(args[2]);
                         if (shouldRequireSneak != null) {
@@ -179,7 +179,7 @@ public class BookCmd {
             //NOTE: The list subbcommand with a page number is up above!
             if (args.length == 2 && args[1].equalsIgnoreCase(LIST)){ //no argument, defaults to first page
                 //check permission
-                if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_SHELF_ADMIN, PermissionUtils.GREENBOOK_SHELF_LIST)){
+                if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_SHELF_WILDCARD, PermissionUtils.GREENBOOK_SHELF_LIST)){
                     //get all currently active books
                     List<String> books = ShelfListener.inst().getBooks();
                     //how many books are known. Needed to calculate how many pages there are and
@@ -241,20 +241,20 @@ public class BookCmd {
             case 2 -> {
                 ArrayList<String> result = new ArrayList<>();
 
-                if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_SHELF_ADMIN, PermissionUtils.GREENBOOK_SHELF_ADD)){
+                if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_SHELF_WILDCARD, PermissionUtils.GREENBOOK_SHELF_ADD)){
                     result.add(ADD);
                 }
-                if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_SHELF_ADMIN, PermissionUtils.GREENBOOK_SHELF_REMOVE)){
+                if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_SHELF_WILDCARD, PermissionUtils.GREENBOOK_SHELF_REMOVE)){
                     result.add(REMOVE_SHORT);
                     result.add(REMOVE_LONG);
                 }
-                if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_SHELF_ADMIN, PermissionUtils.GREENBOOK_SHELF_LIST)){
+                if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_SHELF_WILDCARD, PermissionUtils.GREENBOOK_SHELF_LIST)){
                     result.add(LIST);
                 }
-                if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_SHELF_ADMIN, PermissionUtils.GREENBOOK_SHELF_SNEAK)){
+                if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_SHELF_WILDCARD, PermissionUtils.GREENBOOK_SHELF_SNEAK)){
                     result.add(SNEAK);
                 }
-                if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_SHELF_ADMIN, PermissionUtils.GREENBOOK_SHELF_EMPTYHAND)){
+                if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_SHELF_WILDCARD, PermissionUtils.GREENBOOK_SHELF_EMPTYHAND)){
                     result.add(EMPTY_HAND_SHORT);
                     result.add(EMPTY_HAND_LONG);
                 }
@@ -266,7 +266,7 @@ public class BookCmd {
                     //greenbook shelf remove ?
                     case REMOVE_SHORT, REMOVE_LONG -> {
                         //check permission
-                        if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_SHELF_ADMIN, PermissionUtils.GREENBOOK_SHELF_REMOVE)){
+                        if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_SHELF_WILDCARD, PermissionUtils.GREENBOOK_SHELF_REMOVE)){
                             ArrayList<String> result = new ArrayList<>();
 
                             //make list of all known book ids
@@ -281,7 +281,7 @@ public class BookCmd {
                     //greenbook shelf list ?
                     case LIST -> {
                         //check permission
-                        if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_SHELF_ADMIN, PermissionUtils.GREENBOOK_SHELF_LIST)){
+                        if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_SHELF_WILDCARD, PermissionUtils.GREENBOOK_SHELF_LIST)){
                             ArrayList<String> result = new ArrayList<>();
 
                             //cache number of pages to not recalculate every loop
@@ -301,7 +301,7 @@ public class BookCmd {
                     //both are boolean values
                     case SNEAK, EMPTY_HAND_SHORT, EMPTY_HAND_LONG -> {
                         //check if sender has any permission of the both subcommands
-                        if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_SHELF_ADMIN, PermissionUtils.GREENBOOK_SHELF_EMPTYHAND, PermissionUtils.GREENBOOK_SHELF_SNEAK)){
+                        if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_SHELF_WILDCARD, PermissionUtils.GREENBOOK_SHELF_EMPTYHAND, PermissionUtils.GREENBOOK_SHELF_SNEAK)){
                             //filter by already given argument
                             return Stream.of(String.valueOf(true), String.valueOf(false)).filter(s -> s.toLowerCase().startsWith(args[2])).toList();
                         }
