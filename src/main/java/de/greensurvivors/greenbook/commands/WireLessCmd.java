@@ -1,10 +1,10 @@
 package de.greensurvivors.greenbook.commands;
 
 import de.greensurvivors.greenbook.GreenBook;
-import de.greensurvivors.greenbook.PermissionUtils;
 import de.greensurvivors.greenbook.config.WireLessConfig;
 import de.greensurvivors.greenbook.language.Lang;
 import de.greensurvivors.greenbook.listener.WirelessListener;
+import de.greensurvivors.greenbook.utils.PermissionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -35,7 +35,7 @@ public class WireLessCmd {
         if (args.length > 1){
             switch (args[1].toLowerCase()){
                 case UPDATE_SIGNS -> {
-                    if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_WIRELESS_UPDATE_SIGNS)){
+                    if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_WIRELESS_UPDATE_SIGNS_CMD)){
                         if (sender instanceof Player player){
                             final World WORLD = player.getWorld();
                             final int CHUNK_SIM_DIST = WORLD.getSimulationDistance();
@@ -130,7 +130,7 @@ public class WireLessCmd {
         switch (args.length){
             case 2 -> {
                 ArrayList<String> result = new ArrayList<>();
-                if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_WIRELESS_UPDATE_SIGNS)){
+                if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_WIRELESS_UPDATE_SIGNS_CMD)){
                     result.add(UPDATE_SIGNS);
                 }
                 if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_WIRELESS_SET_PLAYER_SPECIFIC_CHANNELS)){

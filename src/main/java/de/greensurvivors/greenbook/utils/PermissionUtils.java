@@ -1,4 +1,4 @@
-package de.greensurvivors.greenbook;
+package de.greensurvivors.greenbook.utils;
 
 import org.bukkit.permissions.Permissible;
 
@@ -40,9 +40,10 @@ public enum PermissionUtils {
     GREENBOOK_PAINTING_EDIT(GREENBOOK_ROOT.get() + "painting.edit"),
     GREENBOOK_PAINTING_RANGE(GREENBOOK_ROOT.get() + "painting.set.range"),
 
-    GREENBOOK_WIRELESS_UPDATE_SIGNS(GREENBOOK_ROOT.get() + "wireless.update_signs"),
-    GREENBOOK_WIRELESS_SET_PLAYER_SPECIFIC_CHANNELS(GREENBOOK_ROOT.get() + "wireless.player_specific_channels"),
-    GREENBOOK_WIRELESS_SET_COMPATIBILITY_MODE(GREENBOOK_ROOT.get() + "wireless.compatibility_mode"),
+    GREENBOOK_WIRELESS_CREATE_SIGN(GREENBOOK_ROOT.get() + "wireless.create_sign"),
+    GREENBOOK_WIRELESS_UPDATE_SIGNS_CMD(GREENBOOK_ROOT.get() + "wireless.update_signs_cmd"),
+    GREENBOOK_WIRELESS_SET_PLAYER_SPECIFIC_CHANNELS(GREENBOOK_ROOT.get() + "wireless.set.player_specific_channels"),
+    GREENBOOK_WIRELESS_SET_COMPATIBILITY_MODE(GREENBOOK_ROOT.get() + "wireless.set.compatibility_mode"),
 
     GREENBOOK_PLUGIN(GREENBOOK_ROOT.get() + "plugin"),
     GREENBOOK_RELOAD(GREENBOOK_ROOT.get() + "reload");

@@ -1,8 +1,8 @@
 package de.greensurvivors.greenbook.listener;
 
-import de.greensurvivors.greenbook.PermissionUtils;
 import de.greensurvivors.greenbook.language.Lang;
 import de.greensurvivors.greenbook.utils.LocationUtil;
+import de.greensurvivors.greenbook.utils.PermissionUtils;
 import io.papermc.paper.entity.TeleportFlag;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;

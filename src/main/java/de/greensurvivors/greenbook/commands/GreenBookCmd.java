@@ -1,6 +1,6 @@
 package de.greensurvivors.greenbook.commands;
 
-import de.greensurvivors.greenbook.PermissionUtils;
+import de.greensurvivors.greenbook.utils.PermissionUtils;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -86,7 +86,7 @@ public class GreenBookCmd implements CommandExecutor, TabCompleter {
             if(PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_PAINTING_RANGE)){
                 result.add(PaintingCmd.SUBCOMMAND);
             }
-            if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_WIRELESS_UPDATE_SIGNS, PermissionUtils.GREENBOOK_WIRELESS_SET_PLAYER_SPECIFIC_CHANNELS, PermissionUtils.GREENBOOK_WIRELESS_SET_COMPATIBILITY_MODE)){
+            if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_WIRELESS_UPDATE_SIGNS_CMD, PermissionUtils.GREENBOOK_WIRELESS_SET_PLAYER_SPECIFIC_CHANNELS, PermissionUtils.GREENBOOK_WIRELESS_SET_COMPATIBILITY_MODE)){
                 result.add(WireLessCmd.SUBCOMMAND);
             }
 

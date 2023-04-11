@@ -19,7 +19,9 @@ public enum Lang implements Cons {
 	SIGN_RECEIVER_ID("Mc1111"),
 	SIGN_RECEIVER_NAME("Reveiver"),
 	//placing feedback
-	NO_WALLSIGN("You have to place this at a wall."),
+	NO_WALLSIGN("&cYou have to place this at a wall."),
+	CREATED_RECEIVER("&2Successfully created wireless receiver."),
+	CREATED_Transmitter("&2Successfully created wireless transmitter."),
 
 	// /coin command
 	COIN_STOSS_SELF(String.format("&e%s &cdied, by trying to toss themselves a coin.", Lang.PLAYER)),

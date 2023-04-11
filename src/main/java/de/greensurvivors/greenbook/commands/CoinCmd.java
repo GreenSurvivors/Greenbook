@@ -1,8 +1,8 @@
 package de.greensurvivors.greenbook.commands;
 
-import de.greensurvivors.greenbook.PermissionUtils;
 import de.greensurvivors.greenbook.config.CoinConfig;
 import de.greensurvivors.greenbook.language.Lang;
+import de.greensurvivors.greenbook.utils.PermissionUtils;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;

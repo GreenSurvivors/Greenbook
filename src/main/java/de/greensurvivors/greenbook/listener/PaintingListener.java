@@ -2,8 +2,8 @@ package de.greensurvivors.greenbook.listener;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import de.greensurvivors.greenbook.PermissionUtils;
 import de.greensurvivors.greenbook.language.Lang;
+import de.greensurvivors.greenbook.utils.PermissionUtils;
 import org.bukkit.Art;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;

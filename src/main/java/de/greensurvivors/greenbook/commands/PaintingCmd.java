@@ -1,10 +1,10 @@
 package de.greensurvivors.greenbook.commands;
 
-import de.greensurvivors.greenbook.PermissionUtils;
 import de.greensurvivors.greenbook.config.PaintingConfig;
 import de.greensurvivors.greenbook.language.Lang;
 import de.greensurvivors.greenbook.listener.PaintingListener;
 import de.greensurvivors.greenbook.utils.MiscUtil;
+import de.greensurvivors.greenbook.utils.PermissionUtils;
 import org.bukkit.command.CommandSender;
 
 import java.util.Collections;

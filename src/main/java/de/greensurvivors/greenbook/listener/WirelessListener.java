@@ -3,6 +3,7 @@ package de.greensurvivors.greenbook.listener;
 import de.greensurvivors.greenbook.GreenBook;
 import de.greensurvivors.greenbook.config.WireLessConfig;
 import de.greensurvivors.greenbook.language.Lang;
+import de.greensurvivors.greenbook.utils.PermissionUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.*;
@@ -221,11 +222,8 @@ public class WirelessListener implements Listener {
         }
     }
 
-    //todo feedback message + sign destroy if no permission
-    //todo add player name on last line to indicate owner visually
-
     /**
-     * if a reciver gets placed, safe its location to file and cache it
+     * if a receiver gets placed, safe its location to file and cache it
      */
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     private void onSignPlace(SignChangeEvent event) {
@@ -242,56 +240,77 @@ public class WirelessListener implements Listener {
                 line2Str = matcher.group(1);
 
                 if (line2Str.equalsIgnoreCase(Lang.SIGN_RECEIVER_ID.get())) {
-                    if (Tag.WALL_SIGNS.isTagged(event.getBlock().getType())) {
-                        //set the name of the ic
-                        event.line(0, Lang.build(Lang.SIGN_RECEIVER_NAME.get()));
+                    //check permission
+                    if (PermissionUtils.hasPermission(event.getPlayer(), PermissionUtils.GREENBOOK_WIRELESS_CREATE_SIGN)){
+                        if (Tag.WALL_SIGNS.isTagged(event.getBlock().getType())) {
+                            //set the name and id of the receiver
+                            event.line(0, Lang.build(Lang.SIGN_RECEIVER_NAME.get()));
+                            event.line(1, Lang.build("[" + Lang.SIGN_RECEIVER_ID.get() + "]"));
 
-                        //set the uuid of the player if needed
-                        String playerUUIDStr = null;
-                        if (usePlayerSpecificChannels) {
-                            playerUUIDStr = event.getPlayer().getUniqueId().toString();
+                            //set the uuid of the player if needed
+                            String playerUUIDStr = null;
+                            if (usePlayerSpecificChannels) {
+                                playerUUIDStr = event.getPlayer().getUniqueId().toString();
 
-                            changedSign.getPersistentDataContainer().set(CHANNEL_UUID_KEY, PersistentDataType.STRING, playerUUIDStr);
-                        }
+                                changedSign.getPersistentDataContainer().set(CHANNEL_UUID_KEY, PersistentDataType.STRING, playerUUIDStr);
+                                changedSign.line(3, event.getPlayer().name());
+                            }
 
-                        Component channel = event.line(2);
-                        String channelStr;
+                            Component channel = event.line(2);
+                            String channelStr;
 
-                        if (channel == null) {
-                            channelStr = "";
+                            if (channel == null) {
+                                channelStr = "";
+                            } else {
+                                channelStr = plainSerializer.serialize(channel);
+                            }
+
+                            //cache the new receiver
+                            this.addReceiver(event.getBlock().getLocation(), channelStr);
+
+                            synchronized (knownReceiverLocations){
+                                WireLessConfig.inst().saveReceiverLocations(channelStr, knownReceiverLocations.get(channelStr), playerUUIDStr);
+                            }
                         } else {
-                            channelStr = plainSerializer.serialize(channel);
+                            event.getPlayer().sendMessage(Lang.build(Lang.NO_WALLSIGN.get()));
+                            event.getBlock().setType(Material.AIR);
+                            for (ItemStack signItem : event.getBlock().getDrops()) {
+                                event.getBlock().getLocation().getWorld().dropItemNaturally(event.getBlock().getLocation(), signItem);
+                            }
                         }
+                    } else { //no permission
+                        event.getPlayer().sendMessage(Lang.build(Lang.NO_PERMISSION_SOMETHING.get()));
 
-                        //cache the new receiver
-                        this.addReceiver(event.getBlock().getLocation(), channelStr);
-
-                        synchronized (knownReceiverLocations){
-                            WireLessConfig.inst().saveReceiverLocations(channelStr, knownReceiverLocations.get(channelStr), playerUUIDStr);
-                        }
-                    } else {
-                        event.getPlayer().sendMessage(Lang.build(Lang.NO_WALLSIGN.get()));
-                        event.getBlock().setType(Material.AIR);
-                        for (ItemStack signItem : event.getBlock().getDrops()) {
-                            event.getBlock().getLocation().getWorld().dropItemNaturally(event.getBlock().getLocation(), signItem);
-                        }
+                        event.setCancelled(true);
+                        event.getBlock().breakNaturally();
                     }
                 } else if (line2Str.equalsIgnoreCase(Lang.SIGN_TRANSMITTER_ID.get())) {
-                    //set the name of the ic
-                    event.line(0, Lang.build(Lang.SIGN_TRANSMITTER_NAME.get()));
+                    //check permission
+                    if (PermissionUtils.hasPermission(event.getPlayer(), PermissionUtils.GREENBOOK_WIRELESS_CREATE_SIGN)){
+                        //set the name and id of the transmitter
+                        event.line(0, Lang.build(Lang.SIGN_TRANSMITTER_NAME.get()));
+                        event.line(1, Lang.build("[" + Lang.SIGN_TRANSMITTER_ID.get() + "]"));
 
-                    //set the uuid of the player if needed
-                    if (usePlayerSpecificChannels) {
-                        changedSign.getPersistentDataContainer().set(CHANNEL_UUID_KEY, PersistentDataType.STRING, event.getPlayer().getUniqueId().toString());
+                        //set the uuid of the player if needed
+                        if (usePlayerSpecificChannels) {
+                            changedSign.getPersistentDataContainer().set(CHANNEL_UUID_KEY, PersistentDataType.STRING, event.getPlayer().getUniqueId().toString());
+                        }
                     }
+                } else { //no permission
+                    event.getPlayer().sendMessage(Lang.build(Lang.NO_PERMISSION_SOMETHING.get()));
+
+                    event.setCancelled(true);
+                    event.getBlock().breakNaturally();
                 }
             }
         }
     }
 
     /**
-     *
-     * @param chunk
+     * iterates through all blocks in a chunk to find legacy signs
+     * and signs that where deleted from config but not from world
+     * called, if a chunk loads and compatibility mode is on or the update sign command was called
+     * @param chunk the chunk to index all receiver signs in
      */
     public void parseThroughChunk(Chunk chunk){
         synchronized (MUTEX){
@@ -333,7 +352,6 @@ public class WirelessListener implements Listener {
      * iterates through all blocks in a freshly loaded chunk to find legacy signs
      * and signs that where deleted from config but not from world
      * To work the compatibilityMode have to get turned on
-     * @param event
      */
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     private void onChunkLoad(final ChunkLoadEvent event) {

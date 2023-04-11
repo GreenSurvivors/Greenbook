@@ -1,7 +1,7 @@
 package de.greensurvivors.greenbook.listener;
 
-import de.greensurvivors.greenbook.PermissionUtils;
 import de.greensurvivors.greenbook.language.Lang;
+import de.greensurvivors.greenbook.utils.PermissionUtils;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
