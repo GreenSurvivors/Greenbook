@@ -78,7 +78,7 @@ public class WireLessConfig {
      * @param channelStr
      * @param locations
      * @param playerUUID
-     */
+     */ //todo make thread safe
     public void saveReceiverLocations(@NotNull String channelStr, @NotNull HashSet<Location> locations, @Nullable String playerUUID) {
         //don't allow forbidden chars or empty filenames
         if (channelStr.equals("")) {

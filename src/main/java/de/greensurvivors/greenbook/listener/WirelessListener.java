@@ -140,7 +140,11 @@ public class WirelessListener implements Listener {
 
                         String transmitterChannel = plainSerializer.serialize(transmitterSign.line(2));
 
-                        HashSet<Location> receiverLocations = knownReceiverLocations.get(transmitterChannel);
+                        HashSet<Location> receiverLocations;
+                        synchronized (knownReceiverLocations) {
+                            receiverLocations = knownReceiverLocations.get(transmitterChannel);
+                        }
+
                         String transmitterPlayerUUIDStr = transmitterSign.getPersistentDataContainer().get(CHANNEL_UUID_KEY, PersistentDataType.STRING);
 
                         if (receiverLocations == null) {
@@ -224,7 +228,7 @@ public class WirelessListener implements Listener {
 
     /**
      * if a receiver gets placed, safe its location to file and cache it
-     */
+     */ //todo maybe wax the sign automatically in 1.20
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     private void onSignPlace(SignChangeEvent event) {
         PlainTextComponentSerializer plainSerializer = PlainTextComponentSerializer.plainText();
