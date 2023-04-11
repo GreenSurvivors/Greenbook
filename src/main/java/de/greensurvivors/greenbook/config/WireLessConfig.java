@@ -14,7 +14,6 @@ public class WireLessConfig {
     private static final String
             //config key root, never use this directly!
             WIRELESS_KEY = "wireless.",
-            //todo these settings are only accessible via config file --> make config commands
             //if every player should have thair own channel or all player activate all other recivers
             //this means, a transmitter placed by a player only activates receivers placed by the same player.
             USE_PLAYER_SPECIFIC_CHANNELS = WIRELESS_KEY + "usePlayerSpecificChannels",
@@ -90,6 +89,16 @@ public class WireLessConfig {
         ChannelConfig config = new ChannelConfig(channelStr, playerUUID);
 
         config.saveCfg(locations);
+    }
+
+    public void setUsePlayerSpecificChannels(boolean newValue){
+        GreenBook.inst().getConfig().set(USE_PLAYER_SPECIFIC_CHANNELS, newValue);
+        WirelessListener.inst().setUsePlayerSpecificChannels(newValue);
+    }
+
+    public void setCompatiblityMode(boolean newValue){
+        GreenBook.inst().getConfig().set(COMPATIBILITY_MODE, newValue);
+        WirelessListener.inst().setCompatibilityMode(newValue);
     }
 
     protected void load() {

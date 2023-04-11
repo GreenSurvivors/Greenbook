@@ -81,6 +81,7 @@ public enum Lang implements Cons {
 	NO_SUCH_PLAYER(String.format("&cCould not get a valid player named %s", VALUE)),
 	NO_ITEM_HOLDING("&cYou not are holding a item."),
 	NOT_ENOUGH_ARGS("&cNot enough arguments."),
+	UNKNOWN_ARGUMENT(String.format("&cUnknown or wrong argument &6'&e%s&6'&c. Try &e/fm help", VALUE)),
 	UNKNOWN_ERROR("&cUnknown Error. What happened?");
 
 	//the message

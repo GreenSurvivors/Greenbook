@@ -45,6 +45,9 @@ public class GreenBookCmd implements CommandExecutor, TabCompleter {
                 case PaintingCmd.SUBCOMMAND -> {
                     return PaintingCmd.handleCommand(sender, args);
                 }
+                case WireLessCmd.SUBCOMMAND -> {
+                    return WireLessCmd.handleCommand(sender, args);
+                }
                 default -> {
                     return false;
                 }
@@ -82,6 +85,9 @@ public class GreenBookCmd implements CommandExecutor, TabCompleter {
             }
             if(PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_PAINTING_RANGE)){
                 result.add(PaintingCmd.SUBCOMMAND);
+            }
+            if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_WIRELESS_UPDATE_SIGNS)){
+                result.add(WireLessCmd.SUBCOMMAND);
             }
 
             result = result.stream().filter(s -> s.startsWith(args[0].toLowerCase())).toList();

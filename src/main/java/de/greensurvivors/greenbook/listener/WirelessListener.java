@@ -5,10 +5,7 @@ import de.greensurvivors.greenbook.config.WireLessConfig;
 import de.greensurvivors.greenbook.language.Lang;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.Tag;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
@@ -30,7 +27,6 @@ import java.util.HashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-//todo create a command to load signs around the player - a local compatibility mode
 public class WirelessListener implements Listener {
     //pattern to identify transmitters and receivers
     private static final Pattern signPattern = Pattern.compile("\\[(.*?)\\]S?");
@@ -56,6 +52,8 @@ public class WirelessListener implements Listener {
     //this class keeps track of its own instance, so it's basically static
     private static WirelessListener instance;
 
+    private static final Object MUTEX = new Object();
+
     private WirelessListener(){}
 
     /**
@@ -72,10 +70,10 @@ public class WirelessListener implements Listener {
      * clears list of cached receiver locations
      */
     public void clear() {
-        knownReceiverLocations.clear();
+        synchronized (knownReceiverLocations) {
+            knownReceiverLocations.clear();
+        }
     }
-
-    //todo command 4 this
 
     /**
      * set if player specific channels should be used.
@@ -102,8 +100,10 @@ public class WirelessListener implements Listener {
      * @param channel channel the receiver belongs to
      */
     private void addReceiver(@NotNull Location receiverLocation, @NotNull String channel) {
-        knownReceiverLocations.computeIfAbsent(channel, k -> new HashSet<>());
-        knownReceiverLocations.get(channel).add(receiverLocation.toBlockLocation());
+        synchronized (knownReceiverLocations) {
+            knownReceiverLocations.computeIfAbsent(channel, k -> new HashSet<>());
+            knownReceiverLocations.get(channel).add(receiverLocation.toBlockLocation());
+        }
     }
 
     /**
@@ -144,7 +144,9 @@ public class WirelessListener implements Listener {
 
                         if (receiverLocations == null) {
                             receiverLocations = WireLessConfig.inst().loadReceiverLocations(transmitterChannel, usePlayerSpecificChannels ? transmitterPlayerUUIDStr : null);
-                            knownReceiverLocations.put(transmitterChannel, receiverLocations);
+                            synchronized (knownReceiverLocations){
+                                knownReceiverLocations.put(transmitterChannel, receiverLocations);
+                            }
                         }
 
                         if (receiverLocations != null) {
@@ -187,21 +189,28 @@ public class WirelessListener implements Listener {
 
                                                 } else {
                                                     // update channel, should never occur, but fixing it anyway
-                                                    knownReceiverLocations.get(transmitterChannel).remove(receiverLocation.toBlockLocation());
-
+                                                    synchronized (knownReceiverLocations) {
+                                                        knownReceiverLocations.get(transmitterChannel).remove(receiverLocation.toBlockLocation());
+                                                    }
                                                     addReceiver(receiverLocation, receiverChannel);
                                                 }
                                             } else {
                                                 // remove from list
-                                                knownReceiverLocations.get(transmitterChannel).remove(receiverLocation.toBlockLocation());
+                                                synchronized (knownReceiverLocations){
+                                                    knownReceiverLocations.get(transmitterChannel).remove(receiverLocation.toBlockLocation());
+                                                }
                                             }
                                         } else {
                                             // remove from list
-                                            knownReceiverLocations.get(transmitterChannel).remove(receiverLocation.toBlockLocation());
+                                            synchronized (knownReceiverLocations) {
+                                                knownReceiverLocations.get(transmitterChannel).remove(receiverLocation.toBlockLocation());
+                                            }
                                         }
                                     } else {
                                         // remove from list
-                                        knownReceiverLocations.get(transmitterChannel).remove(receiverLocation.toBlockLocation());
+                                        synchronized (knownReceiverLocations){
+                                            knownReceiverLocations.get(transmitterChannel).remove(receiverLocation.toBlockLocation());
+                                        }
                                     }
                                 }
                             }
@@ -257,7 +266,9 @@ public class WirelessListener implements Listener {
                         //cache the new receiver
                         this.addReceiver(event.getBlock().getLocation(), channelStr);
 
-                        WireLessConfig.inst().saveReceiverLocations(channelStr, knownReceiverLocations.get(channelStr), playerUUIDStr);
+                        synchronized (knownReceiverLocations){
+                            WireLessConfig.inst().saveReceiverLocations(channelStr, knownReceiverLocations.get(channelStr), playerUUIDStr);
+                        }
                     } else {
                         event.getPlayer().sendMessage(Lang.build(Lang.NO_WALLSIGN.get()));
                         event.getBlock().setType(Material.AIR);
@@ -278,17 +289,13 @@ public class WirelessListener implements Listener {
         }
     }
 
-    //todo load uuid from persistant data storage to restore lost receiver files
     /**
-     * iterates through all blocks in a freshly loaded chunk to find legacy signs
-     * and signs that where deleted from config but not from world
-     * To work the compatibilityMode have to get turned on
-     * @param event
+     *
+     * @param chunk
      */
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    private void onChunkLoad(final ChunkLoadEvent event) {
-        if (compatibilityMode) {
-            for (BlockState state : event.getChunk().getTileEntities(block -> Tag.SIGNS.isTagged(block.getType()), false)) {
+    public void parseThroughChunk(Chunk chunk){
+        synchronized (MUTEX){
+            for (BlockState state : chunk.getTileEntities(block -> Tag.SIGNS.isTagged(block.getType()), false)) {
                 if ((state instanceof Sign sign)) {
                     PlainTextComponentSerializer plainSerializer = PlainTextComponentSerializer.plainText();
                     String line2 = plainSerializer.serialize(sign.line(1)).trim();
@@ -308,12 +315,28 @@ public class WirelessListener implements Listener {
                                 this.addReceiver(state.getLocation(), channelStr);
 
                                 String playerUUIDStr = plainSerializer.serialize(sign.line(3));
-                                WireLessConfig.inst().saveReceiverLocations(channelStr, knownReceiverLocations.get(channelStr), usePlayerSpecificChannels ? playerUUIDStr : null);
+                                synchronized (knownReceiverLocations){
+                                    WireLessConfig.inst().saveReceiverLocations(channelStr, knownReceiverLocations.get(channelStr), usePlayerSpecificChannels ? playerUUIDStr : null);
+                                }
                             }
                         }
                     }
                 }
             }
+        }
+    }
+
+    //todo load uuid from persistant data storage to restore lost receiver files
+    /**
+     * iterates through all blocks in a freshly loaded chunk to find legacy signs
+     * and signs that where deleted from config but not from world
+     * To work the compatibilityMode have to get turned on
+     * @param event
+     */
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    private void onChunkLoad(final ChunkLoadEvent event) {
+        if (compatibilityMode) {
+            Bukkit.getScheduler().runTaskAsynchronously(GreenBook.inst(), () -> parseThroughChunk(event.getChunk()));
         }
     }
 

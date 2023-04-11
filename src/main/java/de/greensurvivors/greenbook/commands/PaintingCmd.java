@@ -26,7 +26,7 @@ public class PaintingCmd {
      * @param args    Passed command arguments
      * @return        true, if enough args where given.
      */
-    public static boolean handleCommand(CommandSender sender, String[] args){
+    protected static boolean handleCommand(CommandSender sender, String[] args){
         if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_PAINTING_RANGE)){
             if (args.length >= 3 && args[1].equalsIgnoreCase(RANGE)){
                 if (Misc.isInt(args[2])){
@@ -59,7 +59,7 @@ public class PaintingCmd {
      * @param args    Passed command arguments
      * @return        "range" if second argument, else empty list
      */
-    public static List<String> handleTab(CommandSender sender, String[] args){
+    protected static List<String> handleTab(CommandSender sender, String[] args){
         //check permission
         if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_PAINTING_RANGE)){
             if (args.length == 2){

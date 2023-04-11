@@ -44,7 +44,7 @@ public class BookCmd {
      * @param args    Passed command arguments
      * @return        false if not enough arguments, otherwise true
      */
-    public static boolean handleCommand(@NotNull CommandSender sender, @NotNull String[] args) {
+    protected static boolean handleCommand(@NotNull CommandSender sender, @NotNull String[] args) {
         if (args.length >= 3){
             switch (args[1].toLowerCase()){
                 case ADD -> {//greenbook book add [quote] - add a new quote (aka book)
@@ -271,7 +271,7 @@ public class BookCmd {
      * @return A List of possible completions for the final argument, or null
      * to default to the command executor
      */
-    public static @Nullable List<String> handleTabComplete(@NotNull CommandSender sender, @NotNull String[] args) {
+    protected static @Nullable List<String> handleTabComplete(@NotNull CommandSender sender, @NotNull String[] args) {
         switch (args.length){
             //greenbook shelf ?
             //return list of subcommands the sender has permission for
