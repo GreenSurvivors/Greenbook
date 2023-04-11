@@ -4,7 +4,7 @@ import de.greensurvivors.greenbook.PermissionUtils;
 import de.greensurvivors.greenbook.config.PaintingConfig;
 import de.greensurvivors.greenbook.language.Lang;
 import de.greensurvivors.greenbook.listener.PaintingListener;
-import de.greensurvivors.greenbook.utils.Misc;
+import de.greensurvivors.greenbook.utils.MiscUtil;
 import org.bukkit.command.CommandSender;
 
 import java.util.Collections;
@@ -29,7 +29,7 @@ public class PaintingCmd {
     protected static boolean handleCommand(CommandSender sender, String[] args){
         if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_PAINTING_RANGE)){
             if (args.length >= 3 && args[1].equalsIgnoreCase(RANGE)){
-                if (Misc.isInt(args[2])){
+                if (MiscUtil.isInt(args[2])){
                     int range = Math.max(0, Integer.parseInt(args[2])); //don't allow negativ ranges
 
                     //set the working value

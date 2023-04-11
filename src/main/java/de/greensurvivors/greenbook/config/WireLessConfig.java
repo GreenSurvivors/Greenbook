@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.regex.Pattern;
 
 //todo make it easier to switch between player specific channels and not
+//todo make file use async like in GreenTreasure
 public class WireLessConfig {
     private static final String
             //config key root, never use this directly!

@@ -3,7 +3,7 @@ package de.greensurvivors.greenbook.utils;
 /**
  * utils that doesn't belong anywhere else, currently contains a test if a string is an int, used by commands
  */
-public class Misc {
+public class MiscUtil {
     private static final int MAX_INT_CHARS = (int) (Math.log10(Integer.MAX_VALUE) + 1);
 
     /**

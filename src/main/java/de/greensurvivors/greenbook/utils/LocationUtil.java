@@ -17,13 +17,7 @@ import java.util.logging.Level;
  * currently used by lift-listener to find a safe location to teleport to
  */
 public final class LocationUtil {
-    // Water types used for TRANSPARENT_MATERIALS and is-water-safe config option
-    // I have no idea how Tag.FLUIDS_WATER works.
-    private static final Set<Material> WATER_TYPES = Set.of(Material.WATER, Material.LEGACY_WATER, Material.LEGACY_STATIONARY_WATER);
-    // Types checked by isBlockDamaging
-    private static final Set<Material> DAMAGING_TYPES = Set.of(Material.CACTUS, Material.FIRE, Material.SOUL_FIRE, Material.CAMPFIRE, Material.SOUL_CAMPFIRE, Material.SWEET_BERRY_BUSH, Material.WITHER_ROSE);
-    // I have no idea how Tag.FLUIDS_LAVA works.
-    private static final Set<Material> LAVA_TYPES = Set.of(Material.LAVA, Material.LEGACY_LAVA, Material.LEGACY_STATIONARY_LAVA);
+    private static final Set<Material> DAMAGING_TYPES = Set.of(Material.CACTUS, Material.FIRE, Material.SOUL_FIRE, Material.CAMPFIRE, Material.SOUL_CAMPFIRE, Material.SWEET_BERRY_BUSH, Material.WITHER_ROSE, Material.POWDER_SNOW);
 
     private static boolean isWaterSafe = false;
 
@@ -45,17 +39,20 @@ public final class LocationUtil {
                 return false;
             }
 
-            if (DAMAGING_TYPES.contains(material) || LAVA_TYPES.contains(material) || Tag.BEDS.isTagged(material)) {
+            // I have no idea how Tag.FLUIDS_LAVA works.
+            if (DAMAGING_TYPES.contains(material) || Material.LAVA == material || Tag.BEDS.isTagged(material)) {
                 return false;
             }
 
-            if (!isWaterSafe && WATER_TYPES.contains(material)){
+            // I have no idea how Tag.FLUIDS_WATER works.
+            if (!isWaterSafe && Material.WATER == material){
                 return false;
             }
         }
 
         //test if there is enough room but also a floor to stand on
-
+        //todo: there are probably cases, where collidesAt at y-1 returns true but a player still can't stand on.
+        // might want to use https://www.spigotmc.org/threads/how-to-actually-detect-which-block-a-player-is-standing-on.492043/
         return !toTest.collidesAt(new Location(world, x, y, z)) && toTest.collidesAt(new Location(world, x, y-1, z)) ;
     }
 
@@ -65,7 +62,7 @@ public final class LocationUtil {
      * try to get a safe location to teleport to, up to 5 blocks difference
      * @param toTest player to try to get the Destination for
      * @param dy the vertical distance counting form the postion of the Player toTest. negative means downwards.
-     * @return safe (no damage will be taken) location to teleport to, will be null, if no was found
+     * @return safe (no damage will be taken) location to teleport to, will be null, if no location was found
      */
     public static @Nullable Location getSafeLiftDestination(final @NotNull Entity toTest, double dy) {
         //the end location we try to get a safe location around
@@ -95,7 +92,7 @@ public final class LocationUtil {
 
         boolean foundSafeLoc = false;
 
-        if (isEntitySafeAt(toTest, world, x, y, z)){ //this is purly optimizing, starting with i = 0 would have the same effect, but we would check the same location twice.
+        if (isEntitySafeAt(toTest, world, x, y, z)){ //this is purely optimizing, starting with i = 0 would have the same effect, but we would check the same location twice.
             foundSafeLoc = true;
         }  else {
             for (int i = 1; i <= 5; i++){ //todo there is probably optimizing to be had here, since we are checking if a block was safe at least double.

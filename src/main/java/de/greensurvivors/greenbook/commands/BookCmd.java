@@ -4,7 +4,7 @@ import de.greensurvivors.greenbook.PermissionUtils;
 import de.greensurvivors.greenbook.config.ShelfConfig;
 import de.greensurvivors.greenbook.language.Lang;
 import de.greensurvivors.greenbook.listener.ShelfListener;
-import de.greensurvivors.greenbook.utils.Misc;
+import de.greensurvivors.greenbook.utils.MiscUtil;
 import net.kyori.adventure.text.Component;
 import org.apache.commons.lang3.BooleanUtils;
 import org.bukkit.command.CommandSender;
@@ -73,7 +73,7 @@ public class BookCmd {
                 case REMOVE_SHORT, REMOVE_LONG -> { //greenbook book remove [quote number] - remove a quote (aka book) by its id (important: may change if books are added or removed)
                     if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_SHELF_WILDCARD, PermissionUtils.GREENBOOK_SHELF_REMOVE)){
                         //check if the given id was valid
-                        if (Misc.isInt(args[2])) {
+                        if (MiscUtil.isInt(args[2])) {
                             String book = ShelfListener.inst().getBook(Integer.parseInt(args[2]));
                             if (book != null){
                                 //it is a book. now remove it from config and current active list
@@ -105,7 +105,7 @@ public class BookCmd {
                         //how many pages of books are there? - needed in header and limit page to how many exits
                         final int NUM_OF_PAGES = (int) Math.ceil((double)NUM_OF_BOOKS / (double)BOOKS_PER_PAGE);
 
-                        if (Misc.isInt(args[2])) {
+                        if (MiscUtil.isInt(args[2])) {
                             //limit page to range of possible pages
                             final int PAGE = Math.max(Math.min(Integer.parseInt(args[2]), NUM_OF_PAGES), 1);
                             //don't try to access more books than exits
