@@ -314,7 +314,10 @@ public class WirelessListener implements Listener {
                                 //cache the new receiver
                                 this.addReceiver(state.getLocation(), channelStr);
 
-                                String playerUUIDStr = plainSerializer.serialize(sign.line(3));
+                                String playerUUIDStr = sign.getPersistentDataContainer().get(CHANNEL_UUID_KEY, PersistentDataType.STRING);
+                                //if no uuid was in the data container try to get it from the third line
+                                playerUUIDStr = playerUUIDStr == null ? plainSerializer.serialize(sign.line(3)) : playerUUIDStr;
+
                                 synchronized (knownReceiverLocations){
                                     WireLessConfig.inst().saveReceiverLocations(channelStr, knownReceiverLocations.get(channelStr), usePlayerSpecificChannels ? playerUUIDStr : null);
                                 }
@@ -326,7 +329,6 @@ public class WirelessListener implements Listener {
         }
     }
 
-    //todo load uuid from persistant data storage to restore lost receiver files
     /**
      * iterates through all blocks in a freshly loaded chunk to find legacy signs
      * and signs that where deleted from config but not from world

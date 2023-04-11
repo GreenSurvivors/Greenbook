@@ -33,7 +33,7 @@ public enum PermissionUtils {
     GREENBOOK_SHELF_USE (GREENBOOK_ROOT.get() + "shelf.use"),
     GREENBOOK_SHELF_ADD (GREENBOOK_ROOT.get() +"shelf.add"),
     GREENBOOK_SHELF_REMOVE (GREENBOOK_ROOT.get() +"shelf.remove"),
-    GREENBOOK_SHELF_LIST (GREENBOOK_ROOT.get() +".helf.list"),
+    GREENBOOK_SHELF_LIST (GREENBOOK_ROOT.get() +".shelf.list"),
     GREENBOOK_SHELF_EMPTYHAND(GREENBOOK_ROOT.get() + "shelf.set.emptyhand"),
     GREENBOOK_SHELF_SNEAK(GREENBOOK_ROOT.get() + "shelf.set.require_sneak"),
 
