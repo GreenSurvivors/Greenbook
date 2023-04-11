@@ -126,7 +126,27 @@ public class BookCmd {
                             }
 
                             //add footer
-                            tempComponents.add(Lang.build(Lang.SHELF_LIST_FOOTER.get())); //todo make buttons clickable
+                            Component footer = Lang.build(Lang.LIST_FOOTER_OUTER.get());
+
+                            //back button or none
+                            if (PAGE > 1){
+                                footer = footer.append(Lang.build(Lang.LIST_FOOTER_BACK.get().replace(Lang.VALUE, String.valueOf(PAGE-1)), null, null, "/" + GreenBookCmd.getCommand() + " " + LIST + " " + (PAGE - 1), null));
+                            } else {
+                                footer = footer.append(Lang.build(Lang.LIST_FOOTER_NONE.get()));
+                            }
+
+                            //inner part, separating both buttons
+                            footer = footer.append(Lang.build(Lang.LIST_FOOTER_INNER.get()));
+
+                            //next button
+                            if (PAGE < NUM_OF_PAGES){
+                                footer = footer.append(Lang.build(Lang.LIST_FOOTER_NEXT.get().replace(Lang.VALUE, String.valueOf(PAGE+1)), null, null, "/" + GreenBookCmd.getCommand()  + " " + LIST + " " + (PAGE + 1), null));
+                            } else {
+                                footer = footer.append(Lang.build(Lang.LIST_FOOTER_NONE.get()));
+                            }
+
+                            footer = footer.append(Lang.build(Lang.LIST_FOOTER_OUTER.get()));
+                            tempComponents.add(footer);
 
                             //join with new line as separator and send the result
                             sender.sendMessage(Lang.join(tempComponents));
@@ -205,7 +225,24 @@ public class BookCmd {
                     }
 
                     //add footer
-                    tempComponents.add(Lang.build(Lang.SHELF_LIST_FOOTER.get())); //todo make buttons clickable
+                    Component footer = Lang.build(Lang.LIST_FOOTER_OUTER.get());
+
+                    //we are allways on the first page. There is no back button.
+                    footer = footer.append(Lang.build(Lang.LIST_FOOTER_NONE.get()));
+
+
+                    //inner part, separating both buttons
+                    footer = footer.append(Lang.build(Lang.LIST_FOOTER_INNER.get()));
+
+                    //next button
+                    if (NUM_OF_PAGES > 1){
+                        footer = footer.append(Lang.build(Lang.LIST_FOOTER_NEXT.get().replace(Lang.VALUE, String.valueOf(2)), null, null, "/" + GreenBookCmd.getCommand()  + " " + LIST + " " + (2), null));
+                    } else {
+                        footer = footer.append(Lang.build(Lang.LIST_FOOTER_NONE.get()));
+                    }
+
+                    footer = footer.append(Lang.build(Lang.LIST_FOOTER_OUTER.get()));
+                    tempComponents.add(footer);
 
                     //join with new line as separator and send the result
                     sender.sendMessage(Lang.join(tempComponents));

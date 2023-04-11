@@ -45,7 +45,11 @@ public enum Lang implements Cons {
 	SHELF_REMOVED_BOOK("&2Successfully removed Book:"),
 	SHELF_NO_BOOK(String.format("&2No Book with the id of &e%s&2 exists", VALUE)),
 	SHELF_LIST_HEADER(String.format("&6-----------{Books &e%s&6/&e%s}-----------", VALUE, MAX)),
-	SHELF_LIST_FOOTER("&6-------------------------------"),
+	LIST_FOOTER_OUTER("&2--"),
+	LIST_FOOTER_INNER("&2---<*>---"),
+	LIST_FOOTER_BACK(String.format("&6<<( &e%s&6 ) ", VALUE)),
+	LIST_FOOTER_NEXT(String.format("&6 ( &e%s&6 )>>", VALUE)),
+	LIST_FOOTER_NONE("-------"),
 	SHELF_SET_EMPTYHAND(String.format("&2Reading books requires empty hand: &e%s", VALUE)),
 	SHELF_SET_SNEAK(String.format("&2Reading books requires sneaking: &e%s", VALUE)),
 
