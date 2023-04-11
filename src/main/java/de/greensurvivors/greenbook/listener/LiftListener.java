@@ -184,7 +184,7 @@ public class LiftListener implements Listener {
     private void liftTeleport(@NotNull Player player, double dy, @NotNull String floorName){
         //try to get a safe location to teleport to, up to 5 blocks difference,
         //might be null if no was found
-        Location destination = LocationUtil.getSafeLiftDestination(player.getLocation(), dy > 0, player.getLocation().add(0, dy, 0));
+        Location destination = LocationUtil.getSafeLiftDestination(player, dy);
 
         if (destination != null){
             boolean teleported;

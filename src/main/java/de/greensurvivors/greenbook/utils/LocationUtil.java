@@ -5,11 +5,10 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.World;
+import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.EnumSet;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
 
@@ -19,146 +18,108 @@ import java.util.logging.Level;
  */
 public final class LocationUtil {
     // Water types used for TRANSPARENT_MATERIALS and is-water-safe config option
-    private static final Set<Material> WATER_TYPES = getAllMatchingMaterials("FLOWING_WATER", "WATER");
+    // I have no idea how Tag.FLUIDS_WATER works.
+    private static final Set<Material> WATER_TYPES = Set.of(Material.WATER, Material.LEGACY_WATER, Material.LEGACY_STATIONARY_WATER);
     // Types checked by isBlockDamaging
-    private static final Set<Material> DAMAGING_TYPES = getAllMatchingMaterials("CACTUS", "CAMPFIRE", "FIRE", "MAGMA_BLOCK", "SOUL_CAMPFIRE", "SOUL_FIRE", "SWEET_BERRY_BUSH", "WITHER_ROSE");
-    private static final Set<Material> LAVA_TYPES = getAllMatchingMaterials("FLOWING_LAVA", "LAVA", "STATIONARY_LAVA");
-    private static final Material PORTAL = getMatchingMaterial("NETHER_PORTAL", "PORTAL", "END_PORTAL");
-    private static final Material LIGHT = getMatchingMaterial("LIGHT");
+    private static final Set<Material> DAMAGING_TYPES = Set.of(Material.CACTUS, Material.FIRE, Material.SOUL_FIRE, Material.CAMPFIRE, Material.SOUL_CAMPFIRE, Material.SWEET_BERRY_BUSH, Material.WITHER_ROSE);
+    // I have no idea how Tag.FLUIDS_LAVA works.
+    private static final Set<Material> LAVA_TYPES = Set.of(Material.LAVA, Material.LEGACY_LAVA, Material.LEGACY_STATIONARY_LAVA);
 
-    // The player can stand inside these materials
-    private static final Set<Material> HOLLOW_MATERIALS = EnumSet.noneOf(Material.class);
+    private static boolean isWaterSafe = false;
 
-    static {
-        // Materials from Material.isTransparent()
-        for (final Material mat : Material.values()) {
-            if (mat.isBlock() && !mat.isCollidable()) {
-                HOLLOW_MATERIALS.add(mat);
+    public static void setIsWaterSafe(final boolean newIsWaterSafe) { //todo config
+        isWaterSafe = newIsWaterSafe;
+    }
+
+    private static boolean isEntitySafeAt(final @NotNull Entity toTest, final @NotNull World world, final double x, final double y, final double z) {
+        //start looking for unsafe blocks one Block under the entity.
+        final int minY = Math.max(world.getMinHeight(), (int)y-1);
+        //end looking at the height of the entity
+        final int maxY = Math.min(world.getMaxHeight(), (int)(y + toTest.getBoundingBox().getHeight()));
+
+        //test for unsafe blocks at the new postion
+        for (int i = minY; i <= maxY; i++){
+            Material material = world.getType((int)x, i, (int)z);
+
+            if (Tag.PORTALS.isTagged(material)) {
+                return false;
+            }
+
+            if (DAMAGING_TYPES.contains(material) || LAVA_TYPES.contains(material) || Tag.BEDS.isTagged(material)) {
+                return false;
+            }
+
+            if (!isWaterSafe && WATER_TYPES.contains(material)){
+                return false;
             }
         }
 
-        // Light blocks can be passed through and are not considered transparent for some reason
-        if (LIGHT != null) {
-            HOLLOW_MATERIALS.add(LIGHT);
-        }
+        //test if there is enough room but also a floor to stand on
+
+        return !toTest.collidesAt(new Location(world, x, y, z)) && toTest.collidesAt(new Location(world, x, y-1, z)) ;
     }
 
-    /**
-     * Return a set containing <b>all</b> Materials that match one of the provided
-     * names.
-     *
-     * @param names The names of the fields to search for
-     * @return All matching enum fields
-     */
-    private static Set<Material> getAllMatchingMaterials(final String... names) {
-        final HashSet<Material> set = new HashSet<>();
 
-        for (final String name : names) {
-            Material material = getMatchingMaterial(name);
-
-            if (material != null){
-                set.add(material);
-            }
-        }
-
-        return set;
-    }
-
-    /**
-     * Returns the Material matching the first provided enum name.
-     * If no Material is found, this method returns null.
-     *
-     * @param names The names of the fields to search for
-     * @return The first matching Material
-     */
-    private static Material getMatchingMaterial(final String... names) {
-        for (final String name : names){
-            try {
-                return Material.valueOf(name);
-            } catch (IllegalArgumentException ignored){
-            }
-        }
-
-        return null;
-    }
-
-    public static void setIsWaterSafe(final boolean isWaterSafe) { //todo config
-        if (isWaterSafe) {
-            HOLLOW_MATERIALS.addAll(WATER_TYPES);
-        } else {
-            HOLLOW_MATERIALS.removeAll(WATER_TYPES);
-        }
-    }
-
-    private static boolean isBlockHollowSafe(final World world, final int x, final int y, final int z) { //todo accept open doors and alike via hitbox
-        final Material material = world.getBlockAt(x, y, z).getType();
-
-        if (DAMAGING_TYPES.contains(material) || LAVA_TYPES.contains(material) || Tag.BEDS.isTagged(material)) {
-            return false;
-        }
-
-        if (material == PORTAL) {
-            return false;
-        }
-
-        return (y > world.getMaxHeight() || HOLLOW_MATERIALS.contains(world.getBlockAt(x, y, z).getType()));
-    }
-
-    //,
-    //might be null if no was found
+    //might be null if no location was found
     /**
      * try to get a safe location to teleport to, up to 5 blocks difference
-     * @param fromLoc location to start from, is imported to not teleport to the same y level
-     * @param up if the from-location gets over or under the end-location into play
-     * @param toLoc the end location we try to get a safe location around
+     * @param toTest player to try to get the Destination for
+     * @param dy the vertical distance counting form the postion of the Player toTest. negative means downwards.
      * @return safe (no damage will be taken) location to teleport to, will be null, if no was found
      */
-    public static @Nullable Location getSafeLiftDestination(final @NotNull Location fromLoc, final boolean up, final @Nullable Location toLoc) {
-        if (toLoc == null || toLoc.getWorld() == null) {
+    public static @Nullable Location getSafeLiftDestination(final @NotNull Entity toTest, double dy) {
+        //the end location we try to get a safe location around
+        final Location toLoc = toTest.getLocation().add(0, dy, 0);
+
+        if (toLoc.getWorld() == null) {
             GreenLogger.log(Level.WARNING, "couldn't find safe destination for null.");
             return null;
         }
 
         final World world = toLoc.getWorld();
-        int x = toLoc.getBlockX();
+        final double x = toLoc.getX();
         int y = toLoc.getBlockY();
-        int originY = fromLoc.getBlockY();
-        int z = toLoc.getBlockZ();
+        //y to start from, is imported to not teleport to the same y level
+        int originY = toTest.getLocation().getBlockY();
+        final double z = toLoc.getZ();
 
         int maxY = Math.min(toLoc.getBlockY() + 5, world.getMaxHeight()+1);
         int minY = Math.max(toLoc.getBlockY() - 5, world.getMinHeight());
 
-        if(up){ //never teleport to the same floor the origin lift is on
+        //if the from-location gets over or under the end-location into play
+        if(dy > 0){ //never teleport to the same floor the origin lift is on
             minY = Math.max(minY, originY+1);
         } else {
             maxY = Math.min(maxY, originY -1);
         }
 
-        //get floor y
-        while (isBlockHollowSafe(world, x, y, z)){
-            if (y <= minY){ //never teleport to the same floor the origin lift is on
-                return null;
-            }
+        boolean foundSafeLoc = false;
 
-            y--;
-            GreenLogger.log(Level.INFO, "down: " + y);
+        if (isEntitySafeAt(toTest, world, x, y, z)){ //this is purly optimizing, starting with i = 0 would have the same effect, but we would check the same location twice.
+            foundSafeLoc = true;
+        }  else {
+            for (int i = 1; i <= 5; i++){ //todo there is probably optimizing to be had here, since we are checking if a block was safe at least double.
+                if (y + i <= maxY && //never teleport to the same floor the origin lift is on
+                        isEntitySafeAt(toTest, world, x, y+i, z)){ //check if the new location + i blocks is safe to stand on
+                    foundSafeLoc = true;
+                    y += i;
+                    break;
+                }
+
+                if (y - i >= minY && //never teleport to the same floor the origin lift is on
+                        isEntitySafeAt(toTest, world, x, y-i, z)){ //check if the new location - i blocks is safe to stand on
+                    foundSafeLoc = true;
+                    y -= i;
+                    break;
+                }
+            }
         }
 
-        //get 2 safe places above floor
-        while (!isBlockHollowSafe(world, x, y, z) || !isBlockHollowSafe(world, x, y+1, z)){
-            if (y >= maxY){ //never teleport to the same floor the origin lift is on
-                return null;
-            }
-
-            y++;
-        }
-
-        //check if the block is unsafe to stand on
-        final Material material = world.getBlockAt(x, y-1, z).getType();
-        if (DAMAGING_TYPES.contains(material) || LAVA_TYPES.contains(material) || Tag.BEDS.isTagged(material) || material == PORTAL) {
+        //no location where found.
+        if (!foundSafeLoc){
             return null;
         }
 
-        return new Location(world, x + 0.5,  y, z + 0.5, toLoc.getYaw(), toLoc.getPitch());
+        return new Location(world, x,  y, z, toLoc.getYaw(), toLoc.getPitch());
     }
 }
