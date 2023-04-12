@@ -1,6 +1,7 @@
 package de.greensurvivors.greenbook.commands;
 
 import de.greensurvivors.greenbook.GreenBook;
+import de.greensurvivors.greenbook.GreenLogger;
 import de.greensurvivors.greenbook.config.WireLessConfig;
 import de.greensurvivors.greenbook.language.Lang;
 import de.greensurvivors.greenbook.listener.WirelessListener;
@@ -15,6 +16,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
 
 public class WireLessCmd {
     public static final String SUBCOMMAND = "wire";
@@ -43,25 +47,34 @@ public class WireLessCmd {
                             final int CHUNK_START_Z = player.getChunk().getZ();
 
                             Bukkit.getScheduler().runTaskAsynchronously(GreenBook.inst(), () -> {
+                                //note: All chunks should be loaded, getChunkAtAsync should report back immediately, since we are operating around a player.
+                                // However, since we are working async there is no guarantee.
                                 for (int dist = 0; dist <= CHUNK_SIM_DIST; dist++){
-                                    //north
-                                    for (int dx = CHUNK_START_X - dist; dx <= CHUNK_START_X + dist; dx++){
-                                        WirelessListener.inst().parseThroughChunk(WORLD.getChunkAt(dx, CHUNK_START_Z + dist));
-                                    }
+                                    try {
+                                        //north
+                                        for (int dx = CHUNK_START_X - dist; dx <= CHUNK_START_X + dist; dx++){
+                                            WirelessListener.inst().parseThroughChunk(WORLD.getChunkAtAsync(dx, CHUNK_START_Z + dist).get());
+                                        }
 
-                                    //east, it's one chunk smaller in north and south direction since we already checked the chunks there
-                                    for (int dz = CHUNK_START_Z - dist +1; dz <= CHUNK_START_Z + dist -1; dz++){
-                                        WirelessListener.inst().parseThroughChunk(WORLD.getChunkAt(CHUNK_START_X + dist, dz));
-                                    }
+                                        //east, it's one chunk smaller in north and south direction since we already checked the chunks there
+                                        for (int dz = CHUNK_START_Z - dist +1; dz <= CHUNK_START_Z + dist -1; dz++){
+                                            WirelessListener.inst().parseThroughChunk(WORLD.getChunkAtAsync(CHUNK_START_X + dist, dz).get());
+                                        }
 
-                                    //south
-                                    for (int dx = CHUNK_START_X + dist; dx >= CHUNK_START_X - dist; dx--){
-                                        WirelessListener.inst().parseThroughChunk(WORLD.getChunkAt(dx, CHUNK_START_Z - dist));
-                                    }
+                                        //south
+                                        for (int dx = CHUNK_START_X + dist; dx >= CHUNK_START_X - dist; dx--){
+                                            WirelessListener.inst().parseThroughChunk(WORLD.getChunkAtAsync(dx, CHUNK_START_Z - dist).get());
+                                        }
 
-                                    //west, it's one chunk smaller in north and south direction since we already checked the chunks there
-                                    for (int dz = CHUNK_START_Z + dist -1; dz >= CHUNK_START_Z - dist +1; dz--){
-                                        WirelessListener.inst().parseThroughChunk(WORLD.getChunkAt(CHUNK_START_X - dist, dz));
+                                        //west, it's one chunk smaller in north and south direction since we already checked the chunks there
+                                        for (int dz = CHUNK_START_Z + dist -1; dz >= CHUNK_START_Z - dist +1; dz--){
+                                            WirelessListener.inst().parseThroughChunk(WORLD.getChunkAtAsync(CHUNK_START_X - dist, dz).get());
+                                        }
+                                    } catch (CancellationException | InterruptedException exception){
+                                        GreenLogger.log(Level.WARNING, "Couldn't update signs, ether interrupted or canceled.", exception);
+                                    } catch (ExecutionException exception){
+                                        GreenLogger.log(Level.SEVERE, "Couldn't update signs, error:", exception);
+                                        GreenLogger.log(Level.SEVERE, "Cause: ", exception.getCause());
                                     }
                                 }
                             });

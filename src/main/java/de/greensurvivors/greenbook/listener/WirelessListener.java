@@ -53,8 +53,6 @@ public class WirelessListener implements Listener {
     //this class keeps track of its own instance, so it's basically static
     private static WirelessListener instance;
 
-    private static final Object MUTEX = new Object();
-
     private WirelessListener(){}
 
     /**
@@ -317,34 +315,35 @@ public class WirelessListener implements Listener {
      * @param chunk the chunk to index all receiver signs in
      */
     public void parseThroughChunk(Chunk chunk){
-        synchronized (MUTEX){
-            for (BlockState state : chunk.getTileEntities(block -> Tag.SIGNS.isTagged(block.getType()), false)) {
-                if ((state instanceof Sign sign)) {
-                    PlainTextComponentSerializer plainSerializer = PlainTextComponentSerializer.plainText();
-                    String line2 = plainSerializer.serialize(sign.line(1)).trim();
-                    Matcher matcher = signPattern.matcher(line2);
+        for (BlockState state : chunk.getTileEntities(block -> Tag.SIGNS.isTagged(block.getType()), false)) {
+            if ((state instanceof Sign sign)) {
+                PlainTextComponentSerializer plainSerializer = PlainTextComponentSerializer.plainText();
+                String line2 = plainSerializer.serialize(sign.line(1)).trim();
+                Matcher matcher = signPattern.matcher(line2);
 
-                    //clear line 2 of square brackets []
-                    if (matcher.matches()) {
-                        line2 = matcher.group(1);
+                //clear line 2 of square brackets []
+                if (matcher.matches()) {
+                    line2 = matcher.group(1);
 
-                        if (line2.equalsIgnoreCase(Lang.SIGN_RECEIVER_ID.get())) {
-                            if (Tag.WALL_SIGNS.isTagged(state.getType())) {
-                                Component channel = sign.line(2);
+                    if (line2.equalsIgnoreCase(Lang.SIGN_RECEIVER_ID.get())) {
+                        if (Tag.WALL_SIGNS.isTagged(state.getType())) {
+                            Component channel = sign.line(2);
 
-                                String channelStr = plainSerializer.serialize(channel);
+                            String channelStr = plainSerializer.serialize(channel);
 
-                                //cache the new receiver
-                                this.addReceiver(state.getLocation(), channelStr);
+                            //cache the new receiver
+                            this.addReceiver(state.getLocation(), channelStr);
 
-                                String playerUUIDStr = sign.getPersistentDataContainer().get(CHANNEL_UUID_KEY, PersistentDataType.STRING);
-                                //if no uuid was in the data container try to get it from the third line
-                                playerUUIDStr = playerUUIDStr == null ? plainSerializer.serialize(sign.line(3)) : playerUUIDStr;
+                            String playerUUIDStr = sign.getPersistentDataContainer().get(CHANNEL_UUID_KEY, PersistentDataType.STRING);
+                            //if no uuid was in the data container try to get it from the third line
+                            playerUUIDStr = playerUUIDStr == null ? plainSerializer.serialize(sign.line(3)) : playerUUIDStr;
 
-                                synchronized (knownReceiverLocations){
-                                    WireLessConfig.inst().saveReceiverLocations(channelStr, knownReceiverLocations.get(channelStr), usePlayerSpecificChannels ? playerUUIDStr : null);
-                                }
+                            HashSet<Location> tempLocationStorage;
+                            synchronized (knownReceiverLocations){
+                                tempLocationStorage = knownReceiverLocations.get(channelStr);
                             }
+
+                            WireLessConfig.inst().saveReceiverLocations(channelStr, tempLocationStorage, usePlayerSpecificChannels ? playerUUIDStr : null);
                         }
                     }
                 }

@@ -2,6 +2,7 @@ package de.greensurvivors.greenbook.config;
 
 import de.greensurvivors.greenbook.GreenBook;
 import de.greensurvivors.greenbook.listener.WirelessListener;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -10,7 +11,6 @@ import java.util.HashSet;
 import java.util.regex.Pattern;
 
 //todo make it easier to switch between player specific channels and not
-//todo make file use async like in GreenTreasure
 public class WireLessConfig {
     private static final String
             //config key root, never use this directly!
@@ -30,6 +30,9 @@ public class WireLessConfig {
     private static final boolean
             DEFAULT_USE_PLAYER_SPECIFIC_CHANNELS = true,
             DEFAULT_COMPATIBILITY_MODE = false;
+
+    //mutex to save channels async
+    private final Object MUTEX = new Object();
 
     //this class keeps track of its own instance, so it's basically static
     private static WireLessConfig instance;
@@ -70,7 +73,13 @@ public class WireLessConfig {
 
         ChannelConfig config = new ChannelConfig(channelStr, playerUUIDStr);
 
-        return config.getSet();
+        HashSet<Location> result;
+        synchronized (MUTEX){
+            result = config.getSet();
+        }
+
+        return result;
+
     }
 
     /**
@@ -78,7 +87,7 @@ public class WireLessConfig {
      * @param channelStr
      * @param locations
      * @param playerUUID
-     */ //todo make thread safe
+     */
     public void saveReceiverLocations(@NotNull String channelStr, @NotNull HashSet<Location> locations, @Nullable String playerUUID) {
         //don't allow forbidden chars or empty filenames
         if (channelStr.equals("")) {
@@ -89,7 +98,9 @@ public class WireLessConfig {
 
         ChannelConfig config = new ChannelConfig(channelStr, playerUUID);
 
-        config.saveCfg(locations);
+        synchronized (MUTEX){
+            Bukkit.getScheduler().runTaskAsynchronously(GreenBook.inst(), () -> config.saveCfg(locations));
+        }
     }
 
     public void setUsePlayerSpecificChannels(boolean newValue){
