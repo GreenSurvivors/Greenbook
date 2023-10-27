@@ -12,6 +12,7 @@ import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
 import org.bukkit.block.data.type.Switch;
 import org.bukkit.block.data.type.WallSign;
+import org.bukkit.block.sign.Side;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -19,7 +20,6 @@ import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 
@@ -115,7 +115,7 @@ public class WirelessListener implements Listener {
         if (eBlock.getState() instanceof Sign transmitterSign) {
             PlainTextComponentSerializer plainSerializer = PlainTextComponentSerializer.plainText();
 
-            String line2 = plainSerializer.serialize(transmitterSign.line(1)).trim();
+            String line2 = plainSerializer.serialize(transmitterSign.getSide(Side.FRONT).line(1)).trim();
 
             Matcher matcher = signPattern.matcher(line2);
             // clear line 2 of square brackets []
@@ -136,7 +136,7 @@ public class WirelessListener implements Listener {
                     if (powerLast == null || (powerLast != powerNow)) {
                         lastPowerState.put(eBlock.getLocation(), powerNow);
 
-                        String transmitterChannel = plainSerializer.serialize(transmitterSign.line(2));
+                        String transmitterChannel = plainSerializer.serialize(transmitterSign.getSide(Side.FRONT).line(2));
 
                         HashSet<Location> receiverLocations;
                         synchronized (knownReceiverLocations) {
@@ -165,7 +165,7 @@ public class WirelessListener implements Listener {
                                         Sign receiverSign = (Sign) receiverBlock.getState();
 
                                         // test if the second line is stating the sign is a receiver
-                                        line2 = plainSerializer.serialize(receiverSign.line(1)).trim();
+                                        line2 = plainSerializer.serialize(receiverSign.getSide(Side.FRONT).line(1)).trim();
                                         matcher = signPattern.matcher(line2);
 
                                         if (matcher.matches()) {
@@ -180,7 +180,7 @@ public class WirelessListener implements Listener {
                                                 }
 
                                                 // sign is a receiver, check the channel
-                                                String receiverChannel = plainSerializer.serialize(receiverSign.line(2));
+                                                String receiverChannel = plainSerializer.serialize(receiverSign.getSide(Side.FRONT).line(2));
                                                 if (transmitterChannel.equals(receiverChannel)) {
                                                     // update lever
                                                     Location leverLoc = receiverLocation.clone().add(wallSign.getFacing().getDirection().multiply(-2));
@@ -227,6 +227,7 @@ public class WirelessListener implements Listener {
     /**
      * if a receiver gets placed, safe its location to file and cache it
      */ //todo maybe wax the sign automatically in 1.20
+    //todo changable signs?
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     private void onSignPlace(SignChangeEvent event) {
         PlainTextComponentSerializer plainSerializer = PlainTextComponentSerializer.plainText();
@@ -244,41 +245,45 @@ public class WirelessListener implements Listener {
                 if (line2Str.equalsIgnoreCase(Lang.SIGN_RECEIVER_ID.get())) {
                     //check permission
                     if (PermissionUtils.hasPermission(event.getPlayer(), PermissionUtils.GREENBOOK_WIRELESS_CREATE_SIGN)){
-                        if (Tag.WALL_SIGNS.isTagged(event.getBlock().getType())) {
-                            //set the name and id of the receiver
-                            event.line(0, Lang.build(Lang.SIGN_RECEIVER_NAME.get()));
-                            event.line(1, Lang.build("[" + Lang.SIGN_RECEIVER_ID.get() + "]"));
+                        // only handle front sides
+                        if (event.getSide() == Side.FRONT) {
+                            if (Tag.WALL_SIGNS.isTagged(event.getBlock().getType())) {
+                                //set the name and id of the receiver
+                                event.line(0, Lang.build(Lang.SIGN_RECEIVER_NAME.get()));
+                                event.line(1, Lang.build("[" + Lang.SIGN_RECEIVER_ID.get() + "]"));
 
-                            //set the uuid of the player if needed
-                            String playerUUIDStr = null;
-                            if (usePlayerSpecificChannels) {
-                                playerUUIDStr = event.getPlayer().getUniqueId().toString();
+                                //set the uuid of the player if needed
+                                String playerUUIDStr = null;
+                                if (usePlayerSpecificChannels) {
+                                    playerUUIDStr = event.getPlayer().getUniqueId().toString();
 
-                                changedSign.getPersistentDataContainer().set(CHANNEL_UUID_KEY, PersistentDataType.STRING, playerUUIDStr);
-                                changedSign.line(3, event.getPlayer().name());
-                            }
+                                    changedSign.getPersistentDataContainer().set(CHANNEL_UUID_KEY, PersistentDataType.STRING, playerUUIDStr);
+                                    changedSign.getSide(Side.FRONT).line(3, event.getPlayer().name());
+                                }
 
-                            Component channel = event.line(2);
-                            String channelStr;
+                                Component channel = event.line(2);
+                                String channelStr;
 
-                            if (channel == null) {
-                                channelStr = "";
+                                if (channel == null) {
+                                    channelStr = "";
+                                } else {
+                                    channelStr = plainSerializer.serialize(channel);
+                                }
+
+                                //cache the new receiver
+                                this.addReceiver(event.getBlock().getLocation(), channelStr);
+
+                                synchronized (knownReceiverLocations){
+                                    WireLessConfig.inst().saveReceiverLocations(channelStr, knownReceiverLocations.get(channelStr), playerUUIDStr);
+                                }
                             } else {
-                                channelStr = plainSerializer.serialize(channel);
+                                event.getPlayer().sendMessage(Lang.build(Lang.NO_WALLSIGN.get()));
+                                event.getBlock().breakNaturally();
                             }
-
-                            //cache the new receiver
-                            this.addReceiver(event.getBlock().getLocation(), channelStr);
-
-                            synchronized (knownReceiverLocations){
-                                WireLessConfig.inst().saveReceiverLocations(channelStr, knownReceiverLocations.get(channelStr), playerUUIDStr);
-                            }
-                        } else {
-                            event.getPlayer().sendMessage(Lang.build(Lang.NO_WALLSIGN.get()));
-                            event.getBlock().setType(Material.AIR);
-                            for (ItemStack signItem : event.getBlock().getDrops()) {
-                                event.getBlock().getLocation().getWorld().dropItemNaturally(event.getBlock().getLocation(), signItem);
-                            }
+                        } else { // backside
+                            event.getPlayer().sendMessage(Lang.build(Lang.NO_FRONTSIDE.get()));
+                            event.line(1, Component.empty());
+                            event.setCancelled(true);
                         }
                     } else { //no permission
                         event.getPlayer().sendMessage(Lang.build(Lang.NO_PERMISSION_SOMETHING.get()));
@@ -318,7 +323,7 @@ public class WirelessListener implements Listener {
         for (BlockState state : chunk.getTileEntities(block -> Tag.SIGNS.isTagged(block.getType()), false)) {
             if ((state instanceof Sign sign)) {
                 PlainTextComponentSerializer plainSerializer = PlainTextComponentSerializer.plainText();
-                String line2 = plainSerializer.serialize(sign.line(1)).trim();
+                String line2 = plainSerializer.serialize(sign.getSide(Side.FRONT).line(1)).trim();
                 Matcher matcher = signPattern.matcher(line2);
 
                 //clear line 2 of square brackets []
@@ -327,7 +332,7 @@ public class WirelessListener implements Listener {
 
                     if (line2.equalsIgnoreCase(Lang.SIGN_RECEIVER_ID.get())) {
                         if (Tag.WALL_SIGNS.isTagged(state.getType())) {
-                            Component channel = sign.line(2);
+                            Component channel = sign.getSide(Side.FRONT).line(2);
 
                             String channelStr = plainSerializer.serialize(channel);
 
@@ -336,7 +341,7 @@ public class WirelessListener implements Listener {
 
                             String playerUUIDStr = sign.getPersistentDataContainer().get(CHANNEL_UUID_KEY, PersistentDataType.STRING);
                             //if no uuid was in the data container try to get it from the third line
-                            playerUUIDStr = playerUUIDStr == null ? plainSerializer.serialize(sign.line(3)) : playerUUIDStr;
+                            playerUUIDStr = playerUUIDStr == null ? plainSerializer.serialize(sign.getSide(Side.FRONT).line(3)) : playerUUIDStr;
 
                             HashSet<Location> tempLocationStorage;
                             synchronized (knownReceiverLocations){

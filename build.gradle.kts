@@ -3,12 +3,12 @@
 plugins {
     `java-library`
     //java
-    id("io.papermc.paperweight.userdev") version "1.5.3"
-	id("xyz.jpenilla.run-paper") version "2.0.1" // Adds runServer and runMojangMappedServer tasks for testing
+    id("io.papermc.paperweight.userdev") version "1.5.9"
+	id("xyz.jpenilla.run-paper") version "2.2.0" // Adds runServer and runMojangMappedServer tasks for testing
 }
 
 group = "de.greensurvivors"
-version = "0.0.1-SNAPSHOT"
+version = "0.0.2-SNAPSHOT"
 description = "Like Craftbook, but not a buggy dinosaur"
 //java.sourceCompatibility = JavaVersion.VERSION_17
 
@@ -27,7 +27,7 @@ repositories {
 }
 
 dependencies {
-    paperweight.paperDevBundle("1.19.3-R0.1-SNAPSHOT")
+    paperweight.paperDevBundle("1.20.2-R0.1-SNAPSHOT")
 }
 
 tasks {

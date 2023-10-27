@@ -112,7 +112,7 @@ public class ShelfListener implements Listener {
                 //check permission
                 if (PermissionUtils.hasPermission(ePlayer, PermissionUtils.GREENBOOK_SHELF_WILDCARD, PermissionUtils.GREENBOOK_SHELF_USE)){
                     //do we have books?
-                    if (books.size() > 0){
+                    if (!books.isEmpty()){
                         //send a random quote
                         ePlayer.sendMessage(
                                 //join the components together with new line a separator

@@ -57,7 +57,7 @@ public class WireLessConfig {
     }
 
     /**
-     *
+     * //todo databank instead of file
      * @param channelStr channel, stripped of all color / formatting
      * <br> a channel connects a transmitter with a receiver with the same channel
      * @param playerUUIDStr UUID of the player owning this channel. If null global owns it.
@@ -65,7 +65,7 @@ public class WireLessConfig {
      */
     public @Nullable HashSet<Location> loadReceiverLocations(@NotNull String channelStr, @Nullable String playerUUIDStr) {
         //don't allow forbidden chars or empty filenames
-        if (channelStr.equals("")) {
+        if (channelStr.isEmpty()) {
             channelStr = FILENAME_REPLACEMENT_STR;
         } else {
             channelStr = FILENAME_LIMITATIONS.matcher(channelStr).replaceAll(FILENAME_REPLACEMENT_STR);
@@ -79,7 +79,6 @@ public class WireLessConfig {
         }
 
         return result;
-
     }
 
     /**
@@ -90,7 +89,7 @@ public class WireLessConfig {
      */
     public void saveReceiverLocations(@NotNull String channelStr, @NotNull HashSet<Location> locations, @Nullable String playerUUID) {
         //don't allow forbidden chars or empty filenames
-        if (channelStr.equals("")) {
+        if (channelStr.isEmpty()) {
             channelStr = FILENAME_REPLACEMENT_STR;
         } else {
             channelStr = FILENAME_LIMITATIONS.matcher(channelStr).replaceAll(FILENAME_REPLACEMENT_STR);

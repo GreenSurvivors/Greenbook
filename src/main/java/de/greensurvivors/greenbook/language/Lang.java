@@ -20,6 +20,7 @@ public enum Lang implements Cons {
 	SIGN_RECEIVER_NAME("Reveiver"),
 	//placing feedback
 	NO_WALLSIGN("&cYou have to place this at a wall."),
+	NO_FRONTSIDE("&cThis can't be used on backsides."),
 	CREATED_RECEIVER("&2Successfully created wireless receiver."),
 	CREATED_Transmitter("&2Successfully created wireless transmitter."),
 
