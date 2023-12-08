@@ -8,16 +8,17 @@ public class MiscUtil {
 
     /**
      * Test if a String can safely convert into an integer
+     *
      * @param toTest String input
      * @return boolean, is only true if the Sting has the right size and is entirely made of numbers (first char might be a '-')
      */
-    public static boolean isInt (String toTest){
+    public static boolean isInt(String toTest) {
         if (toTest == null) {
             return false;
         }
 
         int length = toTest.length();
-        if (length > MAX_INT_CHARS){ //protection against overflow
+        if (length > MAX_INT_CHARS) { //protection against overflow
             return false;
         } else if (length == 0) { //empty
             return false;

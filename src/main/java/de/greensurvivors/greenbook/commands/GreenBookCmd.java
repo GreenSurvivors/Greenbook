@@ -34,8 +34,8 @@ public class GreenBookCmd implements CommandExecutor, TabCompleter {
      */
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
-        if (args.length > 0){ //execute subcommand
-            switch (args[0].toLowerCase()){
+        if (args.length > 0) { //execute subcommand
+            switch (args[0].toLowerCase()) {
                 case ReloadCmd.SUBCOMMAND -> {
                     return ReloadCmd.handleCommand(sender, args);
                 }
@@ -75,24 +75,24 @@ public class GreenBookCmd implements CommandExecutor, TabCompleter {
         List<String> result = new ArrayList<>();
         //add subcommands if the sender has the permission for it.
         if (args.length == 1) {
-            if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_RELOAD)){
+            if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_RELOAD)) {
                 result.add(ReloadCmd.SUBCOMMAND);
             }
             if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_SHELF_WILDCARD,
                     PermissionUtils.GREENBOOK_SHELF_ADD, PermissionUtils.GREENBOOK_SHELF_REMOVE, PermissionUtils.GREENBOOK_SHELF_LIST,
-                    PermissionUtils.GREENBOOK_SHELF_SNEAK, PermissionUtils.GREENBOOK_SHELF_EMPTYHAND)){
+                    PermissionUtils.GREENBOOK_SHELF_SNEAK, PermissionUtils.GREENBOOK_SHELF_EMPTYHAND)) {
                 result.add(BookCmd.SUBCOMMAND);
             }
-            if(PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_PAINTING_RANGE)){
+            if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_PAINTING_RANGE)) {
                 result.add(PaintingCmd.SUBCOMMAND);
             }
-            if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_WIRELESS_UPDATE_SIGNS_CMD, PermissionUtils.GREENBOOK_WIRELESS_SET_PLAYER_SPECIFIC_CHANNELS, PermissionUtils.GREENBOOK_WIRELESS_SET_COMPATIBILITY_MODE)){
+            if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_WIRELESS_UPDATE_SIGNS_CMD, PermissionUtils.GREENBOOK_WIRELESS_SET_PLAYER_SPECIFIC_CHANNELS, PermissionUtils.GREENBOOK_WIRELESS_SET_COMPATIBILITY_MODE)) {
                 result.add(WireLessCmd.SUBCOMMAND);
             }
 
             result = result.stream().filter(s -> s.startsWith(args[0].toLowerCase())).toList();
-        } else if (args.length > 1){
-            switch (args[0].toLowerCase()){//tab complete of subcommands
+        } else if (args.length > 1) {
+            switch (args[0].toLowerCase()) {//tab complete of subcommands
                 case BookCmd.SUBCOMMAND -> {
                     return BookCmd.handleTabComplete(sender, args);
                 }

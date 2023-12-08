@@ -56,7 +56,6 @@ public class LiftListener implements Listener {
      */
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     private void onSignChange(SignChangeEvent event) {
-
         Component line1 = event.line(1);
         Player ePlayer = event.getPlayer();
 
@@ -70,16 +69,16 @@ public class LiftListener implements Listener {
                     // check permission
                     if (PermissionUtils.hasPermission(ePlayer, PermissionUtils.GREENBOOK_LIFT_WILDCARD, PermissionUtils.GREENBOOK_LIFT_CREATE)) {
                         //set the line with the right casing, but keep the decorations
-                        event.line(1, PlainTextComponentSerializer.plainText().deserialize(type.getLabel()).decorations(line1.decorations()));
+                        event.line(1, Component.text(type.getLabel()).decorations(line1.decorations()));
 
                         ePlayer.sendMessage(Lang.build(Lang.LIFT_CREATE_SUCCESS.get()));
-                    } else {
+                    } else { //no permission
                         ePlayer.sendMessage(Lang.build(Lang.NO_PERMISSION_SOMETHING.get()));
 
                         event.setCancelled(true);
                         event.getBlock().breakNaturally();
                     }
-                } else {
+                } else { //backside
                     ePlayer.sendMessage(Lang.build(Lang.NO_FRONTSIDE.get()));
                     event.line(1, Component.empty());
                     event.setCancelled(true);
@@ -260,7 +259,7 @@ public class LiftListener implements Listener {
                 if (origionSign.isWaxed() || !event.getPlayer().isSneaking()) {
                     //determine if teleport should go up or down, in case of a bidirectional lift
                     boolean useBothUp;
-                    if (event.getInteractionPoint() == null) {
+                    if (event.getInteractionPoint() == null) { //todo the interaction point might be faulty
                         useBothUp = false;
                     } else {
                         double relativeHeight = event.getInteractionPoint().getY();
@@ -271,7 +270,7 @@ public class LiftListener implements Listener {
                     useLift(origionSign, event.getPlayer(), useBothUp);
                 } //player will edit sign instead of using the lift
             } //not interacted with a sign
-        }
+        } //wrong hand or not a block
     }
 
     private enum LiftType {
@@ -285,14 +284,14 @@ public class LiftListener implements Listener {
         STOP("[Lift]");
 
         //sting representation
-        private final String label;
+        private final String LABEL;
         //pattern to easy match the label against a string
-        private final Pattern pattern;
+        private final Pattern PATTERN;
 
         LiftType(String label) {
-            this.label = label;
-            //case-insensitive regex with the square brackets escaped
-            this.pattern = Pattern.compile(String.format("(?i)%s", label.replace("[", "\\[")));
+            this.LABEL = label;
+            //case-insensitive regex with the square brackets escaped; nothing surrounding the label but whitespace
+            this.PATTERN = Pattern.compile(String.format("^\\s(?i)%s\\s$", label.replace("[", "\\[")));
         }
 
         /**
@@ -303,7 +302,7 @@ public class LiftListener implements Listener {
          */
         public static @Nullable LiftType fromLabel(Component line) {
             for (LiftType liftType : values()) {
-                if (liftType.pattern.matcher(PlainTextComponentSerializer.plainText().serialize(line)).matches()) {
+                if (liftType.PATTERN.matcher(PlainTextComponentSerializer.plainText().serialize(line)).matches()) {
                     return liftType;
                 }
             }
@@ -317,7 +316,7 @@ public class LiftListener implements Listener {
          * @return The label
          */
         public @NotNull String getLabel() {
-            return this.label;
+            return this.LABEL;
         }
     }
 }

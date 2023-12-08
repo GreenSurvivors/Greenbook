@@ -17,7 +17,16 @@ import java.util.logging.Level;
  * currently used by lift-listener to find a safe location to teleport to
  */
 public final class LocationUtil {
-    private static final Set<Material> DAMAGING_TYPES = Set.of(Material.CACTUS, Material.FIRE, Material.SOUL_FIRE, Material.CAMPFIRE, Material.SOUL_CAMPFIRE, Material.SWEET_BERRY_BUSH, Material.WITHER_ROSE, Material.POWDER_SNOW);
+    private static final Set<Material> DAMAGING_TYPES = Set.of(
+            Material.CACTUS,
+            Material.FIRE,
+            Material.SOUL_FIRE,
+            Material.CAMPFIRE,
+            Material.SOUL_CAMPFIRE,
+            Material.SWEET_BERRY_BUSH,
+            Material.WITHER_ROSE,
+            Material.POWDER_SNOW
+    );
 
     private static boolean isWaterSafe = false;
 
@@ -27,13 +36,13 @@ public final class LocationUtil {
 
     private static boolean isEntitySafeAt(final @NotNull Entity toTest, final @NotNull World world, final double x, final double y, final double z) {
         //start looking for unsafe blocks one Block under the entity.
-        final int minY = Math.max(world.getMinHeight(), (int)y-1);
+        final int minY = Math.max(world.getMinHeight(), (int) y - 1);
         //end looking at the height of the entity
-        final int maxY = Math.min(world.getMaxHeight(), (int)(y + toTest.getBoundingBox().getHeight()));
+        final int maxY = Math.min(world.getMaxHeight(), (int) (y + toTest.getBoundingBox().getHeight()));
 
         //test for unsafe blocks at the new postion
-        for (int i = minY; i <= maxY; i++){
-            Material material = world.getType((int)x, i, (int)z);
+        for (int i = minY; i <= maxY; i++) {
+            Material material = world.getType((int) x, i, (int) z);
 
             if (Tag.PORTALS.isTagged(material)) {
                 return false;
@@ -45,7 +54,7 @@ public final class LocationUtil {
             }
 
             // I have no idea how Tag.FLUIDS_WATER works.
-            if (!isWaterSafe && Material.WATER == material){
+            if (!isWaterSafe && Material.WATER == material) {
                 return false;
             }
         }
@@ -53,15 +62,16 @@ public final class LocationUtil {
         //test if there is enough room but also a floor to stand on
         //todo: there are probably cases, where collidesAt at y-1 returns true but a player still can't stand on.
         // might want to use https://www.spigotmc.org/threads/how-to-actually-detect-which-block-a-player-is-standing-on.492043/
-        return !toTest.collidesAt(new Location(world, x, y, z)) && toTest.collidesAt(new Location(world, x, y-1, z)) ;
+        return !toTest.collidesAt(new Location(world, x, y, z)) && toTest.collidesAt(new Location(world, x, y - 1, z));
     }
 
 
     //might be null if no location was found
     /**
      * try to get a safe location to teleport to, up to 5 blocks difference
+     *
      * @param toTest player to try to get the Destination for
-     * @param dy the vertical distance counting form the postion of the Player toTest. negative means downwards.
+     * @param dy     the vertical distance counting form the postion of the Player toTest. negative means downwards.
      * @return safe (no damage will be taken) location to teleport to, will be null, if no location was found
      */
     public static @Nullable Location getSafeLiftDestination(final @NotNull Entity toTest, double dy) {
@@ -80,31 +90,31 @@ public final class LocationUtil {
         int originY = toTest.getLocation().getBlockY();
         final double z = toLoc.getZ();
 
-        int maxY = Math.min(toLoc.getBlockY() + 5, world.getMaxHeight()+1);
+        int maxY = Math.min(toLoc.getBlockY() + 5, world.getMaxHeight() + 1);
         int minY = Math.max(toLoc.getBlockY() - 5, world.getMinHeight());
 
         //if the from-location gets over or under the end-location into play
-        if(dy > 0){ //never teleport to the same floor the origin lift is on
-            minY = Math.max(minY, originY+1);
+        if (dy > 0) { //never teleport to the same floor the origin lift is on
+            minY = Math.max(minY, originY + 1);
         } else {
-            maxY = Math.min(maxY, originY -1);
+            maxY = Math.min(maxY, originY - 1);
         }
 
         boolean foundSafeLoc = false;
 
-        if (isEntitySafeAt(toTest, world, x, y, z)){ //this is purely optimizing, starting with i = 0 would have the same effect, but we would check the same location twice.
+        if (isEntitySafeAt(toTest, world, x, y, z)) { //this is purely optimizing, starting with i = 0 would have the same effect, but we would check the same location twice.
             foundSafeLoc = true;
-        }  else {
-            for (int i = 1; i <= 5; i++){ //todo there is probably optimizing to be had here, since we are checking if a block was safe at least double.
+        } else {
+            for (int i = 1; i <= 5; i++) { //todo there is probably optimizing to be had here, since we are checking if a block was safe at least double.
                 if (y + i <= maxY && //never teleport to the same floor the origin lift is on
-                        isEntitySafeAt(toTest, world, x, y+i, z)){ //check if the new location + i blocks is safe to stand on
+                        isEntitySafeAt(toTest, world, x, y + i, z)) { //check if the new location + i blocks is safe to stand on
                     foundSafeLoc = true;
                     y += i;
                     break;
                 }
 
                 if (y - i >= minY && //never teleport to the same floor the origin lift is on
-                        isEntitySafeAt(toTest, world, x, y-i, z)){ //check if the new location - i blocks is safe to stand on
+                        isEntitySafeAt(toTest, world, x, y - i, z)) { //check if the new location - i blocks is safe to stand on
                     foundSafeLoc = true;
                     y -= i;
                     break;
@@ -113,10 +123,10 @@ public final class LocationUtil {
         }
 
         //no location where found.
-        if (!foundSafeLoc){
+        if (!foundSafeLoc) {
             return null;
         }
 
-        return new Location(world, x,  y, z, toLoc.getYaw(), toLoc.getPitch());
+        return new Location(world, x, y, z, toLoc.getYaw(), toLoc.getPitch());
     }
 }

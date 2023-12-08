@@ -1,8 +1,7 @@
 //import net.minecrell.pluginyml.bukkit.BukkitPluginDescription
 
 plugins {
-    `java-library`
-    //java
+    `java-library` //java
     id("io.papermc.paperweight.userdev") version "1.5.9"
 	id("xyz.jpenilla.run-paper") version "2.2.0" // Adds runServer and runMojangMappedServer tasks for testing
 }

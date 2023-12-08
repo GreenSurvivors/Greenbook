@@ -62,6 +62,7 @@ public class CoinConfig {
 
     /**
      * get coin item saved in main config or the default one
+     *
      * @return coin item saved in main config or the default one, of no was configured or faulty
      */
     public @NotNull ItemStack loadCoinItem() {

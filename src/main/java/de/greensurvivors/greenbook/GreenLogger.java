@@ -41,7 +41,8 @@ public class GreenLogger {
      */
     public static void log(Level level, String message, Throwable thrown) {
         //the paper logger doesn't support color anymore. But as long as using chatColor still works we will use it
-        logger.log(level,  ChatColor.translateAlternateColorCodes('&', message), thrown);
+        //todo ^ this is NOT true
+        logger.log(level, ChatColor.translateAlternateColorCodes('&', message), thrown);
     }
 
 }
