@@ -11,31 +11,34 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public enum Lang implements Cons {
-	//wireless redstone
-	//technical values
-	SIGN_TRANSMITTER_ID("Mc1110"),
-	SIGN_TRANSMITTER_NAME("Transmitter"),
-	SIGN_RECEIVER_ID("Mc1111"),
-	SIGN_RECEIVER_NAME("Reveiver"),
-	//placing feedback
-	NO_WALLSIGN("You have to place this at a wall."),
+public enum Lang implements Cons { //todo use mini message
+    //wireless redstone
+    //technical values
+    SIGN_TRANSMITTER_ID("Mc1110"),
+    SIGN_TRANSMITTER_NAME("Transmitter"),
+    SIGN_RECEIVER_ID("Mc1111"),
+    SIGN_RECEIVER_NAME("Reveiver"),
+    //placing feedback
+    NO_WALLSIGN("&cYou have to place this at a wall."),
+    NO_FRONTSIDE("&cThis can't be used on backsides."),
+    CREATED_RECEIVER("&2Successfully created wireless receiver."),
+    CREATED_Transmitter("&2Successfully created wireless transmitter."),
 
-	// /coin command
-	COIN_STOSS_SELF(String.format("&e%s &cdied, by trying to toss themselves a coin.", Lang.PLAYER)),
-	COIN_TOSS_OTHER(String.format("&e%s &2tossed a coin to &e%s&2.", Lang.PLAYER, Lang.PLAYER2)),
-	COIN_SET(String.format("&2Set coin item successfully to &6'&e%s&6'", VALUE)),
-	COIN_NOT_ENOUGH("&cYou have not enough coins."),
+    // /coin command
+    COIN_STOSS_SELF(String.format("&e%s &cdied, by trying to toss themselves a coin.", Lang.PLAYER)),
+    COIN_TOSS_OTHER(String.format("&e%s &2tossed a coin to &e%s&2.", Lang.PLAYER, Lang.PLAYER2)),
+    COIN_SET(String.format("&2Set coin item successfully to &6'&e%s&6'", VALUE)),
+    COIN_NOT_ENOUGH("&cYou have not enough coins."),
 
-	//lift - elevator
-	//using feedback
-	LIFT_CREATE_SUCCESS("&2Lift was successfully created."),
-	LIFT_USED_STOP("&cYou cant depart from this kind of Lift."),
-	LIFT_USED_UP("&6Moved a floor up."),
-	LIFT_USED_DOWN("&6Moved a floor down."),
-	LIFT_USED_FLOOR(String.format("&6Moved to floor %s", VALUE)),
-	LIFT_DESTINATION_OBSTRUCTED("&cThe floor ist obstructed."),
-	LIFT_DESTINATION_UNKNOWN("&cThis lift has no destination."),
+    //lift - elevator
+    //using feedback
+    LIFT_CREATE_SUCCESS("&2Lift was successfully created."),
+    LIFT_USED_STOP("&cYou cant depart from this kind of Lift."),
+    LIFT_USED_UP("&6Moved a floor up."),
+    LIFT_USED_DOWN("&6Moved a floor down."),
+    LIFT_USED_FLOOR(String.format("&6Moved to floor %s", VALUE)),
+    LIFT_DESTINATION_OBSTRUCTED("&cThe floor ist obstructed."),
+    LIFT_DESTINATION_UNKNOWN("&cThis lift has no destination."),
 
 	//readable bookshelfs
 	//usage feedback
@@ -45,7 +48,11 @@ public enum Lang implements Cons {
 	SHELF_REMOVED_BOOK("&2Successfully removed Book:"),
 	SHELF_NO_BOOK(String.format("&2No Book with the id of &e%s&2 exists", VALUE)),
 	SHELF_LIST_HEADER(String.format("&6-----------{Books &e%s&6/&e%s}-----------", VALUE, MAX)),
-	SHELF_LIST_FOOTER("&6-------------------------------"),
+	LIST_FOOTER_OUTER("&2--"),
+	LIST_FOOTER_INNER("&2---<*>---"),
+	LIST_FOOTER_BACK(String.format("&6<<( &e%s&6 ) ", VALUE)),
+	LIST_FOOTER_NEXT(String.format("&6 ( &e%s&6 )>>", VALUE)),
+	LIST_FOOTER_NONE("-------"),
 	SHELF_SET_EMPTYHAND(String.format("&2Reading books requires empty hand: &e%s", VALUE)),
 	SHELF_SET_SNEAK(String.format("&2Reading books requires sneaking: &e%s", VALUE)),
 
@@ -77,6 +84,7 @@ public enum Lang implements Cons {
 	NO_SUCH_PLAYER(String.format("&cCould not get a valid player named %s", VALUE)),
 	NO_ITEM_HOLDING("&cYou not are holding a item."),
 	NOT_ENOUGH_ARGS("&cNot enough arguments."),
+	UNKNOWN_ARGUMENT(String.format("&cUnknown or wrong argument &6'&e%s&6'&c. Try &e/fm help", VALUE)),
 	UNKNOWN_ERROR("&cUnknown Error. What happened?");
 
 	//the message

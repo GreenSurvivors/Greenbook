@@ -26,7 +26,8 @@ public class GreenLogger {
      * @param message The string message (or a key in the message catalog)
      */
     public static void log(Level level, String message) {
-        logger.log(level,  ChatColor.translateAlternateColorCodes('&', message));
+        //the paper logger doesn't support color anymore. But as long as using chatColor still works we will use it
+        logger.log(level, ChatColor.translateAlternateColorCodes('&', message));
     }
 
     /**
@@ -39,7 +40,9 @@ public class GreenLogger {
      * @param thrown  Throwable associated with log message.
      */
     public static void log(Level level, String message, Throwable thrown) {
-        logger.log(level,  ChatColor.translateAlternateColorCodes('&', message), thrown);
+        //the paper logger doesn't support color anymore. But as long as using chatColor still works we will use it
+        //todo ^ this is NOT true
+        logger.log(level, ChatColor.translateAlternateColorCodes('&', message), thrown);
     }
 
 }

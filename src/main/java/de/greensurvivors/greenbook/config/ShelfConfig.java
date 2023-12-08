@@ -66,7 +66,7 @@ public class ShelfConfig {
     public void saveShelfConfig() {
         //config.setDefault doesn't work for string lists.
         //so we have to set it here if no valid list was set
-        if(this.configuration.getStringList(BOOKS_KEY).isEmpty()){
+        if (this.configuration.getStringList(BOOKS_KEY).isEmpty()) {
             this.configuration.set(BOOKS_KEY, DEFAULT_BOOKS);
         }
 
@@ -91,16 +91,17 @@ public class ShelfConfig {
      * updates the currently working value
      * might be default if no valid value was set in config
      */
-    private void loadRequireEmptyHand(){
+    private void loadRequireEmptyHand() {
         ShelfListener.inst().setRequireEmptyHand(this.configuration.getBoolean(REQUIRE_EMPTY_HAND_KEY, DEFAULT_REQUIRE_EMPTY_HAND));
     }
 
     /**
      * set if reading a book requires an empty hand.
      * saves this value to file and loading the new value again to update the current working value
+     *
      * @param required if reading a book requires an empty hand.
      */
-    public void setRequireEmptyHand(boolean required){
+    public void setRequireEmptyHand(boolean required) {
         //set value in config
         this.configuration.set(REQUIRE_EMPTY_HAND_KEY, required);
         //save config to file
@@ -115,16 +116,17 @@ public class ShelfConfig {
      * updates the currently working value
      * might be default if no valid value was set in config
      */
-    private void loadRequireSneak(){
+    private void loadRequireSneak() {
         ShelfListener.inst().setRequireSneak(this.configuration.getBoolean(REQUIRE_SNEAKING, DEFAULT_REQUIRE_SNEAK));
     }
 
     /**
      * set if reading a book requires sneaking.
      * saves this value to file and loading the new value again to update the current working value
+     *
      * @param required if reading a book requires sneaking.
      */
-    public void setRequireSneak(boolean required){
+    public void setRequireSneak(boolean required) {
         //set value in config
         this.configuration.set(REQUIRE_SNEAKING, required);
         //save config to file
@@ -136,6 +138,7 @@ public class ShelfConfig {
 
     /**
      * add a new quote (book) to config. Update currently used books
+     *
      * @param newBook new quote (book) to show up right-clicking a bookshelf
      */
     public void addBook(@NotNull String newBook) {
@@ -153,6 +156,7 @@ public class ShelfConfig {
 
     /**
      * remove a quote (book) from config. Update currently used books
+     *
      * @param oldBook old quote (book) to not show up anymore, when right-clicking a bookshelf
      */
     public void removeBook(@NotNull String oldBook) {

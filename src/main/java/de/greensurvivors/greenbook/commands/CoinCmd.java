@@ -1,8 +1,8 @@
 package de.greensurvivors.greenbook.commands;
 
-import de.greensurvivors.greenbook.PermissionUtils;
 import de.greensurvivors.greenbook.config.CoinConfig;
 import de.greensurvivors.greenbook.language.Lang;
+import de.greensurvivors.greenbook.utils.PermissionUtils;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -51,7 +51,7 @@ public class CoinCmd implements CommandExecutor, TabCompleter {
      * @param command Command which was executed (ignored)
      * @param label   Alias of the command which was used (ignored)
      * @param args    Passed command arguments
-     * @return        default true, but false if no additional args where given
+     * @return default true, but false if no additional args where given
      */
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @Nullable Command command, @NotNull String label, @Nullable String[] args) {
@@ -143,7 +143,7 @@ public class CoinCmd implements CommandExecutor, TabCompleter {
      * @param label   Alias of the command which was used (ignored)
      * @param args    The arguments passed to the command, including final
      *                partial argument to be completed
-     * @return        A List of possible completions for the final argument, or an empty list
+     * @return A List of possible completions for the final argument, or an empty list
      */
     @Override
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @Nullable Command command, @Nullable String label, @NotNull String[] args) {

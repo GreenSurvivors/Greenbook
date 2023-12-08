@@ -40,6 +40,7 @@ public class PaintingConfig {
 
     /**
      * save the new modifying range to  main config file
+     *
      * @param newRange range the player can still switch paintings
      */
     public void saveNewRange(int newRange) {

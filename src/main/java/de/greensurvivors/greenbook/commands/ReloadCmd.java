@@ -1,8 +1,8 @@
 package de.greensurvivors.greenbook.commands;
 
-import de.greensurvivors.greenbook.PermissionUtils;
 import de.greensurvivors.greenbook.config.MainConfig;
 import de.greensurvivors.greenbook.language.Lang;
+import de.greensurvivors.greenbook.utils.PermissionUtils;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -15,13 +15,14 @@ public class ReloadCmd {
 
     /**
      * /greenbook reload - reload all configs and language files
+     *
      * @param sender source of command, for permission check
      * @param args   given arguments (ignored)
-     * @return       true, you can't mess up
+     * @return true, you can't mess up
      */
-    protected static boolean handleCommand(@NotNull CommandSender sender, @Nullable String[] args){
+    protected static boolean handleCommand(@NotNull CommandSender sender, @Nullable String[] args) {
         //check permission
-        if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_RELOAD)){
+        if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_RELOAD)) {
             //reload config + language
             MainConfig.inst().reloadMain();
 
