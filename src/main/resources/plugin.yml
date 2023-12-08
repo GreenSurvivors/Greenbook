@@ -4,6 +4,9 @@ description: Like Craftbook, but not a buggy dinosaur
 version: 0.0.1-Snapshot
 api-version: 1.19
 author: GreensurvivorsTeam
+libraries:
+  - com.github.ben-manes.caffeine:caffeine:3.1.8
+  - org.apache.commons:commons-collections4:4.4
 
 commands:
   coin:
