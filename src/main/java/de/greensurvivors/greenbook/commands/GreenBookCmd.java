@@ -1,110 +1,100 @@
 package de.greensurvivors.greenbook.commands;
 
-import de.greensurvivors.greenbook.utils.PermissionUtils;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.tree.LiteralCommandNode;
+import de.greensurvivors.greenbook.GreenBook;
+import io.papermc.paper.command.brigadier.CommandSourceStack;
+import io.papermc.paper.command.brigadier.Commands;
+import org.bukkit.Bukkit;
+import org.bukkit.permissions.Permissible;
+import org.bukkit.permissions.Permission;
+import org.bukkit.permissions.PermissionDefault;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-/**
- * all config subcommands except of /coin
- */
-public class GreenBookCmd implements CommandExecutor, TabCompleter {
+@SuppressWarnings("UnstableApiUsage") // brigadier api
+public class GreenBookCmd {
     private static final String COMMAND = "greenbook";
+    private static final String DESCRIPTION = "Contains all main GreenBookCommands use /greenbook help <subcommand>.";
+    private static final Permission PERMISSION = new Permission("greenbook.cmd.greenbook.*", DESCRIPTION, PermissionDefault.OP);
+    /**
+     * contains all the registered subcommands
+     * (they get registered when a new instance get created)
+     */
+    private final Set<ASubCommand> subCommands = new HashSet<>();
+    private final @NotNull GreenBook plugin;
+    private LiteralArgumentBuilder<CommandSourceStack> cmdBuilder;
 
-    public static String getCommand() {
+    public GreenBookCmd(@NotNull GreenBook plugin) {
+        this.plugin = plugin;
+
+        // register permission
+        Bukkit.getPluginManager().addPermission(PERMISSION);
+
+        cmdBuilder = Commands.literal(COMMAND).
+            requires(s -> s.getSender().hasPermission(PERMISSION));
+
+        ReloadSubCmd reloadSubCmd = new ReloadSubCmd(plugin, PERMISSION);
+        HelpSubCommand helpSubCommand = new HelpSubCommand(plugin, PERMISSION);
+
+        registerSubcommand(reloadSubCmd, reloadSubCmd.getCmdNodes());
+    }
+
+    public static @NotNull String getCommandName() {
         return COMMAND;
     }
 
-    /**
-     * Executes the given sub command, returning its success.
-     * <br>
-     * If false is returned, then the "usage" plugin.yml entry for this command will be sent to the player.
-     *
-     * @param sender  Source of the command
-     * @param command Command which was executed
-     * @param label   Alias of the command which was used
-     * @param args    Passed command arguments
-     * @return true if a valid command, otherwise false
-     */
-    @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
-        if (args.length > 0) { //execute subcommand
-            switch (args[0].toLowerCase()) {
-                case ReloadCmd.SUBCOMMAND -> {
-                    return ReloadCmd.handleCommand(sender, args);
-                }
-                case BookCmd.SUBCOMMAND -> {
-                    return BookCmd.handleCommand(sender, args);
-                }
-                case PaintingCmd.SUBCOMMAND -> {
-                    return PaintingCmd.handleCommand(sender, args);
-                }
-                case WireLessCmd.SUBCOMMAND -> {
-                    return WireLessCmd.handleCommand(sender, args);
-                }
-                default -> {
-                    return false;
-                }
-            }
-        }
+    public @NotNull Permission getPermission() {
+        return PERMISSION;
+    }
 
-        return false;
+    public void registerSubcommand(@NotNull ASubCommand subCommand,
+                                   @NotNull List<@NotNull LiteralCommandNode<CommandSourceStack>> nodes) {
+        subCommands.add(subCommand);
+
+        for (LiteralCommandNode<CommandSourceStack> node : nodes) {
+            cmdBuilder.then(node);
+        }
+    }
+
+    public void finalizeSubCommands(final @NotNull Commands commandsRegistrar) {
+        if (cmdBuilder != null) {
+            commandsRegistrar.register(cmdBuilder.build(), DESCRIPTION, List.of());
+
+            cmdBuilder = null;
+        }
     }
 
     /**
-     * Requests a list of possible completions for a command argument.
+     * get a subcommand by its alias, filtered by the permission check of each subcommand against the permissible
      *
-     * @param sender  Source of the command.  For players tab-completing a
-     *                command inside a command block, this will be the player, not
-     *                the command block.
-     * @param command Command which was executed
-     * @param label   Alias of the command which was used
-     * @param args    The arguments passed to the command, including final
-     *                partial argument to be completed
-     * @return A List of possible completions for the final argument, or null
-     * to default to the command executor
+     * @param permissible to check against for permission to using the subcommand
+     * @param string      the string to contain an alias of a subcommand to get
+     * @return the subcommand with the alias or null if no where found
      */
-    @Override
-    public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
-        List<String> result = new ArrayList<>();
-        //add subcommands if the sender has the permission for it.
-        if (args.length == 1) {
-            if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_RELOAD)) {
-                result.add(ReloadCmd.SUBCOMMAND);
-            }
-            if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_SHELF_WILDCARD,
-                    PermissionUtils.GREENBOOK_SHELF_ADD, PermissionUtils.GREENBOOK_SHELF_REMOVE, PermissionUtils.GREENBOOK_SHELF_LIST,
-                    PermissionUtils.GREENBOOK_SHELF_SNEAK, PermissionUtils.GREENBOOK_SHELF_EMPTYHAND)) {
-                result.add(BookCmd.SUBCOMMAND);
-            }
-            if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_PAINTING_RANGE)) {
-                result.add(PaintingCmd.SUBCOMMAND);
-            }
-            if (PermissionUtils.hasPermission(sender, PermissionUtils.GREENBOOK_WIRELESS_UPDATE_SIGNS_CMD, PermissionUtils.GREENBOOK_WIRELESS_SET_PLAYER_SPECIFIC_CHANNELS, PermissionUtils.GREENBOOK_WIRELESS_SET_COMPATIBILITY_MODE)) {
-                result.add(WireLessCmd.SUBCOMMAND);
-            }
+    protected @Nullable ASubCommand getSubCommandFromString(@NotNull Permissible permissible, @NotNull String string) {
+        String subCmdStr = string.toLowerCase();
 
-            result = result.stream().filter(s -> s.startsWith(args[0].toLowerCase())).toList();
-        } else if (args.length > 1) {
-            switch (args[0].toLowerCase()) {//tab complete of subcommands
-                case BookCmd.SUBCOMMAND -> {
-                    return BookCmd.handleTabComplete(sender, args);
-                }
-                case PaintingCmd.SUBCOMMAND -> {
-                    return PaintingCmd.handleTab(sender, args);
-                }
-                case WireLessCmd.SUBCOMMAND -> {
-                    return WireLessCmd.handleTab(sender, args);
-                }
+        for (ASubCommand subCommand : subCommands) {
+            if (subCommand.getAliases().contains(subCmdStr) && subCommand.checkPermission(permissible)) {
+                return subCommand;
             }
         }
 
-        return result;
+        return null;
+    }
+
+    /**
+     * get all registered Subcommands, filtered by the permission check of each subcommand against the permissible
+     *
+     * @param permissible to check against for permission to using the subcommand
+     */
+    protected Set<ASubCommand> getSubCommands(@NotNull Permissible permissible) {
+        return subCommands.stream().filter(subCommand -> subCommand.checkPermission(permissible)).collect(Collectors.toSet());
     }
 }

@@ -1,0 +1,18 @@
+loader: de.greensurvivors.greenbook.bootstrap.GreenPluginLoader
+main: de.greensurvivors.greenbook.GreenBook
+name: GreenBook
+# noinspection YAMLSchemaValidation
+api-version: '${apiVersion}'
+version: ${version}
+description: ${description}
+author: GreensurvivorsTeam
+dependencies:
+  server:
+    CraftBook:
+      load: AFTER
+      required: false
+      join-classpath: false
+    WorldEdit:
+      load: AFTER
+      required: false
+      join-classpath: true

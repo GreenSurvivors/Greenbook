@@ -1,58 +1,66 @@
-//import net.minecrell.pluginyml.bukkit.BukkitPluginDescription
-
 plugins {
-    `java-library` //java
-    id("io.papermc.paperweight.userdev") version "1.5.9"
-	id("xyz.jpenilla.run-paper") version "2.2.0" // Adds runServer and runMojangMappedServer tasks for testing
+    `java-library`
+    id("io.papermc.paperweight.userdev") version "1.7.1"
+    id("xyz.jpenilla.run-paper") version "2.3.0" // Adds runServer task for testing
 }
 
 group = "de.greensurvivors"
-version = "0.0.2-SNAPSHOT"
+version = "0.0.3-SNAPSHOT"
 description = "Like Craftbook, but not a buggy dinosaur"
-//java.sourceCompatibility = JavaVersion.VERSION_17
+// this is the minecraft. This is also used as the api version of the plugin.yml
+val mcVersion = "1.21"
+// don't use spigots reobfused jar
+paperweight.reobfArtifactConfiguration = io.papermc.paperweight.userdev.ReobfArtifactConfiguration.MOJANG_PRODUCTION
 
+val targetJavaVersion = 21
 java {
-  // Configure the java toolchain. This allows gradle to auto-provision JDK 17 on systems that only have JDK 8 installed for example.
-  toolchain.languageVersion.set(JavaLanguageVersion.of(17))
+    val javaVersion = JavaVersion.toVersion(targetJavaVersion)
+    sourceCompatibility = javaVersion
+    targetCompatibility = javaVersion
+    if (JavaVersion.current() < javaVersion) {
+        // Configure the java toolchain. This allows gradle to auto-provision JDK 21 on systems that only have JDK 8 installed for example.
+        toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
+    }
 }
 
 repositories {
+    mavenCentral()
     mavenLocal()
 
-    //paper
     maven {
+        name = "papermc-repo"
         url = uri("https://repo.papermc.io/repository/maven-public/")
+    }
+    maven { // world edit
+        name = "enginehub.org"
+        url = uri("https://maven.enginehub.org/repo/")
     }
 }
 
 dependencies {
-    paperweight.paperDevBundle("1.20.2-R0.1-SNAPSHOT")
+    paperweight.paperDevBundle("$mcVersion-R0.1-SNAPSHOT")
+    compileOnly("org.jetbrains:annotations:24.1.0")
+    api("com.github.ben-manes.caffeine:caffeine:3.1.8") // caches
+    api("org.apache.commons:commons-collections4:4.5.0-M2")
+    api("com.sk89q.worldedit:worldedit-bukkit:7.3.5-SNAPSHOT")
 }
 
 tasks {
-  // Configure reobfJar to run when invoking the build task
-  assemble {
-    dependsOn(reobfJar)
-  }
+    compileJava {
+        options.encoding = Charsets.UTF_8.name() // We want UTF-8 for everything
 
-  compileJava {
-    options.encoding = Charsets.UTF_8.name() // We want UTF-8 for everything
+        // Set the release flag. This configures what version bytecode the compiler will emit, as well as what JDK APIs are usable.
+        // See https://openjdk.java.net/jeps/247 for more information.
+        options.release.set(targetJavaVersion)
+    }
 
-    // Set the release flag. This configures what version bytecode the compiler will emit, as well as what JDK APIs are usable.
-    // See https://openjdk.java.net/jeps/247 for more information.
-    options.release.set(17)
-  }
-  
-  processResources {
-    filteringCharset = Charsets.UTF_8.name() // We want UTF-8 for everything
-  }
+    processResources {
+        filteringCharset = Charsets.UTF_8.name() // We want UTF-8 for everything
 
-  /*
-  reobfJar {
-    // This is an example of how you might change the output location for reobfJar. It's recommended not to do this
-    // for a variety of reasons, however it's asked frequently enough that an example of how to do it is included here.
-    outputJar.set(layout.buildDirectory.file("libs/PaperweightTestPlugin-${project.version}.jar"))
-  }
-   */
- 
+        expand(
+            "version" to project.version,
+            "description" to project.description,
+            "apiVersion" to mcVersion
+        )
+    }
 }
