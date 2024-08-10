@@ -1,5 +1,7 @@
 package de.greensurvivors.greenbook.features.gate;
 
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import de.greensurvivors.greenbook.GreenBook;
 import de.greensurvivors.greenbook.commands.GreenBookCmd;
 import de.greensurvivors.greenbook.features.AFeature;
@@ -15,22 +17,22 @@ import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
+import net.minecraft.core.BlockPos;
 import org.bukkit.*;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.block.BlockType;
-import org.bukkit.block.Sign;
+import org.bukkit.block.*;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Waterlogged;
 import org.bukkit.block.data.type.HangingSign;
 import org.bukkit.block.data.type.WallHangingSign;
 import org.bukkit.block.data.type.WallSign;
 import org.bukkit.block.sign.Side;
+import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
@@ -40,6 +42,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings({
     "UnstableApiUsage", // position
@@ -76,7 +79,8 @@ public class GateFeature extends AFeature<GateConfig> implements Listener { // t
         cardinalDirections = Collections.unmodifiableMap(tempCardinal);
     }
 
-    private final @NotNull NamespacedKey blockTypeKey, directionKey, axisKey, amountKey, lastPowerStateKey; // todo make gates toggleable with redstone
+    private final @NotNull NamespacedKey blockTypeKey, directionKey, axisKey, amountKey, lastPowerStateKey;
+    private final @NotNull LoadingCache<@NotNull Location, @NotNull Integer> gateLastPowerStateSignCache;
 
     public GateFeature(@NotNull GreenBook plugin) {
         super(plugin, FeatureType.BRIDGE, new GateConfig(plugin));
@@ -89,6 +93,20 @@ public class GateFeature extends AFeature<GateConfig> implements Listener { // t
         amountKey = new NamespacedKey(plugin, "gateBlockAmount");
 
         lastPowerStateKey = new NamespacedKey(plugin, "gateLastPowerStateKey");
+
+        gateLastPowerStateSignCache = Caffeine.newBuilder().
+            expireAfterWrite(2, TimeUnit.MINUTES).
+            build(location -> {
+                BlockState state = location.getBlock().getState(false); // danger no snapshot
+
+                if (state instanceof Sign sign && getFeatureConfig().isGate(sign.getSide(Side.FRONT).line(1))) {
+                    Integer lastPowerState = sign.getPersistentDataContainer().get(lastPowerStateKey, PersistentDataType.INTEGER);
+
+                    return Objects.requireNonNullElse(lastPowerState, -1);
+                } else {
+                    return Integer.MIN_VALUE;
+                }
+            });
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
@@ -148,6 +166,32 @@ public class GateFeature extends AFeature<GateConfig> implements Listener { // t
         }
     }
 
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
+    private void onSignPowerChange(@NotNull BlockPhysicsEvent event) {
+
+        Block eBlock = event.getBlock();
+        if (Tag.ALL_SIGNS.isTagged(event.getChangedType()) && // fast check to "fail" fast for non-relevant changes
+            eBlock.getState(false) instanceof Sign sign) { // danger no snapshot
+            final int lastSavedState = gateLastPowerStateSignCache.get(eBlock.getLocation());
+
+            if (lastSavedState > Integer.MIN_VALUE) {
+                /*
+                 * eBlock.getBlockPower() does NOT work here!
+                 * It will fail to get indirect power whenever a "direct" power source (just redstone dust, really) is next to it
+                 */
+                int newPowerState = ((CraftWorld) event.getBlock().getWorld()).getHandle().getBestNeighborSignal(new BlockPos(event.getBlock().getX(), event.getBlock().getY(), event.getBlock().getZ()));
+
+                if (newPowerState != lastSavedState) {
+                    sign.getPersistentDataContainer().set(lastPowerStateKey, PersistentDataType.INTEGER, newPowerState);
+                }
+
+                if (newPowerState > 0 && lastSavedState <= 0) {
+                    initToggleGate(sign, null);
+                }
+            } // not a gate
+        } // is sign and gate
+    }
+
     @Override
     public void registerCommands(@NotNull Commands commandsRegistrar, @NotNull GreenBookCmd mainCommand) {
 
@@ -163,7 +207,7 @@ public class GateFeature extends AFeature<GateConfig> implements Listener { // t
 
     }
 
-    private void doToggleWork(final @NotNull Sign sign, final @NotNull FrameFloodFill frameFloodFill, @Nullable Audience audience) {
+    private void doToggleWork(final @NotNull Sign sign, final @NotNull FrameFloodFill frameFloodFill, @Nullable Audience audience) { // todo optional open / close message
         final @NotNull PersistentDataContainer container = sign.getPersistentDataContainer();
 
         @Nullable BlockType blockType = getBlockType(container);

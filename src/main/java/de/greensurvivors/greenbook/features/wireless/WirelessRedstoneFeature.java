@@ -245,7 +245,7 @@ public class WirelessRedstoneFeature extends AFeature<WirelessConfig> implements
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     private void onSignPowerChange(@NotNull BlockPhysicsEvent event) {
-        if (!getFeatureConfig().isEnabled()) {
+        if (!getFeatureConfig().isEnabled()) { // todo (de) register listener just with dis-/ enable methods
             return;
         }
 
