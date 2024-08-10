@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Set;
 
 @SuppressWarnings("UnstableApiUsage") // brigadier api
-public class ReloadSubCmd extends ASubCommand { // todo
+public class ReloadSubCmd extends ASubCommand {
     private static final Permission RELOAD_PERM = new Permission("greenbook.cmd.greenbook.reload",
         "Allows to reload the language and config files", PermissionDefault.OP);
     private static final String SUBCOMMAND = "reload";

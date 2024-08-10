@@ -185,7 +185,7 @@ public class GateFeature extends AFeature<GateConfig> implements Listener { // t
                     sign.getPersistentDataContainer().set(lastPowerStateKey, PersistentDataType.INTEGER, newPowerState);
                 }
 
-                if (newPowerState > 0 && lastSavedState <= 0) {
+                if (newPowerState > 0 && lastSavedState <= 0) { // todo I'm sure this is too slow for BlockPhysicsEvent
                     initToggleGate(sign, null);
                 }
             } // not a gate

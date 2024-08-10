@@ -13,11 +13,11 @@ public enum BridgeType {
     BRIDGE("[Bridge]"),
     BRIDGE_END("[Bridge End]");
 
+    private static volatile EnumSet<BridgeType> cachedValues = null; // lazy init to let every BridgeType load in first
     //sting representation
     private volatile @NotNull Component label;
     //pattern to easy match the label against a string
     private volatile @NotNull Pattern pattern;
-    private static volatile EnumSet<BridgeType> cachedValues = null; // lazy init to let every BridgeType load in first
 
     BridgeType(final @NotNull String rawLabel) {
         // we don't use setLabel here because the methode is synchronized and that could lead to some racing conditions
@@ -25,21 +25,6 @@ public enum BridgeType {
         //case-insensitive regex with all special characters escaped; nothing surrounding the label but optional whitespace
         this.pattern = Pattern.compile(String.format("^\\s*(?i)%s\\s*$",
             Pattern.quote(MiniMessage.miniMessage().stripTags(rawLabel))));
-    }
-
-    public synchronized void setLabel(final @NotNull String rawLabel) {
-        this.label = MiniMessage.miniMessage().deserialize(rawLabel);
-        //case-insensitive regex with all special characters escaped; nothing surrounding the label but optional whitespace
-        this.pattern = Pattern.compile(String.format("^\\s*(?i)%s\\s*$",
-            Pattern.quote(MiniMessage.miniMessage().stripTags(rawLabel))));
-    }
-
-    private synchronized boolean matchPattern(final @NotNull String str) {
-        return pattern.matcher(str).matches();
-    }
-
-    public synchronized @NotNull Component getLabel() {
-        return label;
     }
 
     /**
@@ -62,5 +47,20 @@ public enum BridgeType {
         }
 
         return null;
+    }
+
+    private synchronized boolean matchPattern(final @NotNull String str) {
+        return pattern.matcher(str).matches();
+    }
+
+    public synchronized @NotNull Component getLabel() {
+        return label;
+    }
+
+    public synchronized void setLabel(final @NotNull String rawLabel) {
+        this.label = MiniMessage.miniMessage().deserialize(rawLabel);
+        //case-insensitive regex with all special characters escaped; nothing surrounding the label but optional whitespace
+        this.pattern = Pattern.compile(String.format("^\\s*(?i)%s\\s*$",
+            Pattern.quote(MiniMessage.miniMessage().stripTags(rawLabel))));
     }
 }

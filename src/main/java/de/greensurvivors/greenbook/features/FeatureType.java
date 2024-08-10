@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.function.Function;
 
 // this is NOT an enum, so this can be expanded by third parties.
-public class FeatureType { // todo make sure ever feature can be disabled
+public class FeatureType { // todo make sure every feature can be disabled
     public final static FeatureType BRIDGE = new FeatureType("Bridges", BridgeFeature::new);
     public final static FeatureType COIN = new FeatureType("Coins", CoinCmdFeature::new);
     public final static FeatureType GATE = new FeatureType("Gates", GateFeature::new);

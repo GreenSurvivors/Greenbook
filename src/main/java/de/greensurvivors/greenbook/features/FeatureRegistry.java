@@ -41,7 +41,7 @@ public class FeatureRegistry {
         }
 
         registeredFeatures.put(newFeature.getFeatureType(), newFeature);
-        newFeature.onEnable(); // todo onEnable() should only be called, whenever
+        newFeature.onEnable(); // todo onEnable() should only be called, whenever <-- thanks for never writing the end of this. Now I forgot.
     }
 
     /**
