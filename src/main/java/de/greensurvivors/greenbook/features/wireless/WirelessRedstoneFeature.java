@@ -200,7 +200,7 @@ public class WirelessRedstoneFeature extends AFeature<WirelessConfig> implements
                     } else { // new valid network
                         // register in network / cache
                         if (newNodeType == WirelessNodeType.RECEIVER) {
-                            event.line(0,  getFeatureConfig().getLabel(WirelessNodeType.RECEIVER));
+                            event.line(0, getFeatureConfig().getLabel(WirelessNodeType.RECEIVER));
                             event.line(1, getFeatureConfig().getID(WirelessNodeType.RECEIVER));
 
                             AWirelessReceiver receiver = AWirelessReceiver.createReceiver(plugin, location, newNetwork);
@@ -209,7 +209,7 @@ public class WirelessRedstoneFeature extends AFeature<WirelessConfig> implements
                             event.line(0, getFeatureConfig().getLabel(WirelessNodeType.TRANSMITTER));
                             event.line(1, getFeatureConfig().getID(WirelessNodeType.TRANSMITTER));
 
-                            WirelessTransmitter transmitter = new WirelessTransmitter(plugin,location, newNetwork);
+                            WirelessTransmitter transmitter = new WirelessTransmitter(plugin, location, newNetwork);
                             loadedNodes.put(location, transmitter);
                         }
 
@@ -258,7 +258,7 @@ public class WirelessRedstoneFeature extends AFeature<WirelessConfig> implements
                  * eBlock.getBlockPower() does NOT work here!
                  * It will fail to get indirect power whenever a "direct" power source (just redstone dust, really) is next to it
                  */
-                int newPowerState = ((CraftWorld)event.getBlock().getWorld()).getHandle().getBestNeighborSignal(new BlockPos(event.getBlock().getX(), event.getBlock().getY(), event.getBlock().getZ()));
+                int newPowerState = ((CraftWorld) event.getBlock().getWorld()).getHandle().getBestNeighborSignal(new BlockPos(event.getBlock().getX(), event.getBlock().getY(), event.getBlock().getZ()));
 
                 transmitter.setLastPowerState((byte) newPowerState);
             }  // is transmitter

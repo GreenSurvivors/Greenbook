@@ -84,7 +84,7 @@ public class LiftFeature extends AFeature<LiftConfig> implements Listener {
                         plugin.getMessageManager().sendLang(ePlayer, LiftLangPath.LIFT_CREATE_SUCCESS);
 
                         // auto wax to don't annoy users opening editing screen every time they try to use a lift
-                        if (event.getBlock().getState(false) instanceof Sign sign){ // danger no snapshot
+                        if (event.getBlock().getState(false) instanceof Sign sign) { // danger no snapshot
                             sign.setWaxed(true);
                             sign.update(); //todo test if we have to call update if we don't use a snapshot
                         }
@@ -128,7 +128,7 @@ public class LiftFeature extends AFeature<LiftConfig> implements Listener {
         //lifts only go up / down, so x and z always stay the same
         final int x = originSign.getX(), starty = originSign.getY() + step, z = originSign.getZ();
         //is the world max or min height the point to stop for a sign?
-        final int maxSearchCoord = step > 0 ? world.getMaxHeight() -1 : world.getMinHeight();
+        final int maxSearchCoord = step > 0 ? world.getMaxHeight() - 1 : world.getMinHeight();
 
         //try to extract the floor from "to:<floor name>"
         final LiftConfig.DestinationMatcher destinationMatcher = getFeatureConfig().getDeDestinationMatcher(originSign.getSide(Side.FRONT).line(2));
@@ -174,7 +174,7 @@ public class LiftFeature extends AFeature<LiftConfig> implements Listener {
         final double z = toLoc.getZ();
 
         int maxY = Math.min(toLoc.getBlockY() + 5, world.getMaxHeight());
-        int minY = Math.max(toLoc.getBlockY() - 5, world.getMinHeight()+ 1);
+        int minY = Math.max(toLoc.getBlockY() - 5, world.getMinHeight() + 1);
 
         //if the from-location gets over or under the end-location into play
         if (dy > 0) { //never teleport to the same floor the origin lift is on

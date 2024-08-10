@@ -203,7 +203,7 @@ public class BridgeFeature extends AFeature<BridgeConfig> implements Listener {
     }
 
     private @Nullable BridgeType getTypeFromSign(@NotNull Sign sign) {
-       return BridgeType.fromLabel(sign.getSide(Side.FRONT).line(1));
+        return BridgeType.fromLabel(sign.getSide(Side.FRONT).line(1));
     }
 
 
@@ -224,7 +224,7 @@ public class BridgeFeature extends AFeature<BridgeConfig> implements Listener {
             final @NotNull Block bridgeBlock = signBlock.getRelative(blockFace);
             final @NotNull BlockData bridgeBlockData = signBlock.getBlockData();
 
-            if (getFeatureConfig().isAllowedBlock(bridgeBlockData) && !bridgeBlock.getType().isAir()){
+            if (getFeatureConfig().isAllowedBlock(bridgeBlockData) && !bridgeBlock.getType().isAir()) {
                 return bridgeBlockData;
             } else {
                 return null;
@@ -236,7 +236,7 @@ public class BridgeFeature extends AFeature<BridgeConfig> implements Listener {
             final @NotNull Block bridgeBlock = signBlock.getRelative(blockFace);
             final @NotNull BlockData bridgeBlockData = signBlock.getBlockData();
 
-            if (getFeatureConfig().isAllowedBlock(bridgeBlockData) && !bridgeBlock.getType().isAir()){
+            if (getFeatureConfig().isAllowedBlock(bridgeBlockData) && !bridgeBlock.getType().isAir()) {
                 container.set(expectedBridgeDirectionKey, BRIDGE_EXPECTED_DIRECTION_DATA_TYPE, blockFace);
                 return bridgeBlockData;
             }
@@ -247,7 +247,7 @@ public class BridgeFeature extends AFeature<BridgeConfig> implements Listener {
             final @NotNull Block above = signBlock.getRelative(blockFace);
             final @NotNull BlockData bridgeBlockData = signBlock.getBlockData();
 
-            if (getFeatureConfig().isAllowedBlock(bridgeBlockData) && !above.getType().isAir()){
+            if (getFeatureConfig().isAllowedBlock(bridgeBlockData) && !above.getType().isAir()) {
                 container.set(expectedBridgeDirectionKey, BRIDGE_EXPECTED_DIRECTION_DATA_TYPE, blockFace);
                 return bridgeBlockData;
             }
@@ -258,7 +258,7 @@ public class BridgeFeature extends AFeature<BridgeConfig> implements Listener {
             final @NotNull Block above = signBlock.getRelative(blockFace);
             final @NotNull BlockData bridgeBlockData = signBlock.getBlockData();
 
-            if (getFeatureConfig().isAllowedBlock(bridgeBlockData) && !above.getType().isAir()){
+            if (getFeatureConfig().isAllowedBlock(bridgeBlockData) && !above.getType().isAir()) {
                 container.set(expectedBridgeDirectionKey, BRIDGE_EXPECTED_DIRECTION_DATA_TYPE, blockFace);
                 return bridgeBlockData;
             }
@@ -281,10 +281,10 @@ public class BridgeFeature extends AFeature<BridgeConfig> implements Listener {
 
             return null; // todo
 
-        } else if (sign.getBlockData() instanceof Rotatable rotatable){
+        } else if (sign.getBlockData() instanceof Rotatable rotatable) {
             if (Utils.isCardinal(rotatable)) {
 
-                return  null; // todo
+                return null; // todo
             } else { // todo
                 return null;
             }

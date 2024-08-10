@@ -103,6 +103,62 @@ public class ConfigManager {
     }
 
     /**
+     * @param locationToCheckAt
+     * @param entityBoundingBox
+     * @return
+     * @see net.minecraft.world.level.Level#findSupportingBlock(net.minecraft.world.entity.Entity, net.minecraft.world.phys.AABB)
+     */
+    // todo pretty sure we can optimize this if we would merge this with the isEntitySafeAt() methode
+    public static @Nullable BlockPosition findSupportingBlockAt(final @NotNull Location locationToCheckAt, final @NotNull BoundingBox entityBoundingBox) { // todo try to go back to only API usage but hack the new BlockCollisions code is complicated
+        AABB aabb = new AABB(
+            entityBoundingBox.getMinX(), entityBoundingBox.getMinY(), entityBoundingBox.getMinZ(),
+            entityBoundingBox.getMaxX(), entityBoundingBox.getMaxY(), entityBoundingBox.getMaxZ());
+
+        BlockPosition resultBlockPos = null;
+        double shortestDistanceSquared = Double.MAX_VALUE;
+        // forEntity is a confusing name since it really means if we check for suffocation aka non-transparent blocks.
+        // since an entity can stand on such like a Glas block, it has to be false.
+        BlockCollisions<BlockPos> blockCollisions = new BlockCollisions<>(((CraftWorld) locationToCheckAt.getWorld()).getHandle(), null, aabb, false, (blockPos, voxelShape) -> blockPos);
+
+        while (blockCollisions.hasNext()) {
+            BlockPos nmsPosNow = blockCollisions.next();
+            BlockPosition posNow = Position.block(nmsPosNow.getX(), nmsPosNow.getY(), nmsPosNow.getZ());
+
+            double dx = locationToCheckAt.x() - posNow.x();
+            double dy = locationToCheckAt.y() - posNow.y();
+            double dz = locationToCheckAt.z() - posNow.z();
+            // we don't have to use the root here since we only do a comparison with the last value and (square) roots are expensive
+            double newDistanceSquared = dx * dx + dy * dy + dz * dz;
+
+            if (newDistanceSquared < shortestDistanceSquared || newDistanceSquared == shortestDistanceSquared && isNewBlockOrBetterOrder(resultBlockPos, posNow)) {
+                resultBlockPos = posNow;
+                shortestDistanceSquared = newDistanceSquared;
+            }
+        }
+
+        return resultBlockPos;
+    }
+
+    private static boolean isNewBlockOrBetterOrder(final @Nullable BlockPosition resultBlock, final @NotNull BlockPosition block2) {
+        boolean newBlockOrBetterOrder;
+
+        if (resultBlock == null) {
+            newBlockOrBetterOrder = true;
+        } else { // This will
+            if (resultBlock.y() == block2.y()) {
+                if (resultBlock.z() == block2.z()) {
+                    newBlockOrBetterOrder = resultBlock.x() - block2.x() < 0;
+                } else {
+                    newBlockOrBetterOrder = resultBlock.z() - block2.z() < 0;
+                }
+            } else {
+                newBlockOrBetterOrder = resultBlock.y() - block2.y() < 0;
+            }
+        }
+        return newBlockOrBetterOrder;
+    }
+
+    /**
      * Try to get an offline player from a name or a
      * string representation of a UUID.
      * <br>
@@ -246,69 +302,13 @@ public class ConfigManager {
     }
 
     /**
-     * @param locationToCheckAt
-     * @param entityBoundingBox
-     * @return
-     * @see net.minecraft.world.level.Level#findSupportingBlock(net.minecraft.world.entity.Entity, net.minecraft.world.phys.AABB)
-     */
-    // todo pretty sure we can optimize this if we would merge this with the isEntitySafeAt() methode
-    public static @Nullable BlockPosition findSupportingBlockAt(final @NotNull Location locationToCheckAt, final @NotNull BoundingBox entityBoundingBox) { // todo try to go back to only API usage but hack the new BlockCollisions code is complicated
-        AABB aabb = new AABB(
-            entityBoundingBox.getMinX(), entityBoundingBox.getMinY(), entityBoundingBox.getMinZ(),
-            entityBoundingBox.getMaxX(), entityBoundingBox.getMaxY(), entityBoundingBox.getMaxZ());
-
-        BlockPosition resultBlockPos = null;
-        double shortestDistanceSquared = Double.MAX_VALUE;
-        // forEntity is a confusing name since it really means if we check for suffocation aka non-transparent blocks.
-        // since an entity can stand on such like a Glas block, it has to be false.
-        BlockCollisions<BlockPos> blockCollisions = new BlockCollisions<>(((CraftWorld)locationToCheckAt.getWorld()).getHandle(), null, aabb, false, (blockPos, voxelShape) -> blockPos);
-
-        while (blockCollisions.hasNext()) {
-            BlockPos nmsPosNow = blockCollisions.next();
-            BlockPosition posNow =  Position.block(nmsPosNow.getX(), nmsPosNow.getY(), nmsPosNow.getZ());
-
-            double dx = locationToCheckAt.x() - posNow.x();
-            double dy = locationToCheckAt.y() - posNow.y();
-            double dz = locationToCheckAt.z() - posNow.z();
-            // we don't have to use the root here since we only do a comparison with the last value and (square) roots are expensive
-            double newDistanceSquared = dx * dx + dy * dy + dz * dz;
-
-            if (newDistanceSquared < shortestDistanceSquared || newDistanceSquared == shortestDistanceSquared && isNewBlockOrBetterOrder(resultBlockPos, posNow)) {
-                resultBlockPos = posNow;
-                shortestDistanceSquared = newDistanceSquared;
-            }
-        }
-
-        return resultBlockPos;
-    }
-
-    private static boolean isNewBlockOrBetterOrder(final @Nullable BlockPosition resultBlock, final @NotNull BlockPosition block2) {
-        boolean newBlockOrBetterOrder;
-
-        if (resultBlock == null) {
-            newBlockOrBetterOrder = true;
-        } else { // This will
-            if (resultBlock.y() == block2.y()) {
-                if (resultBlock.z() == block2.z()) {
-                    newBlockOrBetterOrder = resultBlock.x() - block2.x() < 0;
-                } else {
-                    newBlockOrBetterOrder = resultBlock.z() - block2.z() < 0;
-                }
-            } else {
-                newBlockOrBetterOrder = resultBlock.y() - block2.y() < 0;
-            }
-        }
-        return newBlockOrBetterOrder;
-    }
-
-    /**
      * @param entity
      * @param world
      * @param x
      * @param y
      * @param z
      * @return
-     * @see net.minecraft.world.level.CollisionGetter#getBlockCollisions(net.minecraft.world.entity.Entity, AABB) 
+     * @see net.minecraft.world.level.CollisionGetter#getBlockCollisions(net.minecraft.world.entity.Entity, AABB)
      */
     public boolean isEntitySafeAt(@NotNull Entity entity, @NotNull World world, double x, double y, double z) { // todo adapt to the new BlockCollisions system but still stay on API
         //start looking for unsafe blocks one Block under the entity.

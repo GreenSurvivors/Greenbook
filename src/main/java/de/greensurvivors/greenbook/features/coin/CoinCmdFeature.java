@@ -37,7 +37,7 @@ public class CoinCmdFeature extends AFeature<CoinConfig> {
 
             requires(s ->
                 getFeatureConfig().isEnabled() &&
-                s.getSender().hasPermission(CoinPermissions.CMD_USE.getPermission())).
+                    s.getSender().hasPermission(CoinPermissions.CMD_USE.getPermission())).
             then(Commands.
                 literal(SET).
                 requires(s -> s.getSender().hasPermission(CoinPermissions.CMD_SET.getPermission())).

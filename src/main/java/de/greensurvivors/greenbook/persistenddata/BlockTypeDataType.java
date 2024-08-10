@@ -11,10 +11,10 @@ import org.jetbrains.annotations.NotNull;
 public class BlockTypeDataType implements PersistentDataType<String, BlockType> {
     private final static @NotNull BlockTypeDataType INSTANCE = new BlockTypeDataType();
 
-    private BlockTypeDataType(){
+    private BlockTypeDataType() {
     }
 
-    public static @NotNull BlockTypeDataType materialDataType () {
+    public static @NotNull BlockTypeDataType materialDataType() {
         return INSTANCE;
     }
 

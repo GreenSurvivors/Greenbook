@@ -21,25 +21,26 @@ public class WirelessTransmitter extends AWirelessNode {
      * at the given location and for the given network.
      * This also registers this transmitter into it's network
      *
-     * @param plugin the greenBook plugin
+     * @param plugin   the greenBook plugin
      * @param location the location of the transmitter
-     * @param network the network the transmitter belongs to
+     * @param network  the network the transmitter belongs to
      */
     public WirelessTransmitter(@NotNull GreenBook plugin, @NotNull Location location, @NotNull WirelessNetwork network) {
-        super(plugin,WirelessNodeType.TRANSMITTER, location, network);
+        super(plugin, WirelessNodeType.TRANSMITTER, location, network);
 
         /*
          * eBlock.getBlockPower() does NOT work here!
          * It will fail to get indirect power whenever a "direct" power source (just redstone dust, really) is next to it
          */
         // todo move to a version dependent class
-        lastPowerState = (byte) ((CraftWorld)location.getWorld()).getHandle().getBestNeighborSignal(new BlockPos(location.getBlockX(), location.getBlockY(), location.getBlockZ()));
+        lastPowerState = (byte) ((CraftWorld) location.getWorld()).getHandle().getBestNeighborSignal(new BlockPos(location.getBlockX(), location.getBlockY(), location.getBlockZ()));
 
         network.addTransmitter(this);
     }
 
     /**
      * Get the last known power state of the transmitter.
+     *
      * @return the last known power state, ranged from 0 to 15
      */
     @Contract(pure = true)
@@ -52,7 +53,7 @@ public class WirelessTransmitter extends AWirelessNode {
      * If it has changed, calculates the highest power state in the network,
      * and updates the power state of all receivers within the network.
      *
-     * @param  nowPowerState the new power state to set
+     * @param nowPowerState the new power state to set
      * @return true if the power state was updated, false if it remained the same
      */
     @Contract(mutates = "this")

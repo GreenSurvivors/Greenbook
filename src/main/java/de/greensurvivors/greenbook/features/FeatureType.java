@@ -30,10 +30,6 @@ public class FeatureType { // todo make sure ever feature can be disabled
     protected final @NotNull String featureName;
     protected final @Nullable Function<@NotNull GreenBook, @NotNull AFeature<?>> constructor;
 
-    public static @NotNull Collection<@NotNull FeatureType> getStandardTypes() {
-        return standardTypes;
-    }
-
     protected FeatureType(@NotNull String featureName) {
         this.featureName = featureName;
         this.constructor = null;
@@ -42,6 +38,10 @@ public class FeatureType { // todo make sure ever feature can be disabled
     protected FeatureType(@NotNull String featureName, @NotNull Function<@NotNull GreenBook, @NotNull AFeature<?>> constructor) {
         this.featureName = featureName;
         this.constructor = constructor;
+    }
+
+    public static @NotNull Collection<@NotNull FeatureType> getStandardTypes() {
+        return standardTypes;
     }
 
     public @NotNull String getFeatureName() {

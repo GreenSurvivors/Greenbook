@@ -66,6 +66,8 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
 
     /** Load factor, normally 0.75 */
     private final transient float loadFactor;
+    /** Header in the linked list */
+    protected transient @Nullable DoubleInt header;
     /** The size of the set */
     private transient int size;
     /** set entries */
@@ -74,9 +76,6 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
     private int threshold;
     /** Modification count for iterators */
     private int modCount;
-
-    /** Header in the linked list */
-    transient @Nullable DoubleInt header;
 
     /**
      * Constructs a new empty set with default size and load factor.
@@ -89,7 +88,7 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
      * Constructs a new, empty set with the specified initial capacity and
      * default load factor.
      *
-     * @param initialCapacity  the initial capacity
+     * @param initialCapacity the initial capacity
      * @throws IllegalArgumentException if the initial capacity is negative
      */
     public LinkedDoubleIntHashSet(final int initialCapacity) {
@@ -100,8 +99,8 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
      * Constructs a new, empty set with the specified initial capacity and
      * load factor.
      *
-     * @param initialCapacity  the initial capacity
-     * @param loadFactor  the load factor
+     * @param initialCapacity the initial capacity
+     * @param loadFactor      the load factor
      * @throws IllegalArgumentException if the initial capacity is negative
      * @throws IllegalArgumentException if the load factor is less than or equal to zero
      */
@@ -122,9 +121,9 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
     /**
      * Constructor which performs no validation on the passed in parameters.
      *
-     * @param initialCapacity  the initial capacity, must be a power of two
-     * @param loadFactor  the load factor, must be &gt; 0.0f and generally &lt; 1.0f
-     * @param threshold  the threshold, must be sensible
+     * @param initialCapacity the initial capacity, must be a power of two
+     * @param loadFactor      the load factor, must be &gt; 0.0f and generally &lt; 1.0f
+     * @param threshold       the threshold, must be sensible
      */
     public LinkedDoubleIntHashSet(final int initialCapacity, final @Range(from = 0, to = 1) float loadFactor, final int threshold) {
         this.loadFactor = loadFactor;
@@ -136,7 +135,7 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
     /**
      * Constructor copying elements from another Collection.
      *
-     * @param coll  the collection to copy
+     * @param coll the collection to copy
      * @throws NullPointerException if the collection is null
      */
     public LinkedDoubleIntHashSet(final @NotNull Collection<? extends DoubleInt> coll) {
@@ -147,8 +146,8 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
     /**
      * Checks whether the set contains the specified value.
      *
-     * @param value1  the first value
-     * @param value2  the second value
+     * @param value1 the first value
+     * @param value2 the second value
      * @return true if the set contains the values
      */
     @Contract(pure = true)
@@ -177,7 +176,7 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
     @Contract(pure = true)
     @Override
     public boolean contains(@Nullable Object o) {
-        if (o instanceof DoubleInt entry){
+        if (o instanceof DoubleInt entry) {
             final int hashCode = entry.hashCode();
             DoubleInt other = data[hashIndex(hashCode, data.length)]; // no local for hash index
             while (other != null) {
@@ -193,8 +192,8 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
     /**
      * Stores the value against the specified value pair.
      *
-     * @param value1  the first value
-     * @param value2  the second value
+     * @param value1 the first value
+     * @param value2 the second value
      * @return true, if the values got added to the set, else false.
      * A Value pair will not get added into the set, if it already inside.
      */
@@ -216,7 +215,7 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
     /**
      * Puts a value into this set.
      *
-     * @param values  the values to add
+     * @param values the values to add
      * @return true if the new values where added, false otherwise.
      * In most cases, when the result is false, that means this set already contains the values.
      */
@@ -261,15 +260,12 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
      * @throws IllegalStateException         if not all the elements can be added at
      *                                       this time due to insertion restrictions
      * @see #add(DoubleInt)
-     *
+     * <p>
      * Copies all the values from the specified set to this set.
      * All values must be non-null and a DoubleInt object.
      * <p>
      * This implementation iterates around the specified set and
      * uses {@link #add(DoubleInt)}.
-     *
-     * @throws NullPointerException if the mapToCopy or any value within is null
-     * @throws ClassCastException if any value in mapToCopy is not a DoubleInt
      */
     @Contract(mutates = "this")
     public boolean addAll(final @NotNull Collection<? extends @NotNull DoubleInt> collection) {
@@ -287,7 +283,7 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
 
         final int newSize = (int) ((size + mapSize) / loadFactor + 1);
         ensureCapacity(calculateNewCapacity(newSize));
-        for (final DoubleInt entry: collection) {
+        for (final DoubleInt entry : collection) {
             changed = changed || add(entry);
         }
 
@@ -321,15 +317,12 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
      * @throws IllegalStateException         if not all the elements can be added at
      *                                       this time due to insertion restrictions
      * @see #add(DoubleInt)
-     *
+     * <p>
      * Copies all the values from the specified set to this set.
      * All values must be non-null and a DoubleInt object.
      * <p>
      * This implementation iterates around the specified set and
      * uses {@link #add(DoubleInt)}.
-     *
-     * @throws NullPointerException if the mapToCopy or any value within is null
-     * @throws ClassCastException if any value in mapToCopy is not a DoubleInt
      */
     public boolean addAllCloned(final @NotNull Collection<? extends @NotNull DoubleInt> collection) {
         for (final DoubleInt valuePair : collection) {
@@ -346,7 +339,7 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
 
         final int newSize = (int) ((size + mapSize) / loadFactor + 1);
         ensureCapacity(calculateNewCapacity(newSize));
-        for (final DoubleInt entry: collection) {
+        for (final DoubleInt entry : collection) {
             changed = changed || add(entry.clone());
         }
 
@@ -360,8 +353,8 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
      * If this element already is in the set, this will do nothing.
      *
      * @param newEntry the element to be added
-     * @throws NullPointerException          if the specified element is null and this
-     *                                       collection does not permit null elements
+     * @throws NullPointerException if the specified element is null and this
+     *                              collection does not permit null elements
      */
     @Override
     @Contract(mutates = "this")
@@ -412,8 +405,8 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
      * Gets the entry mapped to the values specified.
      * This will probably only be needed in very specific situations...
      *
-     * @param value1  the first value
-     * @param value2  the second value
+     * @param value1 the first value
+     * @param value2 the second value
      * @return the entry, null if no match
      */
     public @Nullable DoubleInt getEntry(int value1, int value2) {
@@ -462,8 +455,8 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
     /**
      * Removes the specified {@code DoubleInt} from this set.
      *
-     * @param value1  the first value
-     * @param value2  the second value
+     * @param value1 the first value
+     * @param value2 the second value
      * @return if anything was removed and the set has changed or not
      */
     @Contract(mutates = "this")
@@ -494,12 +487,12 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
      *
      * @param element element to be removed from this collection, if present
      * @return {@code true} if an element was removed as a result of this call
-     * @throws ClassCastException            if the type of the specified element
-     *                                       is incompatible with this collection
-     *                                       ({@linkplain Collection##optional-restrictions optional})
-     * @throws NullPointerException          if the specified element is null and this
-     *                                       collection does not permit null elements
-     *                                       ({@linkplain Collection##optional-restrictions optional})
+     * @throws ClassCastException   if the type of the specified element
+     *                              is incompatible with this collection
+     *                              ({@linkplain Collection##optional-restrictions optional})
+     * @throws NullPointerException if the specified element is null and this
+     *                              collection does not permit null elements
+     *                              ({@linkplain Collection##optional-restrictions optional})
      */
     @Override
     @Contract(mutates = "this")
@@ -525,7 +518,7 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
      * Removes and returns the first element of this set.
      *
      * @return the removed element
-     * @throws NoSuchElementException        if this collection is empty
+     * @throws NoSuchElementException if this collection is empty
      */
     @Override
     public @NotNull DoubleInt removeFirst() {
@@ -542,7 +535,7 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
      * Removes and returns the last element of this set.
      *
      * @return the removed element
-     * @throws NoSuchElementException        if this collection is empty
+     * @throws NoSuchElementException if this collection is empty
      */
     @Override
     public DoubleInt removeLast() {
@@ -558,7 +551,7 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
     /**
      * Removes all {@code DoubleInt} where the first value matches the one specified.
      *
-     * @param value  the first value
+     * @param value the first value
      * @return true if any elements were removed
      */
     @Contract(mutates = "this")
@@ -767,7 +760,7 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
     /**
      * Compares this set with another.
      *
-     * @param obj  the object to compare to
+     * @param obj the object to compare to
      * @return true if equal
      */
     @Override
@@ -817,16 +810,16 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
      */
     public @NotNull String toString() {
         Iterator<DoubleInt> i = iterator();
-        if (! i.hasNext()) {
+        if (!i.hasNext()) {
             return "{}";
         }
 
         StringBuilder sb = new StringBuilder();
         sb.append('{');
-        for (;;) {
+        for (; ; ) {
             DoubleInt e = i.next();
             sb.append(e);
-            if (! i.hasNext()) {
+            if (!i.hasNext()) {
                 return sb.append('}').toString();
             }
             sb.append(',').append(' ');
@@ -847,8 +840,8 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
      * Gets the index into the data storage for the hashCode specified.
      * This implementation uses the least significant bits of the hashCode.
      *
-     * @param hashCode  the hash code to use
-     * @param dataSize  the size of the data to pick a bucket from
+     * @param hashCode the hash code to use
+     * @param dataSize the size of the data to pick a bucket from
      * @return the bucket index
      */
     protected int hashIndex(final int hashCode, final int dataSize) {
@@ -859,8 +852,8 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
      * Is the entry equal to the combined values.
      *
      * @param entry  the entry to compare to
-     * @param value1  the first value
-     * @param value2  the second value
+     * @param value1 the first value
+     * @param value2 the second value
      * @return true if the entry matches
      */
     protected boolean isEntryEqual(final DoubleInt entry, final int value1, final int value2) {
@@ -901,8 +894,8 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
      * This implementation adds the entry to the data storage table and
      * to the end of the linked set.
      *
-     * @param hashIndex  the index into the data array to store at
-     * @param entry  the entry to add
+     * @param hashIndex the index into the data array to store at
+     * @param entry     the entry to add
      */
     protected void addMappingEnd(final int hashIndex, final @NotNull DoubleInt entry) {
         modCount++;
@@ -910,7 +903,7 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
             entry.after = entry;
             entry.before = entry;
         } else {
-            entry.after  = header;
+            entry.after = header;
             entry.before = header.before;
             header.before.after = entry;
             header.before = entry;
@@ -929,8 +922,8 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
      * This implementation adds the entry to the data storage table and
      * to the beginning of the linked list.
      *
-     * @param hashIndex  the index into the data array to store at
-     * @param entry  the entry to add
+     * @param hashIndex the index into the data array to store at
+     * @param entry     the entry to add
      */
     protected void addMappingBegin(final int hashIndex, final @NotNull DoubleInt entry) {
         modCount++;
@@ -939,7 +932,7 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
             entry.after = entry;
         } else {
             entry.before = header;
-            entry.after  = header.after;
+            entry.after = header.after;
             header.before = entry;
             header.after.before = entry;
         }
@@ -953,7 +946,7 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
      * Calculates the new capacity of the set.
      * This implementation normalizes the capacity to a power of two.
      *
-     * @param proposedCapacity  the proposed capacity
+     * @param proposedCapacity the proposed capacity
      * @return the normalized new capacity
      */
     protected int calculateNewCapacity(final int proposedCapacity) {
@@ -975,8 +968,8 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
      * Calculates the new threshold of the set, where it will be resized.
      * This implementation uses the load factor.
      *
-     * @param newCapacity  the new capacity
-     * @param factor  the load factor
+     * @param newCapacity the new capacity
+     * @param factor      the load factor
      * @return the new resize threshold
      */
     protected int calculateThreshold(final int newCapacity, final float factor) {
@@ -1000,7 +993,7 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
     /**
      * Changes the size of the data structure to the capacity proposed.
      *
-     * @param newCapacity  the new capacity of the array (a power of two, less or equal to max)
+     * @param newCapacity the new capacity of the array (a power of two, less or equal to max)
      */
     protected void ensureCapacity(final int newCapacity) {
         final int oldCapacity = data.length;
@@ -1040,10 +1033,9 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
      * removes the entry from the data storage table.
      * The size is not updated.
      *
-     * @param entry  the entry to remove
-     * @param hashIndex  the index into the data structure
+     * @param entry     the entry to remove
+     * @param hashIndex the index into the data structure
      * @param previous  the previous entry in the chain
-     *
      */
     protected void removeEntry(final DoubleInt entry, final int hashIndex, final DoubleInt previous) {
         entry.before.after = entry.after;
@@ -1063,7 +1055,7 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
      * <p>
      * This implementation prepares the DoubleInt for garbage collection.
      *
-     * @param entry  the entry to destroy
+     * @param entry the entry to destroy
      */
     protected void destroyEntry(final @NotNull DoubleInt entry) {
         entry.next = null;
@@ -1078,8 +1070,8 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
      * It also handles changes to {@code modCount} and {@code size}.
      * Subclasses could override to fully control removals from the set.
      *
-     * @param entry  the entry to remove
-     * @param hashIndex  the index into the data structure
+     * @param entry     the entry to remove
+     * @param hashIndex the index into the data structure
      * @param previous  the previous entry in the chain
      */
     protected void removeMapping(final DoubleInt entry, final int hashIndex, final DoubleInt previous) {
@@ -1166,7 +1158,7 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
             if (parent.modCount != expectedModCount) {
                 throw new ConcurrentModificationException();
             }
-            if (next == parent.header)  {
+            if (next == parent.header) {
                 throw new NoSuchElementException(NO_NEXT_ENTRY);
             }
             last = next;
@@ -1183,7 +1175,7 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
                 throw new ConcurrentModificationException();
             }
             final DoubleInt previous = next.before;
-            if (previous == parent.header)  {
+            if (previous == parent.header) {
                 throw new NoSuchElementException(NO_PREVIOUS_ENTRY);
             }
             next = previous;
@@ -1257,6 +1249,19 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
             this.hashCode = hashCode;
         }
 
+        /**
+         * Gets the hash code for the specified double-value.
+         *
+         * @param value1 the first value
+         * @param value2 the second value
+         * @return the hash code
+         */
+        protected static int hash(final int value1, final int value2) {
+            int h = value1 ^ value2;
+
+            return h ^ (h >>> 16);
+        }
+
         @Override
         public boolean equals(final Object obj) {
             if (obj == this) {
@@ -1277,19 +1282,6 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
         }
 
         /**
-         * Gets the hash code for the specified double-value.
-         *
-         * @param value1  the first value
-         * @param value2  the second value
-         * @return the hash code
-         */
-        protected static int hash(final int value1, final int value2) {
-            int h = value1 ^ value2;
-
-            return h ^ (h >>> 16);
-        }
-
-        /**
          * Gets the hashcode that was computed and cached combined of both ints.
          *
          * @return the hash code
@@ -1301,7 +1293,7 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
 
         @Override
         public @NotNull String toString() {
-            return "DoubleInt[" + value1 + ", " + value2  + "]";
+            return "DoubleInt[" + value1 + ", " + value2 + "]";
         }
 
         @SuppressWarnings("MethodDoesntCallSuperMethod")

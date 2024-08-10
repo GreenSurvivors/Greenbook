@@ -32,7 +32,8 @@ public class BinaryWirelessReceiver extends AWirelessReceiver {
     /**
      * Toggles the power state of the block behind the block the receiver is attached to.
      * If the signal strength is greater than 0, the block will be powered, otherwise it will be unpowered.
-     * @param newSignalStrength  the new signal strength
+     *
+     * @param newSignalStrength the new signal strength
      */
     @Override
     public void setPowerState(@Range(from = 0, to = 15) byte newSignalStrength) {

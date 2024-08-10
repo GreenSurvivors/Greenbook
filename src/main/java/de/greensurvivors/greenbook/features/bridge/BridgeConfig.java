@@ -38,8 +38,8 @@ public class BridgeConfig extends AFeatureConfig { // todo cooldown (especially 
     /**
      * Checks if the given block data is allowed in the bridge.
      *
-     * @param  blockData  the block data to check
-     * @return            true if the block data is allowed, false otherwise
+     * @param blockData the block data to check
+     * @return true if the block data is allowed, false otherwise
      */
     protected boolean isAllowedBlock(@NotNull BlockData blockData) {
         for (BlockData allowedBlock : ALLOWED_BRIDGE_BLOCKS.getValueOrFallback()) {
@@ -51,13 +51,11 @@ public class BridgeConfig extends AFeatureConfig { // todo cooldown (especially 
         return false;
     }
 
-    protected @Nullable BlockFace getExpectedBridgeDirectionFromComponent (@NotNull Component line) {
+    protected @Nullable BlockFace getExpectedBridgeDirectionFromComponent(@NotNull Component line) {
         return null; // todo
-
     }
 
-    protected @NotNull Component getExpectedBridgeDirectionLabel (@NotNull BlockFace blockFace) {
+    protected @NotNull Component getExpectedBridgeDirectionLabel(@NotNull BlockFace blockFace) {
         return null; // todo
-
     }
 }

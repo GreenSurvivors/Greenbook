@@ -25,7 +25,7 @@ public class GateConfig extends AFeatureConfig { // todo cooldown (especially fo
     private final @NotNull ConfigOption<Integer> MAX_AREA = new ConfigOption<>("maxArea", 100);
 
     protected GateConfig(@NotNull GreenBook plugin) {
-        super(plugin, FeatureType.BRIDGE,  new YamlConfiguration(), ".yml", new ComparableVersion("1.0.0"));
+        super(plugin, FeatureType.BRIDGE, new YamlConfiguration(), ".yml", new ComparableVersion("1.0.0"));
     }
 
     @Override
@@ -45,12 +45,10 @@ public class GateConfig extends AFeatureConfig { // todo cooldown (especially fo
             return false;
         }
 
-
-
         return PlainTextComponentSerializer.plainText().serialize(line). // get string from component without any format
             equalsIgnoreCase(
-                GATE_LABEL.getValueOrFallback().content() // get expected string without format
-            );
+            GATE_LABEL.getValueOrFallback().content() // get expected string without format
+        );
     }
 
     public @NotNull Component getLabel() {

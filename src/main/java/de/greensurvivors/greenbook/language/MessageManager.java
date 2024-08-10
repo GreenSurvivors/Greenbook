@@ -47,6 +47,7 @@ public class MessageManager {
 
     /**
      * Use with care, as this fetches raw strings.
+     *
      * @param path
      * @return
      */

@@ -39,8 +39,8 @@ public class LiftConfig extends AFeatureConfig {
      * Returns a new instance of the DestinationMatcher class with the given destination name.
      * The names does specify the expected destination name.
      *
-     * @param  destinationName  the name of the destination component
-     * @return                   a new instance of the DestinationMatcher class
+     * @param destinationName the name of the destination component
+     * @return a new instance of the DestinationMatcher class
      */
     @Contract(value = "_ -> new", pure = true)
     protected @NotNull DestinationMatcher getDeDestinationMatcher(@NotNull Component destinationName) {
@@ -57,19 +57,20 @@ public class LiftConfig extends AFeatureConfig {
          * Creates a new instance of the DestinationMatcher class with the given destination name.
          * The names does specify the expected destination name.
          *
-         * @param  expectedDestination  the name of the destination component
+         * @param expectedDestination the name of the destination component
          */
-        protected DestinationMatcher (@NotNull Component expectedDestination) {
+        protected DestinationMatcher(@NotNull Component expectedDestination) {
             matcher = DESTINATION_PATTERN.getValueOrFallback().matcher(PlainTextComponentSerializer.plainText().serialize(expectedDestination));
         }
 
         /**
          * Determines if the given line is a destination, based on the line given in the constructor
+         *
          * @param destinationName the line to check for destination name
          * @return true, if an expected destination was defined and the destinationName matches it,
          * true, if no expected destination was defined, false otherwise
          */
-        protected boolean isDestination (@NotNull Component destinationName) {
+        protected boolean isDestination(@NotNull Component destinationName) {
             if (matcher.matches()) {
                 final @Nullable String floorName = matcher.group("floorName");
 

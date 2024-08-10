@@ -10,10 +10,10 @@ import java.util.UUID;
 public class UUIDPersistentDataType implements PersistentDataType<byte[], UUID> {
     private final static @NotNull UUIDPersistentDataType INSTANCE = new UUIDPersistentDataType();
 
-    private UUIDPersistentDataType () {
+    private UUIDPersistentDataType() {
     }
 
-    public static @NotNull UUIDPersistentDataType uuidPersistentDataType (){
+    public static @NotNull UUIDPersistentDataType uuidPersistentDataType() {
         return INSTANCE;
     }
 

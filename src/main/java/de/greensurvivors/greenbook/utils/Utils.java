@@ -125,7 +125,7 @@ public class Utils {
         };
     }
 
-    public static @NotNull BlockFace rotate90AroundY (final @NotNull BlockFace blockFace) {
+    public static @NotNull BlockFace rotate90AroundY(final @NotNull BlockFace blockFace) {
         return switch (blockFace) {
             case NORTH -> BlockFace.EAST;
             case NORTH_NORTH_EAST -> BlockFace.EAST_SOUTH_EAST;
@@ -147,7 +147,7 @@ public class Utils {
         };
     }
 
-    public static @NotNull BlockFace rotate270AroundY (final @NotNull BlockFace blockFace) {
+    public static @NotNull BlockFace rotate270AroundY(final @NotNull BlockFace blockFace) {
         return switch (blockFace) {
             case NORTH -> BlockFace.WEST;
             case NORTH_NORTH_EAST -> BlockFace.WEST_NORTH_WEST;
@@ -172,9 +172,9 @@ public class Utils {
     /**
      * Calculates the smallest integer greater than or equal to the result of dividing a by b.
      *
-     * @param  a the dividend (must be greater than 0)
-     * @param  b the divisor (must be greater than 0)
-     * @return   the smallest integer greater than or equal to a/b
+     * @param a the dividend (must be greater than 0)
+     * @param b the divisor (must be greater than 0)
+     * @return the smallest integer greater than or equal to a/b
      */
     public static int fastDivCeil(final @Range(from = 1, to = Integer.MAX_VALUE) int a,
                                   final @Range(from = 1, to = Integer.MAX_VALUE) int b) {

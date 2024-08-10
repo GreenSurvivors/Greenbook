@@ -11,7 +11,12 @@ import java.util.Arrays;
 public class AreaPersistentDataType implements PersistentDataType<int[], ImmutablePair<Vector, Vector>> {
     private final static @NotNull AreaPersistentDataType INSTANCE = new AreaPersistentDataType();
 
-    private AreaPersistentDataType (){}
+    private AreaPersistentDataType() {
+    }
+
+    public static @NotNull AreaPersistentDataType areaPersistentDataType() {
+        return INSTANCE;
+    }
 
     @Override
     public @NotNull Class<int[]> getPrimitiveType() {
@@ -21,12 +26,12 @@ public class AreaPersistentDataType implements PersistentDataType<int[], Immutab
     @SuppressWarnings("unchecked")
     @Override
     public @NotNull Class<ImmutablePair<Vector, Vector>> getComplexType() {
-        return (Class<ImmutablePair<Vector, Vector>>)((Class<?>)ImmutablePair.class);
+        return (Class<ImmutablePair<Vector, Vector>>) ((Class<?>) ImmutablePair.class);
     }
 
     @Override
     public int @NotNull [] toPrimitive(@NotNull ImmutablePair<Vector, Vector> complex, @NotNull PersistentDataAdapterContext context) {
-        return new int[] {
+        return new int[]{
             complex.getLeft().getBlockX(), complex.getLeft().getBlockY(), complex.getLeft().getBlockY(),
             complex.getRight().getBlockX(), complex.getRight().getBlockY(), complex.getRight().getBlockY()};
     }
@@ -38,9 +43,5 @@ public class AreaPersistentDataType implements PersistentDataType<int[], Immutab
         }
 
         return ImmutablePair.of(new Vector(primitive[0], primitive[1], primitive[2]), new Vector(primitive[3], primitive[4], primitive[5]));
-    }
-
-    public static @NotNull AreaPersistentDataType areaPersistentDataType() {
-        return INSTANCE;
     }
 }

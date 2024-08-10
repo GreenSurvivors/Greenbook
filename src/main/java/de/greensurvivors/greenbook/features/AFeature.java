@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 
 /**
  * Every feature should make use of {@link IPermissionHolder} to manage its permissions.
+ *
  * @param <C>
  */
 public abstract class AFeature<C extends AFeatureConfig> {

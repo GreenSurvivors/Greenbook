@@ -66,7 +66,7 @@ public class FineWirelessReceiver extends AWirelessReceiver {
                     book.getItemMeta() instanceof BookMeta bookMeta) {
 
                     // fill pages with numbers until page count reaches 15
-                    for (int i = bookMeta.getPageCount()-1; i < 15; i++) {
+                    for (int i = bookMeta.getPageCount() - 1; i < 15; i++) {
                         bookMeta.addPages(Component.text(i));
                     }
 
@@ -114,13 +114,13 @@ public class FineWirelessReceiver extends AWirelessReceiver {
                         // don't trust lecternInventory.setBook(book) it will NOT work unless there was already a book in the lectern.
                         BlockPos pos = new BlockPos(lectern.getX(), lectern.getY(), lectern.getZ());
                         final ServerLevel level = ((CraftWorld) lectern.getWorld()).getHandle();
-                        BlockEntity tileentity = ((org.bukkit.craftbukkit.block.CraftLectern)lectern).getTileEntity();
+                        BlockEntity tileentity = ((org.bukkit.craftbukkit.block.CraftLectern) lectern).getTileEntity();
 
                         if (tileentity instanceof LecternBlockEntity tileentitylectern) {
-                            tileentitylectern.setBook(((CraftItemStack)book).handle); // this works because paper backs up every itemStack by a nms equivalent
+                            tileentitylectern.setBook(((CraftItemStack) book).handle); // this works because paper backs up every itemStack by a nms equivalent
                             // note getState returns a nms state. This is not the same as a bukkitState.
                             // a nms state does represent block data, while a bukkitState represents the tile entity
-                            LecternBlock.resetBookState(null, level, pos, ((org.bukkit.craftbukkit.block.impl.CraftLectern)lectern.getBlockData()).getState(),  true);
+                            LecternBlock.resetBookState(null, level, pos, ((org.bukkit.craftbukkit.block.impl.CraftLectern) lectern.getBlockData()).getState(), true);
                             lectern.getWorld().playSound(lectern.getLocation(), Sound.ITEM_BOOK_PUT, SoundCategory.BLOCKS, 1, 1);
                         }
 
@@ -143,10 +143,10 @@ public class FineWirelessReceiver extends AWirelessReceiver {
      * the book is removed from the lectern and stored in the persistent data container.
      *
      * @param newSignalStrength the new signal strength
-     * @param lectern the lectern to set the page of
-     * @param lecternInventory the inventory of the lectern
-     * @param book the book in the lectern
-     * @param container the persistent data container of the lectern
+     * @param lectern           the lectern to set the page of
+     * @param lecternInventory  the inventory of the lectern
+     * @param book              the book in the lectern
+     * @param container         the persistent data container of the lectern
      */
     private void setLecternPage(@Range(from = 0, to = 15) byte newSignalStrength,
                                 @NotNull Lectern lectern,
@@ -164,9 +164,9 @@ public class FineWirelessReceiver extends AWirelessReceiver {
                     int page;
                     if (pageCount > 14) {
                         // same as (int) Math.ceil((newSignalStrength - 1.0D) / 14.0D * (pageCount - 1.0D)) but with more precision and faster
-                        page = Utils.fastDivCeil((newSignalStrength - 1) * (pageCount - 1),  14);
+                        page = Utils.fastDivCeil((newSignalStrength - 1) * (pageCount - 1), 14);
                     } else { // we don't need floor, since int division is the same, as long as the number is positive
-                        page = (newSignalStrength - 1)  * (pageCount - 1) / 14;
+                        page = (newSignalStrength - 1) * (pageCount - 1) / 14;
                     }
 
                     lectern.setPage(page);
@@ -182,7 +182,7 @@ public class FineWirelessReceiver extends AWirelessReceiver {
 
 
                 // we can't remove the book via API, so we have to dig into nms.
-                LecternBlock.resetBookState(null, ((CraftWorld)lectern.getWorld()).getHandle(), new BlockPos(lectern.getX(), lectern.getY(), lectern.getZ()), ((CraftLectern)lectern.getBlockData()).getState(),  false);
+                LecternBlock.resetBookState(null, ((CraftWorld) lectern.getWorld()).getHandle(), new BlockPos(lectern.getX(), lectern.getY(), lectern.getZ()), ((CraftLectern) lectern.getBlockData()).getState(), false);
 
                 // this alone will not be enough and leave the lectern in an invalid state!
                 lecternInventory.setBook(ItemStack.empty());

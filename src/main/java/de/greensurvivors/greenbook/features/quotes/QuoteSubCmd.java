@@ -50,6 +50,10 @@ public class QuoteSubCmd extends ASubCommand {
         parentPerm.recalculatePermissibles();
     }
 
+    public static @NotNull String getSubcommandName() {
+        return SUBCOMMAND;
+    }
+
     @NotNull
     public List<LiteralCommandNode<CommandSourceStack>> getCmdNodes() {
         LiteralArgumentBuilder<CommandSourceStack> cmdBuilder = Commands.literal(SUBCOMMAND).
@@ -63,10 +67,6 @@ public class QuoteSubCmd extends ASubCommand {
         }
 
         return List.of(cmdBuilder.build());
-    }
-
-    public static @NotNull String getSubcommandName() {
-        return SUBCOMMAND;
     }
 
     @Override

@@ -107,7 +107,7 @@ public class WirelessConfig extends AFeatureConfig {
      * or an error component if the current type is {@link WirelessNodeType#NONE}.
      */
     public @NotNull Component getLabel(@NotNull WirelessNodeType nodeType) {
-        return switch (nodeType){
+        return switch (nodeType) {
             case RECEIVER -> RECEIVER_SETTINGS.getValueOrFallback().displayLabel.getValueOrFallback();
             case TRANSMITTER -> TRANSMITTER_SETTINGS.getValueOrFallback().displayLabel.getValueOrFallback();
             case NONE -> INVALID_DISPLAY_NAME.getValueOrFallback();
@@ -158,17 +158,6 @@ public class WirelessConfig extends AFeatureConfig {
             this.displayLabel = new ConfigOption<>(DISPLAY_NAME_KEY, displayLabel);
         }
 
-        @Override
-        public @NotNull Map<String, Object> serialize() {
-            return Map.of(
-                ConfigurationSerialization.SERIALIZED_TYPE_KEY, WirelessNodeTypeSettings.class.getName(),
-                VERSION.getPath(), VERSION.getValueOrFallback().toString(),
-                id.getPath(), MiniMessage.miniMessage().serialize(id.getValueOrFallback()),
-                idPattern.getPath(), idPattern.getValueOrFallback().toString(),
-                displayLabel.getPath(), MiniMessage.miniMessage().serialize(displayLabel.getValueOrFallback())
-            );
-        }
-
         public static @NotNull WirelessNodeTypeSettings deserialize(Map<String, Object> rawMap) throws IllegalArgumentException {
             if (rawMap.get(VERSION.getPath()) instanceof String versionStr) {
                 if (new ComparableVersion(versionStr).compareTo(VERSION.getValueOrFallback()) > 0) {
@@ -198,6 +187,17 @@ public class WirelessConfig extends AFeatureConfig {
             }
 
             return new WirelessNodeTypeSettings(id, pattern, displayName);
+        }
+
+        @Override
+        public @NotNull Map<String, Object> serialize() {
+            return Map.of(
+                ConfigurationSerialization.SERIALIZED_TYPE_KEY, WirelessNodeTypeSettings.class.getName(),
+                VERSION.getPath(), VERSION.getValueOrFallback().toString(),
+                id.getPath(), MiniMessage.miniMessage().serialize(id.getValueOrFallback()),
+                idPattern.getPath(), idPattern.getValueOrFallback().toString(),
+                displayLabel.getPath(), MiniMessage.miniMessage().serialize(displayLabel.getValueOrFallback())
+            );
         }
     }
 }

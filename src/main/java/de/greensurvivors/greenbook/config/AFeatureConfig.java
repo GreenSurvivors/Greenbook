@@ -14,15 +14,15 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class AFeatureConfig {
-    private static Path featureConfigPath;
     protected final static @NotNull String CONFIG_FOLDER_NAME = "features";
     protected final static @NotNull String ENABLED_CFG_KEY = "isEnabled";
+    private static Path featureConfigPath;
     protected final @NotNull GreenBook plugin;
-    private final @NotNull FeatureType featureType;
     protected final @NotNull FileConfiguration config;
     protected final @NotNull Path configFilePath;
     protected final @NotNull AtomicBoolean isEnabled = new AtomicBoolean(true);
     protected final ConfigOption<@NotNull ComparableVersion> configVersion;
+    private final @NotNull FeatureType featureType;
 
     protected AFeatureConfig(final @NotNull GreenBook plugin, final @NotNull FeatureType featureType,
                              final @NotNull FileConfiguration config, final @NotNull String configFileExtension, @NotNull ComparableVersion configVersion) {
@@ -63,7 +63,7 @@ public abstract class AFeatureConfig {
      * Sets the enabled state of the feature. If the new state is different from the current state,
      * the config is saved and reloaded if the new state is enabled.
      *
-     * @param  isEnabled  the new enabled state of the feature
+     * @param isEnabled the new enabled state of the feature
      */
     @Contract(mutates = "this")
     public void setEnabled(boolean isEnabled) {
