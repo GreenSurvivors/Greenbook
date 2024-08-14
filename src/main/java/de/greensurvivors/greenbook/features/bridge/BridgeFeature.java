@@ -86,7 +86,7 @@ public class BridgeFeature extends AFeature<BridgeConfig> implements Listener {
                 if (event.getBlock().getState(false) instanceof Sign sign) { // danger no snapshot
                     if (Utils.isCardinal((org.bukkit.block.data.type.Sign) sign.getBlockData())) {
                         // only handle front sides
-                        if (event.getSide() == Side.FRONT) { // todo warn if backside was used for other features too
+                        if (event.getSide() == Side.FRONT) {
                             // check permission
                             if (ePlayer.hasPermission(BridePermissions.BRIDGE_CREATE.getPermission())) {
                                 //set the line with the right casing

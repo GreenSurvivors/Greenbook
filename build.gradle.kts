@@ -8,7 +8,7 @@ group = "de.greensurvivors"
 version = "0.0.3-SNAPSHOT"
 description = "Like Craftbook, but not a buggy dinosaur"
 // this is the minecraft. This is also used as the api version of the plugin.yml
-val mcVersion = "1.21"
+val mcVersion = "1.21.1"
 // don't use spigots reobfused jar
 paperweight.reobfArtifactConfiguration = io.papermc.paperweight.userdev.ReobfArtifactConfiguration.MOJANG_PRODUCTION
 

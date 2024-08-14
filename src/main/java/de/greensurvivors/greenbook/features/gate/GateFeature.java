@@ -111,7 +111,7 @@ public class GateFeature extends AFeature<GateConfig> implements Listener { // t
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
     private void onSignChange(@NotNull SignChangeEvent event) {
-        if (!getFeatureConfig().isEnabled()) {
+        if (!getFeatureConfig().isEnabled()) { // todo
             return;
         }
 

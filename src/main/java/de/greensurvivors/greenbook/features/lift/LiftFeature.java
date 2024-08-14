@@ -72,14 +72,14 @@ public class LiftFeature extends AFeature<LiftConfig> implements Listener {
         //if the 2nd line exists
         if (line1 != null) {
             //and is a lift label
-            LiftType type = LiftType.fromLabel(line1);
+            LiftType type = getFeatureConfig().fromLabel(line1);
             if (type != null) {
                 // only handle front sides
-                if (event.getSide() == Side.FRONT) { // todo warn if backside was used for other features too
+                if (event.getSide() == Side.FRONT) {
                     // check permission
                     if (ePlayer.hasPermission(LiftPermissions.LIFT_CREATE.getPermission())) {
                         //set the line with the right casing
-                        event.line(1, type.getLabel());
+                        event.line(1, getFeatureConfig().getLabel(type));
 
                         plugin.getMessageManager().sendLang(ePlayer, LiftLangPath.LIFT_CREATE_SUCCESS);
 
@@ -137,7 +137,7 @@ public class LiftFeature extends AFeature<LiftConfig> implements Listener {
         for (int y = starty; y != maxSearchCoord; y += step) {
             if (world.getBlockState(x, y, z) instanceof Sign destinationSign) {
                 //is the found sign a lift?
-                if (LiftType.fromLabel(destinationSign.getSide(Side.FRONT).line(1)) != null &&
+                if (getFeatureConfig().fromLabel(destinationSign.getSide(Side.FRONT).line(1)) != null &&
                     //no destination string was given or it matches
                     destinationMatcher.isDestination(destinationSign.getSide(Side.FRONT).line(0))) {
 
@@ -269,7 +269,7 @@ public class LiftFeature extends AFeature<LiftConfig> implements Listener {
      * @param isUpIfBoth if the player should teleported up or down, if the lift is a bidirectional lift
      */
     private void useLift(@NotNull Sign originSign, Player player, boolean isUpIfBoth) {
-        LiftType type = LiftType.fromLabel(originSign.getSide(Side.FRONT).line(1));
+        LiftType type = getFeatureConfig().fromLabel(originSign.getSide(Side.FRONT).line(1));
 
         //is it a lift?
         if (type != null) {

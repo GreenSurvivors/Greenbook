@@ -122,7 +122,7 @@ public class CoinCmdFeature extends AFeature<CoinConfig> {
                 })
             );
 
-        commandsRegistrar.register(builder.build(), "", List.of());
+        commandsRegistrar.register(builder.build(), plugin.getMessageManager().getStringFromLang(CoinLangPath.CMD_COIN_DESCRIPTION), List.of());
     }
 
     @Override

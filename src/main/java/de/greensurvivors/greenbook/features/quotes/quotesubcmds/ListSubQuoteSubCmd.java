@@ -115,6 +115,7 @@ public class ListSubQuoteSubCmd extends ASubCommand {
             listBuilder.paged(page, numOfPages);
             listBuilder.pageBackCommand("/" + GreenBookCmd.getCommandName() + " " + QuoteSubCmd.getSubcommandName() + " " + LIST + " " + (page - 1));
             listBuilder.pageNextCommand("/" + GreenBookCmd.getCommandName() + " " + QuoteSubCmd.getSubcommandName() + " " + LIST + " " + (page + 1));
+            listBuilder.pageLastCommand("/" + GreenBookCmd.getCommandName() + " " + QuoteSubCmd.getSubcommandName() + " " + LIST + " " + numOfPages);
 
             //add the quotes for the page
             for (int i = (page - 1) * QUOTES_PER_PAGE; i < maxQuotesThisPage; i++) {

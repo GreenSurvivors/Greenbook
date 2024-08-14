@@ -10,7 +10,7 @@ enum CoinLangPath implements LangPath {
     CMD_COIN_NOT_ENOUGH("cmd.coin.not-enough-coins"),
     CMD_COIN_TOSS_OTHER("cmd.coin.toss.other"),
     CMD_COIN_TOSS_SELF("cmd.coin.toss.self"),
-    ;
+    CMD_COIN_DESCRIPTION("cmd.coin.description");
 
     private final @NotNull String path;
     private final @NotNull String defaultValue;

@@ -31,7 +31,6 @@ public class CoinConfig extends AFeatureConfig {
     protected CoinConfig(@NotNull GreenBook plugin) {
         super(plugin, FeatureType.COIN, new YamlConfiguration(), FILE_EXTENSION, new ComparableVersion("1.0.0"));
 
-
         try (BufferedReader bufferedReader = Files.newBufferedReader(configFilePath)) {
             // handle reader
             config.load(bufferedReader);
@@ -39,7 +38,7 @@ public class CoinConfig extends AFeatureConfig {
             plugin.getComponentLogger().error("Could not load config file for " + getFeatureType().getFeatureName() + ". Will operate purely on default config and not safe anything config related!", e);
         }
 
-        final InputStream defConfigStream = plugin.getResource(getFeatureType().getFeatureName() + FILE_EXTENSION); // todo fetching from ressouces should be done in super
+        final InputStream defConfigStream = plugin.getResource(getFeatureType().getFeatureName() + FILE_EXTENSION); // todo fetching from resources should be done in super
         if (defConfigStream == null) {
             return;
         }

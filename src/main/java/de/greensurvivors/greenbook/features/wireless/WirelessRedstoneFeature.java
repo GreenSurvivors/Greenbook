@@ -110,67 +110,73 @@ public class WirelessRedstoneFeature extends AFeature<WirelessConfig> implements
             return;
         }
 
-        if (event.getSide() == Side.FRONT) {
-            Component line1Comp = event.line(1);
-            Component line2Comp = event.line(2);
-            Component line3Comp = event.line(3);
+        Component line1Comp = event.line(1);
+        Component line2Comp = event.line(2);
+        Component line3Comp = event.line(3);
 
-            Player player = event.getPlayer();
-            Location location = event.getBlock().getLocation();
-            AWirelessNode oldNode = loadedNodes.get(location);
+        Player player = event.getPlayer();
+        Location location = event.getBlock().getLocation();
+        AWirelessNode oldNode = loadedNodes.get(location);
 
-            if (line1Comp != null && line2Comp != null) {
-                WirelessNodeType newNodeType = getFeatureConfig().fromID(line1Comp);
+        if (line1Comp != null && line2Comp != null) {
+            WirelessNodeType newNodeType = getFeatureConfig().fromID(line1Comp);
 
-                WirelessNetwork newNetwork = null;
+            WirelessNetwork newNetwork = null;
 
-                if (newNodeType != WirelessNodeType.NONE) {
-                    if (!player.hasPermission(WirelessPermissions.CREATE_NODE.getPermission())) {
-                        plugin.getMessageManager().sendLang(player, StandardLangPath.NO_PERMISSION);
-                        return;
-                    }
-
-                    if (newNodeType == WirelessNodeType.RECEIVER && !(event.getBlock().getBlockData() instanceof WallSign)) {
-                        plugin.getMessageManager().sendLang(player, WirelessLangPath.ERROR_RECEIVER_NOT_WALL);
-                        event.setCancelled(true);
-                        return;
-                    }
-
-                    String networkChannel = PlainTextComponentSerializer.plainText().serialize(line2Comp);
-
-                    if (networkChannel.isBlank()) {
-                        plugin.getMessageManager().sendLang(player, WirelessLangPath.ERROR_NO_NETWORK);
-
-                        event.setCancelled(true);
-                        return;
-                    } else {
-                        @Nullable String ownerUUIDStr;
-
-                        if (line3Comp == null) {
-                            ownerUUIDStr = null;
-                        } else {
-                            ownerUUIDStr = PlainTextComponentSerializer.plainText().serialize(line3Comp);
-
-                            if (ownerUUIDStr.isBlank()) {
-                                ownerUUIDStr = player.getUniqueId().toString();
-                            } else {
-                                OfflinePlayer playerOnSign = plugin.getConfigManager().getPlayerFromString(ownerUUIDStr);
-
-                                if (playerOnSign == null) {
-                                    plugin.getMessageManager().sendLang(player, StandardLangPath.ARG_NOT_A_PLAYER, Placeholder.unparsed(StandartPlaceHolders.TEXT.getPlaceholder(), ownerUUIDStr));
-                                    event.setCancelled(true);
-                                    return;
-                                } else if (!player.getUniqueId().equals(playerOnSign.getUniqueId()) && !player.hasPermission(WirelessPermissions.SET_NODE_OWNER.getPermission())) {
-                                    plugin.getMessageManager().sendLang(player, StandardLangPath.NO_PERMISSION);
-                                    return;
-                                }
-                            }
-                        }
-
-                        newNetwork = networks.get(new NetworkKey(networkChannel, ownerUUIDStr));
-                    }
+            if (newNodeType != WirelessNodeType.NONE) {
+                if (event.getSide() != Side.FRONT) { // trying to set new node on backside - warn and end
+                    plugin.getMessageManager().sendLang(event.getPlayer(), StandardLangPath.ERROR_SIGN_BACKSIDE);
+                    event.line(1, Component.empty());
+                    event.setCancelled(true);
                 }
 
+                if (!player.hasPermission(WirelessPermissions.CREATE_NODE.getPermission())) {
+                    plugin.getMessageManager().sendLang(player, StandardLangPath.NO_PERMISSION);
+                    return;
+                }
+
+                if (newNodeType == WirelessNodeType.RECEIVER && !(event.getBlock().getBlockData() instanceof WallSign)) {
+                    plugin.getMessageManager().sendLang(player, WirelessLangPath.ERROR_RECEIVER_NOT_WALL);
+                    event.setCancelled(true);
+                    return;
+                }
+
+                String networkChannel = PlainTextComponentSerializer.plainText().serialize(line2Comp);
+
+                if (networkChannel.isBlank()) {
+                    plugin.getMessageManager().sendLang(player, WirelessLangPath.ERROR_NO_NETWORK);
+
+                    event.setCancelled(true);
+                    return;
+                } else {
+                    @Nullable String ownerUUIDStr;
+
+                    if (line3Comp == null) {
+                        ownerUUIDStr = null;
+                    } else {
+                        ownerUUIDStr = PlainTextComponentSerializer.plainText().serialize(line3Comp);
+
+                        if (ownerUUIDStr.isBlank()) {
+                            ownerUUIDStr = player.getUniqueId().toString();
+                        } else {
+                            OfflinePlayer playerOnSign = plugin.getConfigManager().getPlayerFromString(ownerUUIDStr);
+
+                            if (playerOnSign == null) {
+                                plugin.getMessageManager().sendLang(player, StandardLangPath.ARG_NOT_A_PLAYER, Placeholder.unparsed(StandartPlaceHolders.TEXT.getPlaceholder(), ownerUUIDStr));
+                                event.setCancelled(true);
+                                return;
+                            } else if (!player.getUniqueId().equals(playerOnSign.getUniqueId()) && !player.hasPermission(WirelessPermissions.SET_NODE_OWNER.getPermission())) {
+                                plugin.getMessageManager().sendLang(player, StandardLangPath.NO_PERMISSION);
+                                return;
+                            }
+                        }
+                    }
+
+                    newNetwork = networks.get(new NetworkKey(networkChannel, ownerUUIDStr));
+                }
+            }
+
+            if (event.getSide() != Side.FRONT) {
                 if ((oldNode == null && newNetwork != null) ||
                     (oldNode != null && (oldNode.getNodeType() != newNodeType || !oldNode.getNetwork().equals(newNetwork)))) { // something changed
                     if (oldNode instanceof WirelessTransmitter transmitter) {
@@ -225,7 +231,9 @@ public class WirelessRedstoneFeature extends AFeature<WirelessConfig> implements
                         }
                     }
                 } // something changed
-            } else { // empty lines
+            }
+        } else { // empty lines
+            if (event.getSide() == Side.FRONT) {
                 // clear PDC
                 PersistentDataContainer container = ((Sign) event.getBlock().getState(false)).getPersistentDataContainer(); // danger no snapshot!
                 container.remove(nodeTypeKey);
@@ -240,7 +248,7 @@ public class WirelessRedstoneFeature extends AFeature<WirelessConfig> implements
                     plugin.getMessageManager().sendLang(player, WirelessLangPath.RECEIVER_REMOVED);
                 }
             }
-        } // Side
+        }
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)

@@ -21,7 +21,7 @@ public class ListBuilder implements AbstractBuilder<Component> {
     private final @NotNull GreenBook plugin;
     private @NotNull Component title;
     private @Nullable Integer pageNow, maxPages;
-    private @Nullable String backCommand, nextCommand;
+    private @Nullable String backCommand, nextCommand, lastCommand;
     private @Nullable List<@NotNull Component> entries;
     private @Nullable Integer entryRangeStart, entryRangeEnd;
 
@@ -63,6 +63,11 @@ public class ListBuilder implements AbstractBuilder<Component> {
     public @NotNull ListBuilder pageNextCommand(final @NotNull String command) {
         this.nextCommand = command;
 
+        return this;
+    }
+
+    public ListBuilder pageLastCommand(@NotNull String command) {
+        this.lastCommand = command;
         return this;
     }
 
@@ -111,7 +116,10 @@ public class ListBuilder implements AbstractBuilder<Component> {
                 messageManager.getLang(StandardLangPath.LIST_HEADER_PAGED,
                     Placeholder.component(StandartPlaceHolders.TEXT.getPlaceholder(), title),
                     Placeholder.unparsed(StandartPlaceHolders.NUMBER.getPlaceholder(), String.valueOf(pageNow)),
-                    Placeholder.unparsed(StandartPlaceHolders.MAX.getPlaceholder(), String.valueOf(maxPages))) // todo make the last page clickable
+                    Placeholder.component(StandartPlaceHolders.MAX.getPlaceholder(),
+                        lastCommand == null ?
+                            Component.text(maxPages) :
+                            Component.text(maxPages).clickEvent(ClickEvent.suggestCommand(lastCommand))))
             ).appendNewline();
         } else {
             messageBuilder.append(

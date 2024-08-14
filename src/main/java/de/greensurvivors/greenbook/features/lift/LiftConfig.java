@@ -5,6 +5,7 @@ import de.greensurvivors.greenbook.config.AFeatureConfig;
 import de.greensurvivors.greenbook.config.ConfigOption;
 import de.greensurvivors.greenbook.features.FeatureType;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.apache.maven.artifact.versioning.ComparableVersion;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -19,8 +20,23 @@ import java.util.regex.Pattern;
 public class LiftConfig extends AFeatureConfig {
     private final @NotNull ConfigOption<@NotNull Pattern> DESTINATION_PATTERN = new ConfigOption<>("destinationPattern", Pattern.compile("^(?i)\\s*to\\s*:\\s*(?<floorName>.*?)\\s*$"));
 
+    private final @NotNull ConfigOption<Component> upLabel = new ConfigOption<>("type.up.label", Component.text("[Lift Up]"));
+    private volatile @NotNull Pattern upPattern = buildLabelPattern("[Lift Up]");
+    private final @NotNull ConfigOption<Component> downLabel = new ConfigOption<>("type.down.label", Component.text("[Lift Down]"));
+    private volatile @NotNull Pattern downPattern = buildLabelPattern("[Lift Down]");
+    private final @NotNull ConfigOption<Component> bothLabel = new ConfigOption<>("type.both.label", Component.text("[Lift UpDown]"));
+    private volatile @NotNull Pattern bothPattern = buildLabelPattern("[Lift UpDown]");
+    private final @NotNull ConfigOption<Component> stopLabel = new ConfigOption<>("type.stop.label", Component.text("[Lift]"));
+    private volatile @NotNull Pattern stopPattern = buildLabelPattern("[Lift]");
+
     protected LiftConfig(@NotNull GreenBook plugin) {
         super(plugin, FeatureType.LIFT, new YamlConfiguration(), ".yml", new ComparableVersion("1.0.0"));
+    }
+
+    private static @NotNull Pattern buildLabelPattern (@NotNull String rawPatternStr) {
+        //case-insensitive regex with all special characters escaped; nothing surrounding the label but optional whitespace
+        return Pattern.compile(String.format("^\\s*(?i)%s\\s*$",
+            Pattern.quote(MiniMessage.miniMessage().stripTags(rawPatternStr))));
     }
 
     @Override
@@ -33,6 +49,37 @@ public class LiftConfig extends AFeatureConfig {
         CompletableFuture<Void> result = new CompletableFuture<>();
 
         return result;
+    }
+
+    /**
+     * Get the lift type from the component. Ignores text decorations
+     *
+     * @param label The line
+     * @return The lift type, or null if no with the given component was defined
+     */
+    public @Nullable LiftType fromLabel(final @NotNull Component label) {
+        final String lineStr = PlainTextComponentSerializer.plainText().serialize(label);
+
+        if (upPattern.matcher(lineStr).matches()) {
+            return LiftType.UP;
+        } else if (downPattern.matcher(lineStr).matches()) {
+            return LiftType.DOWN;
+        } else if (bothPattern.matcher(lineStr).matches()) {
+            return LiftType.BOTH;
+        } else if (stopPattern.matcher(lineStr).matches()){
+            return LiftType.STOP;
+        }
+
+        return null;
+    }
+
+    public @NotNull Component getLabel (@NotNull LiftType liftType) {
+        return switch (liftType) {
+            case UP -> upLabel.getValueOrFallback();
+            case DOWN -> downLabel.getValueOrFallback();
+            case BOTH -> bothLabel.getValueOrFallback();
+            case STOP -> stopLabel.getValueOrFallback();
+        };
     }
 
     /**

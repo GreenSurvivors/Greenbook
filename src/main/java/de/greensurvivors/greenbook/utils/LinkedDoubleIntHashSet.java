@@ -23,7 +23,6 @@ package de.greensurvivors.greenbook.utils;
 import org.apache.commons.collections4.OrderedIterator;
 import org.apache.commons.collections4.ResettableIterator;
 import org.apache.commons.collections4.iterators.EmptyOrderedIterator;
-import org.apache.commons.lang.NotImplementedException;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -302,6 +301,7 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
      * <a href="SequencedCollection.html#encounter">encounter order</a>,
      * processing of its elements generally occurs in that order.
      * <p/>
+     *
      * @param collection collection containing elements to be added to this collection
      * @return {@code true} if this collection changed as a result of the call
      * @throws UnsupportedOperationException if the {@code addAll} operation
@@ -370,7 +370,6 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
         }
 
         addMappingBegin(index, newEntry);
-        return;
     }
 
     /**
@@ -612,10 +611,61 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
      *
      * @return a reverse-ordered view of this collection, as a {@code SequencedSet}
      */
-    @Override
-    public @NotNull SequencedSet<@NotNull DoubleInt> reversed() {
-        throw new NotImplementedException("Feuer was lazy."); // TODO!!!!!!!!!
-        //return null;
+    public SequencedSet<@NotNull DoubleInt> reversed() {
+        class ReverseLinkedDoubleHashSetView extends AbstractSet<DoubleInt> implements SequencedSet<DoubleInt> {
+            public int size() {
+                return LinkedDoubleIntHashSet.this.size();
+            }
+
+            public @NotNull Iterator<DoubleInt> iterator() {
+                if (isEmpty()) {
+                    return EmptyOrderedIterator.emptyOrderedIterator();
+                }
+                return new LinkIterator(LinkedDoubleIntHashSet.this, true);
+            }
+
+            public boolean add(DoubleInt e) {
+                return LinkedDoubleIntHashSet.this.add(e);
+            }
+
+            public void addFirst(DoubleInt e) {
+                LinkedDoubleIntHashSet.this.addLast(e);
+            }
+
+            public void addLast(DoubleInt e) {
+                LinkedDoubleIntHashSet.this.addFirst(e);
+            }
+
+            public DoubleInt getFirst() {
+                return LinkedDoubleIntHashSet.this.getLast();
+            }
+
+            public DoubleInt getLast() {
+                return LinkedDoubleIntHashSet.this.getFirst();
+            }
+
+            public DoubleInt removeFirst() {
+                return LinkedDoubleIntHashSet.this.removeLast();
+            }
+
+            public DoubleInt removeLast() {
+                return LinkedDoubleIntHashSet.this.removeFirst();
+            }
+
+            public SequencedSet<DoubleInt> reversed() {
+                return LinkedDoubleIntHashSet.this;
+            }
+
+            public Object @NotNull [] toArray() {
+                return toArrayInternal(new DoubleInt[LinkedDoubleIntHashSet.this.size()], true);
+            }
+
+            public <T> T @NotNull [] toArray(T @NotNull [] a) {
+                return toArrayInternal(prepareArray(a), true);
+            }
+        }
+
+        return new ReverseLinkedDoubleHashSetView();
     }
 
 // Theoretically you could work with indices on this set, like you could on a list.
@@ -724,7 +774,7 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
         if (isEmpty()) {
             return EmptyOrderedIterator.emptyOrderedIterator();
         }
-        return new LinkIterator(this);
+        return new LinkIterator(this, false);
     }
 
     /**
@@ -749,12 +799,12 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
      */
     @Override
     public @NotNull DoubleInt @NotNull [] toArray() {
-        return toArrayInternal(new DoubleInt[size()]);
+        return toArrayInternal(new DoubleInt[size()], false);
     }
 
     @Override
     public <T> @NotNull T @NotNull [] toArray(@NotNull T @NotNull [] a) {
-        return toArrayInternal(prepareArray(a));
+        return toArrayInternal(prepareArray(a), false);
     }
 
     /**
@@ -860,17 +910,19 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
         return value1 == entry.getValue1() && value2 == entry.getValue2();
     }
 
-    protected <T> T @NotNull [] toArrayInternal(@NotNull T[] a) {
+    protected <T> T @NotNull [] toArrayInternal(@NotNull T[] a, boolean reversed) {
         int idx = 0;
-        //if (reversed) {
-        //    for (LinkedHashMap.Entry<K,V> e = tail; e != null; e = e.before) {
-        //        r[idx++] = e;
-        //    }
-        //} else {
-        for (DoubleInt e = header; e != null; e = e.after) {
-            ((Object[]) a)[idx++] = e;
+        if (reversed) {
+            if (header != null) {
+                for (DoubleInt e = header.before; e != null; e = e.before) {
+                    ((Object[]) a)[idx++] = e;
+                }
+            }
+        } else {
+            for (DoubleInt e = header; e != null; e = e.after) {
+                ((Object[]) a)[idx++] = e;
+            }
         }
-        //}
         return a;
     }
 
@@ -1111,6 +1163,7 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
         OrderedIterator<DoubleInt>, ResettableIterator<DoubleInt> {
         /** The parent set */
         protected final @NotNull LinkedDoubleIntHashSet parent;
+        protected final boolean reversed;
         /** The current (last returned) entry */
         protected DoubleInt last;
         /** The next entry */
@@ -1118,14 +1171,20 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
         /** The modification count expected */
         protected int expectedModCount;
 
-        protected LinkIterator(final @NotNull LinkedDoubleIntHashSet parent) {
+        protected LinkIterator(final @NotNull LinkedDoubleIntHashSet parent, boolean reversed) {
             this.parent = parent;
             if (parent.header != null) {
-                this.next = parent.header.after;
+                if (reversed) {
+                    this.next = parent.header.before;
+                } else {
+                    this.next = parent.header.after;
+                }
             } else {
                 this.next = null;
             }
             this.expectedModCount = parent.modCount;
+
+            this.reversed = reversed;
         }
 
         @Override
@@ -1147,7 +1206,11 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
         }
 
         public boolean hasPrevious() {
-            return next.before != parent.header;
+            if (reversed) {
+                return next.before != parent.header;
+            } else {
+                return next.after != parent.header;
+            }
         }
 
         /**
@@ -1162,7 +1225,13 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
                 throw new NoSuchElementException(NO_NEXT_ENTRY);
             }
             last = next;
-            next = next.after;
+
+            if (reversed) {
+                next = next.before;
+            } else {
+                next = next.after;
+            }
+
             return last;
         }
 
@@ -1174,7 +1243,13 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
             if (parent.modCount != expectedModCount) {
                 throw new ConcurrentModificationException();
             }
-            final DoubleInt previous = next.before;
+            final DoubleInt previous;
+            if (reversed) {
+                previous = next.after;
+            } else {
+                previous = next.before;
+            }
+
             if (previous == parent.header) {
                 throw new NoSuchElementException(NO_PREVIOUS_ENTRY);
             }
@@ -1198,7 +1273,11 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
         public void reset() {
             last = null;
             if (parent.header != null) {
-                this.next = parent.header.after;
+                if (reversed) {
+                    next = parent.header.before;
+                } else {
+                    next = parent.header.after;
+                }
             } else {
                 this.next = null;
             }
@@ -1221,6 +1300,9 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
      * </p>
      */
     public static class DoubleInt implements Cloneable {
+        /** The individual values */
+        private final int value1;
+        private final int value2;
         /** The entry before this one in the order */
         protected DoubleInt before;
         /** The entry after this one in the order */
@@ -1230,9 +1312,6 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
         protected @Nullable DoubleInt next;
         /** The hash code of the value */
         protected final int hashCode;
-        /** The individual values */
-        private final int value1;
-        private final int value2;
 
         public DoubleInt(final int value1, final int value2) {
             this.value1 = value1;
