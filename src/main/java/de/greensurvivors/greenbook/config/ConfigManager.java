@@ -118,7 +118,7 @@ public class ConfigManager {
         double shortestDistanceSquared = Double.MAX_VALUE;
         // forEntity is a confusing name since it really means if we check for suffocation aka non-transparent blocks.
         // since an entity can stand on such like a Glas block, it has to be false.
-        BlockCollisions<BlockPos> blockCollisions = new BlockCollisions<>(((CraftWorld) locationToCheckAt.getWorld()).getHandle(), null, aabb, false, (blockPos, voxelShape) -> blockPos);
+        BlockCollisions<BlockPos> blockCollisions = new BlockCollisions<>(((CraftWorld) locationToCheckAt.getWorld()).getHandle(), (net.minecraft.world.entity.Entity) null, aabb, false, (blockPos, voxelShape) -> blockPos);
 
         while (blockCollisions.hasNext()) {
             BlockPos nmsPosNow = blockCollisions.next();

@@ -23,7 +23,7 @@ package de.greensurvivors.greenbook.utils;
 import org.apache.commons.collections4.OrderedIterator;
 import org.apache.commons.collections4.ResettableIterator;
 import org.apache.commons.collections4.iterators.EmptyOrderedIterator;
-import org.apache.commons.lang.NotImplementedException;
+import org.apache.commons.lang3.NotImplementedException;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

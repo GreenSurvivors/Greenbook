@@ -25,7 +25,7 @@ public class FeatureType { // todo make sure every feature can be disabled
     public final static FeatureType QUOTES = new FeatureType("Quotes", QuoteFeature::new);
     public final static FeatureType WIRELESS = new FeatureType("WirelessRedstone", WirelessRedstoneFeature::new);
 
-    protected final static @NotNull List<@NotNull FeatureType> standardTypes = List.of(BRIDGE, COIN, GATE, LIFT, PAINTING, QUOTES, WIRELESS);
+    protected final static @NotNull List<@NotNull FeatureType> standardTypes = List.of(BRIDGE, COIN, GATE, LIFT, PAINTING, /*QUOTES,*/ WIRELESS);
 
     protected final @NotNull String featureName;
     protected final @Nullable Function<@NotNull GreenBook, @NotNull AFeature<?>> constructor;
