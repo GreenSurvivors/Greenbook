@@ -385,8 +385,7 @@ public class WirelessRedstoneFeature extends AFeature<WirelessConfig> implements
 
             for (BlockState sign : signs) {
                 // since they are in ALL_SIGNS tag we can safely cast
-                // danger accessing PCD directly! - We do this to don't need to access it via snapshot, witch would be too slow!
-                PersistentDataContainer container = ((CraftSign<?>) sign).getTileEntity().persistentDataContainer;
+                PersistentDataContainer container = ((Sign)sign).getPersistentDataContainer();
 
                 sign.update(true, false);
 

@@ -1,6 +1,6 @@
 plugins {
     `java-library`
-    id("io.papermc.paperweight.userdev") version "1.7.1"
+    id("io.papermc.paperweight.userdev") version "2.0.0-beta.19"
     id("xyz.jpenilla.run-paper") version "2.3.0" // Adds runServer task for testing
 }
 
@@ -8,7 +8,7 @@ group = "de.greensurvivors"
 version = "0.0.3-SNAPSHOT"
 description = "Like Craftbook, but not a buggy dinosaur"
 // this is the minecraft. This is also used as the api version of the plugin.yml
-val mcVersion = "1.21.1"
+val mcVersion = "1.21.11"
 // don't use spigots reobfused jar
 paperweight.reobfArtifactConfiguration = io.papermc.paperweight.userdev.ReobfArtifactConfiguration.MOJANG_PRODUCTION
 
@@ -42,7 +42,7 @@ dependencies {
     compileOnly("org.jetbrains:annotations:24.1.0")
     api("com.github.ben-manes.caffeine:caffeine:3.1.8") // caches
     api("org.apache.commons:commons-collections4:4.5.0-M2")
-    api("com.sk89q.worldedit:worldedit-bukkit:7.3.5-SNAPSHOT")
+    api("com.sk89q.worldedit:worldedit-bukkit:7.4.0-SNAPSHOT")
 }
 
 tasks {

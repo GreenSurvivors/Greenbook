@@ -114,9 +114,9 @@ public class FineWirelessReceiver extends AWirelessReceiver {
                         // don't trust lecternInventory.setBook(book) it will NOT work unless there was already a book in the lectern.
                         BlockPos pos = new BlockPos(lectern.getX(), lectern.getY(), lectern.getZ());
                         final ServerLevel level = ((CraftWorld) lectern.getWorld()).getHandle();
-                        BlockEntity tileentity = ((org.bukkit.craftbukkit.block.CraftLectern) lectern).getTileEntity();
+                        final BlockEntity blockEntity = ((org.bukkit.craftbukkit.block.CraftLectern) lectern).getBlockEntity();
 
-                        if (tileentity instanceof LecternBlockEntity tileentitylectern) {
+                        if (blockEntity instanceof LecternBlockEntity tileentitylectern) {
                             tileentitylectern.setBook(((CraftItemStack) book).handle); // this works because paper backs up every itemStack by a nms equivalent
                             // note getState returns a nms state. This is not the same as a bukkitState.
                             // a nms state does represent block data, while a bukkitState represents the tile entity
