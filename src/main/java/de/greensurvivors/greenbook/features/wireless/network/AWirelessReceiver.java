@@ -34,7 +34,6 @@ public abstract class AWirelessReceiver extends AWirelessNode {
      * @param network  the network the receiver belongs to
      * @return the created receiver, or null if the block at the location is not a wall sign
      */
-    @SuppressWarnings("UnstableApiUsage") // block type
     public static @Nullable AWirelessReceiver createReceiver(@NotNull GreenBook plugin, @NotNull Location location, @NotNull WirelessNetwork network) {
         if (location.getBlock().getBlockData() instanceof WallSign wallSign) {
             BlockFace face = wallSign.getFacing().getOppositeFace();

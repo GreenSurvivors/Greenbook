@@ -22,7 +22,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.Set;
 
-@SuppressWarnings("UnstableApiUsage") // brigadier api
 public class SneakSubQuoteSubCmd extends ASubCommand {
     private static final String SNEAK = "sneak";
     private final @NotNull QuoteConfig quoteConfig;

@@ -32,7 +32,6 @@ public class EditSubSubCommand extends ASubCommand { // todo this
         return permissible.hasPermission(QuotePermissions.CMD_EDIT.getPermission());
     }
 
-    @SuppressWarnings("UnstableApiUsage") // brigadier api
     @Override
     @NotNull
     public List<LiteralCommandNode<CommandSourceStack>> getCmdNodes() {

@@ -1,6 +1,5 @@
 package de.greensurvivors.greenbook.features.coin;
 
-import com.google.common.base.Charsets;
 import de.greensurvivors.greenbook.GreenBook;
 import de.greensurvivors.greenbook.config.AFeatureConfig;
 import de.greensurvivors.greenbook.config.ConfigOption;
@@ -16,6 +15,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.concurrent.CompletableFuture;
 
@@ -43,7 +43,7 @@ public class CoinConfig extends AFeatureConfig {
             return;
         }
 
-        config.setDefaults(YamlConfiguration.loadConfiguration(new InputStreamReader(defConfigStream, Charsets.UTF_8)));
+        config.setDefaults(YamlConfiguration.loadConfiguration(new InputStreamReader(defConfigStream, StandardCharsets.UTF_8)));
 
         /*
         plugin.getConfig()

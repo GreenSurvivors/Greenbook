@@ -19,7 +19,6 @@ public final class GreenBook extends JavaPlugin {
     private FeatureRegistry featureRegistry;
     private DependencyManager dependencyManager;
 
-    @SuppressWarnings("UnstableApiUsage") // brigadier api
     private void onLifeCycleCommandEvent(final @NotNull ReloadableRegistrarEvent<Commands> event) {
         GreenBookCmd mainCommand = new GreenBookCmd(this);
 
@@ -31,7 +30,6 @@ public final class GreenBook extends JavaPlugin {
     }
 
     @Override
-    @SuppressWarnings("UnstableApiUsage") // brigadier api
     public void onEnable() {
         // don't allow craftbook to run
         Plugin craftBook = Bukkit.getPluginManager().getPlugin("CraftBook");
@@ -57,7 +55,6 @@ public final class GreenBook extends JavaPlugin {
 
         // register Commands
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, this::onLifeCycleCommandEvent);
-
     }
 
     @Override

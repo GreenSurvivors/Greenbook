@@ -29,7 +29,6 @@ public abstract class ASubCommand {
      */
     abstract public boolean checkPermission(@NotNull Permissible permissible);
 
-    @SuppressWarnings("UnstableApiUsage") // brigadier api
     abstract public @NotNull List<LiteralCommandNode<CommandSourceStack>> getCmdNodes();
 
     /**

@@ -17,7 +17,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.Set;
 
-@SuppressWarnings("UnstableApiUsage") // brigadier api
 public class PaintingSubCommand extends ASubCommand {
     private static final String SUBCOMMAND = "painting", RANGE = "range";
     private final @NotNull PaintingFeature feature;

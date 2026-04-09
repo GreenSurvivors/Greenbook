@@ -53,7 +53,6 @@ public class BridgeFeature extends AFeature<BridgeConfig> implements Listener {
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
-    @SuppressWarnings("UnstableApiUsage") // brigadier api
     @Override
     public void registerCommands(@NotNull Commands commandsRegistrar, @NotNull GreenBookCmd mainCommand) {
 

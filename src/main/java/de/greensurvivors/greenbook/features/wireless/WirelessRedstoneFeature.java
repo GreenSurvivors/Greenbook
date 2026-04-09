@@ -36,7 +36,6 @@ import org.bukkit.block.data.type.WallSign;
 import org.bukkit.block.sign.Side;
 import org.bukkit.block.sign.SignSide;
 import org.bukkit.craftbukkit.CraftWorld;
-import org.bukkit.craftbukkit.block.CraftSign;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -85,7 +84,6 @@ public class WirelessRedstoneFeature extends AFeature<WirelessConfig> implements
         plugin.getDependencyManager().registerEditSessionEvent(this);
     }
 
-    @SuppressWarnings("UnstableApiUsage") // brigadier api
     @Override
     public void registerCommands(@NotNull Commands commandsRegistrar, @NotNull GreenBookCmd mainCommand) {
     }
@@ -469,12 +467,12 @@ public class WirelessRedstoneFeature extends AFeature<WirelessConfig> implements
         public boolean equals(Object obj) {
             if (obj == this) {
                 return true;
-            } else if (obj instanceof NetworkKey that) {
-                if (this.networkChannel().equalsIgnoreCase(that.networkChannel())) {
+            } else if (obj instanceof NetworkKey(final @NotNull String channel, final @NotNull String uuidStr)) {
+                if (this.networkChannel().equalsIgnoreCase(channel)) {
                     if (this.ownerUUIDStr() != null) {
-                        return this.ownerUUIDStr().equalsIgnoreCase(that.ownerUUIDStr());
+                        return this.ownerUUIDStr().equalsIgnoreCase(uuidStr);
                     } else {
-                        return that.ownerUUIDStr() == null;
+                        return uuidStr == null;
                     }
                 }
             }

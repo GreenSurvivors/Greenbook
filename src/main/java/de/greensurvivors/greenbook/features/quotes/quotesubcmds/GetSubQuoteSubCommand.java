@@ -41,7 +41,6 @@ public class GetSubQuoteSubCommand extends ASubCommand {
         return permissible.hasPermission(QuotePermissions.CMD_GET.getPermission());
     }
 
-    @SuppressWarnings("UnstableApiUsage") // brigadier api
     @Override
     @NotNull
     public List<LiteralCommandNode<CommandSourceStack>> getCmdNodes() {
@@ -64,7 +63,6 @@ public class GetSubQuoteSubCommand extends ASubCommand {
         return Component.text("TODO");
     }
 
-    @SuppressWarnings("UnstableApiUsage") // brigadier api
     private int onCommand(@NotNull CommandContext<CommandSourceStack> context, int quoteId) {
         if (checkPermission(context.getSource().getSender())) {
 

@@ -29,7 +29,6 @@ public class CoinCmdFeature extends AFeature<CoinConfig> {
         super(plugin, FeatureType.COIN, new CoinConfig(plugin));
     }
 
-    @SuppressWarnings("UnstableApiUsage") // brigadier api
     @Override
     public void registerCommands(@NotNull Commands commandsRegistrar, @NotNull GreenBookCmd mainCommand) {
         LiteralArgumentBuilder<CommandSourceStack> builder = Commands.
@@ -48,11 +47,11 @@ public class CoinCmdFeature extends AFeature<CoinConfig> {
                     if (sender.hasPermission(CoinPermissions.CMD_SET.getPermission())) {
                         if (sender instanceof Player player) {
                             //clone so even it the held item stack changes, our copy will stay the same.
-                            ItemStack itemStack = player.getInventory().getItemInMainHand().clone();
+                            ItemStack itemStack = player.getInventory().getItemInMainHand();
 
-                            if (!itemStack.getType().isEmpty()) {
+                            if (!itemStack.isEmpty()) {
                                 //regardless how many items where hold, just one count as coin.
-                                itemStack.setAmount(1);
+                                itemStack.asOne();
 
                                 //save new coin to config
                                 getFeatureConfig().setCoinItem(itemStack);

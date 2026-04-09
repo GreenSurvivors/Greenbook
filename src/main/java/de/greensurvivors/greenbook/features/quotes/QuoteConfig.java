@@ -31,7 +31,6 @@ public class QuoteConfig extends AFeatureConfig {
     private final @NotNull FileConfiguration config;
 
     private final @NotNull ConfigOption<List<@NotNull Quote>> QUOTES = new ConfigOption<>("quotes", new CopyOnWriteArrayList<>());
-    @SuppressWarnings("UnstableApiUsage") // block type
     private final @NotNull ConfigOption<Set<@NotNull BlockType>> QUOTE_MATERIALS = new ConfigOption<>("clickableBlockTypes", ConcurrentHashMap.newKeySet());
     private final @NotNull ConfigOption<Boolean> REQUIRE_SNEAK = new ConfigOption<>("requiresSneak", false);
     private final @NotNull ConfigOption<Boolean> REQUIRE_EMPTY_HAND = new ConfigOption<>("requiresEmptyHand", true);
@@ -259,7 +258,6 @@ public class QuoteConfig extends AFeatureConfig {
         return result;
     }
 
-    @SuppressWarnings("UnstableApiUsage") // block type
     public boolean isQuoteBlockType(@NotNull BlockType type) {
         return QUOTE_MATERIALS.getValueOrFallback().contains(type);
     }
@@ -309,7 +307,7 @@ public class QuoteConfig extends AFeatureConfig {
         }
 
         @Override
-        public String toString() {
+        public @NotNull String toString() {
             return "[id:" + id + ", content: \"" + MiniMessage.miniMessage().serialize(content) + "\"]";
         }
     }

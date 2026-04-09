@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@SuppressWarnings("UnstableApiUsage") // brigadier api
 public class GreenBookCmd {
     private static final String COMMAND = "greenbook";
     private static final String DESCRIPTION = "Contains all main GreenBookCommands use /greenbook help <subcommand>.";

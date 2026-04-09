@@ -21,7 +21,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-@SuppressWarnings("UnstableApiUsage") // brigadier api
 class BookIDArgument implements CustomArgumentType.Converted<Integer, Integer> {
     private static final DynamicCommandExceptionType UNKNOWN_ID = new DynamicCommandExceptionType(
         (found) -> new LiteralMessage("Integer must be a valid quote ID, found: " + found)); // todo translation!

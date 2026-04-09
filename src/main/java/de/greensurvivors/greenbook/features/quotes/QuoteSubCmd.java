@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-@SuppressWarnings("UnstableApiUsage") // brigadier api
 public class QuoteSubCmd extends ASubCommand {
     private static final @NotNull String SUBCOMMAND = "quote";
     private static final @NotNull String ALIAS1 = "shelf", ALIAS2 = "book";

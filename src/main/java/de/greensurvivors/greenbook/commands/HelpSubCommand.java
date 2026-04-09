@@ -11,7 +11,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.Set;
 
-@SuppressWarnings("UnstableApiUsage") // brigadier api
 public class HelpSubCommand extends ASubCommand { // todo
     protected HelpSubCommand(@NotNull GreenBook plugin, @NotNull Permission parentPerm) {
         super(plugin);

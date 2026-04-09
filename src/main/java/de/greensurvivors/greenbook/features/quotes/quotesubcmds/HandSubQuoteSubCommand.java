@@ -22,7 +22,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.Set;
 
-@SuppressWarnings("UnstableApiUsage") // brigadier api
 public class HandSubQuoteSubCommand extends ASubCommand {
     private static final String EMPTY_HAND_SHORT = "hand", EMPTY_HAND_LONG = "emptyhand";
 

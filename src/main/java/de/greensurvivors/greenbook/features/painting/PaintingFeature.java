@@ -5,10 +5,13 @@ import de.greensurvivors.greenbook.commands.GreenBookCmd;
 import de.greensurvivors.greenbook.features.AFeature;
 import de.greensurvivors.greenbook.features.FeatureType;
 import io.papermc.paper.command.brigadier.Commands;
+import io.papermc.paper.registry.RegistryAccess;
+import io.papermc.paper.registry.RegistryKey;
 import org.apache.commons.collections4.BidiMap;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import org.bukkit.Art;
 import org.bukkit.Bukkit;
+import org.bukkit.Registry;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Painting;
 import org.bukkit.entity.Player;
@@ -22,6 +25,7 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Comparator;
 import java.util.UUID;
 
 public class PaintingFeature extends AFeature<PaintingConfig> implements Listener {
@@ -33,7 +37,6 @@ public class PaintingFeature extends AFeature<PaintingConfig> implements Listene
         super(plugin, FeatureType.PAINTING, new PaintingConfig(plugin));
     }
 
-    @SuppressWarnings("UnstableApiUsage") // brigadier api
     @Override
     public void registerCommands(@NotNull Commands commandsRegistrar, @NotNull GreenBookCmd mainCommand) {
         PaintingSubCommand subCommand = new PaintingSubCommand(plugin, this, mainCommand.getPermission());
@@ -233,11 +236,21 @@ public class PaintingFeature extends AFeature<PaintingConfig> implements Listene
                     final int step = forward ? 1 : -1;
 
                     //get an array of all motives
-                    Art[] arts = Art.values();
+                    final @NotNull Registry<Art> registry = RegistryAccess.registryAccess().getRegistry(RegistryKey.PAINTING_VARIANT);
+                    final @NotNull Art @NotNull [] arts = registry.stream().sorted(Comparator.comparing(Art::assetId)).toArray(Art[]::new);
+
+                    int oldOrd = 0;
+                    for (final @NotNull Art art : arts) {
+                        if (art.assetId().equals(painting.getArt().assetId())) {
+                            break;
+                        }
+                        oldOrd++;
+                    }
+
                     //get the mathematically accurate modulo, since the %-operator will be negative, if the first argument is negative
                     //this catches the ord value in range of all possible motives
                     //starting value
-                    int newOrd = Math.floorMod(painting.getArt().ordinal() + step, arts.length);
+                    int newOrd = Math.floorMod(oldOrd + step, arts.length);
 
                     //try to set the motive, if it doesn't fit, try the next one.
                     //if the last was reached start over

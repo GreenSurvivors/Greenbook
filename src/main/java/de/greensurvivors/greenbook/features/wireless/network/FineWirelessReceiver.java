@@ -87,7 +87,6 @@ public class FineWirelessReceiver extends AWirelessReceiver {
      *
      * @param newSignalStrength the new signal strength
      */
-    @SuppressWarnings("UnstableApiUsage") // block type
     @Override
     public void setPowerState(@Range(from = 0, to = 15) byte newSignalStrength) { // todo check if we need a cooldown here
         if (attachedBlockLoc.getBlock().getType() == BlockType.LECTERN.asMaterial() &&

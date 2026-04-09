@@ -1,7 +1,7 @@
 plugins {
     `java-library`
     id("io.papermc.paperweight.userdev") version "2.0.0-beta.19"
-    id("xyz.jpenilla.run-paper") version "2.3.0" // Adds runServer task for testing
+    id("xyz.jpenilla.run-paper") version "2.3.1" // Adds runServer task for testing
 }
 
 group = "de.greensurvivors"
@@ -59,7 +59,7 @@ tasks {
 
         expand(
             "version" to project.version,
-            "description" to project.description,
+            "description" to project.description as String,
             "apiVersion" to mcVersion
         )
     }

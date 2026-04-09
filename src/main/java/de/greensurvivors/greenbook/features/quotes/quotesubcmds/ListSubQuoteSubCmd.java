@@ -36,7 +36,6 @@ import java.util.function.Supplier;
 /**
  * /geenbook quote list < page > - list all known quotes (quotes) neatly arranged in pages.
  */
-@SuppressWarnings("UnstableApiUsage") // brigadier api
 public class ListSubQuoteSubCmd extends ASubCommand {
     private static final String LIST = "list";
     private static final int QUOTES_PER_PAGE = 5;

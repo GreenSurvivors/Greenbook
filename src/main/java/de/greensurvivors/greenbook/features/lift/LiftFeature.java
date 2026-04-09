@@ -7,7 +7,6 @@ import de.greensurvivors.greenbook.features.FeatureType;
 import de.greensurvivors.greenbook.language.StandardLangPath;
 import de.greensurvivors.greenbook.language.StandartPlaceHolders;
 import io.papermc.paper.command.brigadier.Commands;
-import io.papermc.paper.entity.TeleportFlag;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -43,7 +42,6 @@ public class LiftFeature extends AFeature<LiftConfig> implements Listener {
     }
 
     @Override
-    @SuppressWarnings("UnstableApiUsage") // brigadier api
     public void registerCommands(@NotNull Commands commandsRegistrar, @NotNull GreenBookCmd mainCommand) {
     }
 
@@ -232,13 +230,10 @@ public class LiftFeature extends AFeature<LiftConfig> implements Listener {
             boolean teleported;
 
             //try to teleport
-            if (player.getVehicle() == null) {
-                teleported = player.teleport(destination, PlayerTeleportEvent.TeleportCause.PLUGIN,
-                    TeleportFlag.Relative.PITCH, TeleportFlag.Relative.YAW,
-                    TeleportFlag.EntityState.RETAIN_PASSENGERS);
+            if (!player.isInsideVehicle()) {
+                teleported = player.teleport(destination, PlayerTeleportEvent.TeleportCause.PLUGIN);
             } else {
-                teleported = player.getVehicle().teleport(destination, PlayerTeleportEvent.TeleportCause.PLUGIN,
-                    TeleportFlag.EntityState.RETAIN_PASSENGERS, TeleportFlag.EntityState.RETAIN_VEHICLE);
+                teleported = player.getVehicle().teleport(destination, PlayerTeleportEvent.TeleportCause.PLUGIN);
             }
 
             if (teleported) {

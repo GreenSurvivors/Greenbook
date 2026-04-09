@@ -27,7 +27,6 @@ public class QuoteFeature extends AFeature<QuoteConfig> implements Listener { //
     }
 
     @Override
-    @SuppressWarnings("UnstableApiUsage") // brigadier api
     public void registerCommands(@NotNull Commands commandsRegistrar, @NotNull GreenBookCmd mainCommand) {
         QuoteSubCmd subCmd = new QuoteSubCmd(plugin, getFeatureConfig(), mainCommand.getPermission());
 
@@ -48,7 +47,6 @@ public class QuoteFeature extends AFeature<QuoteConfig> implements Listener { //
      * sends a random quote (book) if a player right-clicks a configurated material (default bookshelf)
      * checks if requirements (sneak / empty hand) are meet and if the player has permission
      */
-    @SuppressWarnings("UnstableApiUsage") // block type
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     private void onInteract(@NotNull PlayerInteractEvent event) {
         if (!getFeatureConfig().isEnabled()) {

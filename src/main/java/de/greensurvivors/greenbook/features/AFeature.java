@@ -12,8 +12,6 @@ import org.jetbrains.annotations.NotNull;
 
 /**
  * Every feature should make use of {@link IPermissionHolder} to manage its permissions.
- *
- * @param <C>
  */
 public abstract class AFeature<C extends AFeatureConfig> {
     protected final @NotNull C featureConfig;
@@ -50,7 +48,6 @@ public abstract class AFeature<C extends AFeatureConfig> {
      * @param commandsRegistrar the commands registrar to register stand-alone commands with
      * @param mainCommand       the main command to register the subcommands with
      */
-    @SuppressWarnings("UnstableApiUsage") // brigadier api
     public abstract void registerCommands(final @NotNull Commands commandsRegistrar, @NotNull GreenBookCmd mainCommand);
 
     /**

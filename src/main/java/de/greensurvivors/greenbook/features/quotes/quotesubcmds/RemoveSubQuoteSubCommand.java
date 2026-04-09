@@ -24,7 +24,6 @@ import java.util.Set;
 /**
  * /greenbook quote remove [quote number] - remove a quote (aka book) by its id
  */
-@SuppressWarnings("UnstableApiUsage") // brigadier api
 public class RemoveSubQuoteSubCommand extends ASubCommand {
     private static final String REMOVE_SHORT = "rm", REMOVE_LONG = "remove";
 

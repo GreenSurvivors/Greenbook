@@ -87,17 +87,17 @@ public class MessageManager {
         URL[] urls;
         try {
             urls = new URL[]{langDictionary.toURI().toURL()};
-            lang = ResourceBundle.getBundle(BUNDLE_NAME, locale, new URLClassLoader(urls), UTF8ResourceBundleControl.get());
+            lang = ResourceBundle.getBundle(BUNDLE_NAME, locale, new URLClassLoader(urls));
 
         } catch (SecurityException | MalformedURLException e) {
             plugin.getLogger().log(Level.WARNING, "Exception while reading lang bundle. Using internal", e);
         } catch (MissingResourceException ignored) { // how? missing write access?
-            plugin.getLogger().log(Level.WARNING, "No translation file for " + UTF8ResourceBundleControl.get().toBundleName(BUNDLE_NAME, locale) + " found on disc. Using internal");
+            plugin.getLogger().log(Level.WARNING, "No translation file  for locale \"" + locale.toLanguageTag() + " found on disc. Using internal");
         }
 
         if (lang == null) { // fallback, since we are always trying to save defaults this never should happen
             try {
-                lang = PropertyResourceBundle.getBundle(BUNDLE_NAME, locale, plugin.getClass().getClassLoader(), new UTF8ResourceBundleControl());
+                lang = PropertyResourceBundle.getBundle(BUNDLE_NAME, locale, plugin.getClass().getClassLoader());
             } catch (MissingResourceException e) {
                 plugin.getLogger().log(Level.SEVERE, "Couldn't get Ressource bundle \"lang\" for locale \"" + locale.toLanguageTag() + "\". Messages WILL be broken!", e);
             }
