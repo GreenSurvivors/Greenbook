@@ -5,7 +5,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 
-public class DependencyManager {
+public class DependencyManager { // todo better dependency system for Features. only load them if their dependencies are fulfilled
     private final @NotNull GreenBook plugin;
 
     public DependencyManager(@NotNull GreenBook plugin) {

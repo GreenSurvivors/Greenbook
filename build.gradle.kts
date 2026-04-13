@@ -42,18 +42,10 @@ dependencies {
     compileOnly("org.jetbrains:annotations:24.1.0")
     api("com.github.ben-manes.caffeine:caffeine:3.1.8") // caches
     api("org.apache.commons:commons-collections4:4.5.0-M2")
-    api("com.sk89q.worldedit:worldedit-bukkit:7.4.0-SNAPSHOT")
+    api("com.sk89q.worldedit:worldedit-bukkit:7.4.2-SNAPSHOT")
 }
 
 tasks {
-    compileJava {
-        options.encoding = Charsets.UTF_8.name() // We want UTF-8 for everything
-
-        // Set the release flag. This configures what version bytecode the compiler will emit, as well as what JDK APIs are usable.
-        // See https://openjdk.java.net/jeps/247 for more information.
-        options.release.set(targetJavaVersion)
-    }
-
     processResources {
         filteringCharset = Charsets.UTF_8.name() // We want UTF-8 for everything
 
@@ -62,5 +54,32 @@ tasks {
             "description" to project.description as String,
             "apiVersion" to mcVersion
         )
+    }
+
+    compileJava {
+        options.encoding = Charsets.UTF_8.name() // We want UTF-8 for everything
+
+        // Set the release flag. This configures what version bytecode the compiler will emit, as well as what JDK APIs are usable.
+        // See https://openjdk.java.net/jeps/247 for more information.
+        options.release.set(targetJavaVersion)
+    }
+
+    runServer {
+        downloadPlugins {
+            // make sure to double-check the version id on the Modrinth version page
+            modrinth("worldedit", "p8T2aZ8U" /*project.properties["worldEdit_runVersion"].toString()*/)
+        }
+
+        // disable bstats, as it isn't needed for dev environment
+        doFirst { // this happens after downloading the plugins above, but before the server starts
+            val bStatsCfg = runDirectory.get().asFile.resolve("plugins/bStats/config.yml")
+            if (!bStatsCfg.exists()) {
+                bStatsCfg.parentFile.mkdirs()
+                bStatsCfg.createNewFile()
+            }
+            bStatsCfg.writeText("enabled: false\n")
+        }
+        // automatically agree to eula
+        jvmArgs("-Dcom.mojang.eula.agree=true")
     }
 }
