@@ -82,10 +82,11 @@ public class RemoveSubQuoteSubCommand extends ASubCommand {
         if (checkPermission(context.getSource().getSender())) {
             if (quoteConfig.hasQuote(quoteId)) {
                 //it is a quote. now remove it from config and current active list
-                quoteConfig.removeQuote(quoteId);
-                // send feedback
-                plugin.getMessageManager().sendLang(context.getSource().getSender(), QuotesLangPath.CMD_SUB_REMOVE_SUCCESS,
-                    Placeholder.unparsed(StandartPlaceHolders.NUMBER.getPlaceholder(), String.valueOf(quoteId)));
+                quoteConfig.removeQuote(quoteId).thenAcceptAsync(result -> {
+                    // send feedback
+                    plugin.getMessageManager().sendLang(context.getSource().getSender(), QuotesLangPath.CMD_SUB_REMOVE_SUCCESS,
+                        Placeholder.unparsed(StandartPlaceHolders.NUMBER.getPlaceholder(), String.valueOf(quoteId)));
+                }, plugin.getServer().getScheduler().getMainThreadExecutor(plugin));
             } else {
                 //no quote with this id
                 plugin.getMessageManager().sendLang(context.getSource().getSender(), QuotesLangPath.CMD_SUB_REMOVE_NO_ID,

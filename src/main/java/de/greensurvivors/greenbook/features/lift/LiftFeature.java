@@ -64,8 +64,8 @@ public class LiftFeature extends AFeature<LiftConfigManager> implements Listener
             return;
         }
 
-        Component line1 = event.line(1);
-        Player ePlayer = event.getPlayer();
+        final @Nullable Component line1 = event.line(1);
+        final @NotNull Player ePlayer = event.getPlayer();
 
         //if the 2nd line exists
         if (line1 != null) {

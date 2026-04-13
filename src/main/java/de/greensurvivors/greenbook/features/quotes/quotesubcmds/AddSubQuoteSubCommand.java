@@ -79,12 +79,12 @@ public class AddSubQuoteSubCommand extends ASubCommand {
             Component quoteText = MiniMessage.miniMessage().deserialize(arg);
 
             //save the added book to config and add it to the current active list
-            int bookID = quoteConfig.addQuote(quoteText);
-            // send feedback
-            plugin.getMessageManager().sendLang(context.getSource().getSender(), QuotesLangPath.CMD_SUB_ADD_SUCCESS,
-                Placeholder.component(StandartPlaceHolders.TEXT.getPlaceholder(), quoteText),
-                Placeholder.unparsed(StandartPlaceHolders.NUMBER.getPlaceholder(), String.valueOf(bookID)));
-
+            quoteConfig.addQuote(quoteText).thenAcceptAsync(quoteID -> {
+                // send feedback
+                plugin.getMessageManager().sendLang(context.getSource().getSender(), QuotesLangPath.CMD_SUB_ADD_SUCCESS,
+                    Placeholder.component(StandartPlaceHolders.TEXT.getPlaceholder(), quoteText),
+                    Placeholder.unparsed(StandartPlaceHolders.NUMBER.getPlaceholder(), String.valueOf(quoteID)));
+                }, plugin.getServer().getScheduler().getMainThreadExecutor(plugin));
         } else { //no permission
             plugin.getMessageManager().sendLang(context.getSource().getSender(), StandardLangPath.NO_PERMISSION);
         }

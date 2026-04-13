@@ -10,27 +10,18 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.block.data.BlockData;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.PostProcess;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 
 public class GateConfigManager extends AYamlFeatureConfigManager<GateConfigManager.GateConfigData> { // todo cooldown (especially for redstone activation)
 
     protected GateConfigManager(final @NotNull GreenBook plugin) {
         super(plugin, FeatureType.GATE, TypeToken.get(GateConfigData.class));
-    }
-
-    @Override
-    @MustBeInvokedByOverriders
-    public @NotNull CompletableFuture<Void> reloadConfig() {
-        return super.reloadConfig().thenRun(() ->
-            configData.signLabelRaw = PlainTextComponentSerializer.plainText().serialize(configData.signLabel)
-        );
     }
 
     @Contract(value = "null -> false")
@@ -78,5 +69,10 @@ public class GateConfigManager extends AYamlFeatureConfigManager<GateConfigManag
         protected @NotNull Component signLabel = Component.text("[Gate]");
         protected transient @MonotonicNonNull String signLabelRaw = "[Gate]";
         protected int maxArea = 100;
+
+        @PostProcess
+        protected void deserializeLabel() {
+            signLabelRaw = PlainTextComponentSerializer.plainText().serialize(signLabel);
+        }
     }
 }

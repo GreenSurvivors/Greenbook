@@ -34,9 +34,9 @@ public class CoinCmdFeature extends AFeature<CoinConfigManager> {
         LiteralArgumentBuilder<CommandSourceStack> builder = Commands.
             literal(COMMAND).
 
-            requires(s ->
+            requires(stack ->
                 getFeatureConfig().isEnabled() &&
-                    s.getSender().hasPermission(CoinPermissions.CMD_USE.getPermission())).
+                    stack.getSender().hasPermission(CoinPermissions.CMD_USE.getPermission())).
             then(Commands.
                 literal(SET).
                 requires(s -> s.getSender().hasPermission(CoinPermissions.CMD_SET.getPermission())).
@@ -82,35 +82,29 @@ public class CoinCmdFeature extends AFeature<CoinConfigManager> {
                     //only players can toss a coin
                     if (sender instanceof Player player) {
                         //check other player
-                        Player otherPlayer = context.getArgument("player", PlayerSelectorArgumentResolver.class).resolve(context.getSource()).getFirst(); // todo get all servers with same inventory
+                        final Player otherPlayer = context.getArgument("player", PlayerSelectorArgumentResolver.class)
+                            .resolve(context.getSource()).getFirst(); // todo get all servers with same inventory
 
-                        if (otherPlayer != null) {
-                            if (player.getUniqueId() != otherPlayer.getUniqueId()) {
-                                if (player.getInventory().removeItemAnySlot(getFeatureConfig().getCoinItem()).isEmpty()) {
-                                    //drop items that didn't fit into the other players inventory
-                                    for (ItemStack lostCoin : otherPlayer.getInventory().addItem(getFeatureConfig().getCoinItem()).values()) {
-                                        otherPlayer.getWorld().dropItemNaturally(otherPlayer.getLocation(), lostCoin);
-                                    }
-
-                                    //broadcast success
-                                    plugin.getMessageManager().broadcastLang(CoinLangPath.CMD_COIN_TOSS_OTHER,
-                                        Placeholder.component(StandartPlaceHolders.PLAYER.getPlaceholder(), player.displayName()),
-                                        Placeholder.component(StandartPlaceHolders.PLAYER2.getPlaceholder(), otherPlayer.displayName()));
-                                } else {
-                                    //player didn't have enough coins
-                                    plugin.getMessageManager().sendLang(sender, CoinLangPath.CMD_COIN_NOT_ENOUGH);
+                        if (player.getUniqueId() != otherPlayer.getUniqueId()) {
+                            if (player.getInventory().removeItemAnySlot(getFeatureConfig().getCoinItem()).isEmpty()) {
+                                //drop items that didn't fit into the other players inventory
+                                for (ItemStack lostCoin : otherPlayer.getInventory().addItem(getFeatureConfig().getCoinItem()).values()) {
+                                    otherPlayer.getWorld().dropItemNaturally(otherPlayer.getLocation(), lostCoin);
                                 }
+
+                                //broadcast success
+                                plugin.getMessageManager().broadcastLang(CoinLangPath.CMD_COIN_TOSS_OTHER,
+                                    Placeholder.component(StandartPlaceHolders.PLAYER.getPlaceholder(), player.displayName()),
+                                    Placeholder.component(StandartPlaceHolders.PLAYER2.getPlaceholder(), otherPlayer.displayName()));
                             } else {
-                                //kill player that tried to give themselves a coin and announce it
-                                player.setHealth(0.0d);
-                                plugin.getMessageManager().broadcastLang(CoinLangPath.CMD_COIN_TOSS_SELF,
-                                    Placeholder.component(StandartPlaceHolders.PLAYER.getPlaceholder(), player.displayName())); //todo maybe broadcast it across all servers, that share the same inventory
+                                //player didn't have enough coins
+                                plugin.getMessageManager().sendLang(sender, CoinLangPath.CMD_COIN_NOT_ENOUGH);
                             }
                         } else {
-                            //unknown or offline other player
-                            plugin.getMessageManager().sendLang(sender, StandardLangPath.ARG_NOT_A_PLAYER, Placeholder.unparsed(StandartPlaceHolders.TEXT.getPlaceholder(), "?")); // todo
-
-                            return 0;
+                            //kill player that tried to give themselves a coin and announce it
+                            player.setHealth(0.0d);
+                            plugin.getMessageManager().broadcastLang(CoinLangPath.CMD_COIN_TOSS_SELF,
+                                Placeholder.component(StandartPlaceHolders.PLAYER.getPlaceholder(), player.displayName())); //todo maybe broadcast it across all servers, that share the same inventory
                         }
                     } else {
                         //command sender is not a player

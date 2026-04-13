@@ -21,13 +21,13 @@ import java.util.Set;
 public class QuoteSubCmd extends ASubCommand {
     private static final @NotNull String SUBCOMMAND = "quote";
     private static final @NotNull String ALIAS1 = "shelf", ALIAS2 = "book";
-    private final QuoteConfigManager quoteConfig;
+    private final @NotNull QuoteConfigManager quoteConfig;
 
     /**
      * contains all the registered subcommands
      * (they get registered when a new instance get created)
      */
-    private final Set<ASubCommand> subCommands = new HashSet<>();
+    private final @NotNull Set<@NotNull ASubCommand> subCommands = new HashSet<>();
 
     public QuoteSubCmd(final @NotNull GreenBook plugin,
                        final @NotNull QuoteConfigManager config,
@@ -53,13 +53,11 @@ public class QuoteSubCmd extends ASubCommand {
         return SUBCOMMAND;
     }
 
-    @NotNull
-    public List<LiteralCommandNode<CommandSourceStack>> getCmdNodes() {
+    public @NotNull List<@NotNull LiteralCommandNode<CommandSourceStack>> getCmdNodes() {
         LiteralArgumentBuilder<CommandSourceStack> cmdBuilder = Commands.literal(SUBCOMMAND).
-            requires(s -> quoteConfig.isEnabled())
-            .requires(cmdSourceStack -> checkPermission(cmdSourceStack.getSender()));
+            requires(stack -> quoteConfig.isEnabled() && checkPermission(stack.getSender()));
 
-        for (ASubCommand subCommand : subCommands) {
+        for (final @NotNull ASubCommand subCommand : subCommands) {
             for (LiteralCommandNode<CommandSourceStack> node : subCommand.getCmdNodes()) {
                 cmdBuilder.then(node);
             }

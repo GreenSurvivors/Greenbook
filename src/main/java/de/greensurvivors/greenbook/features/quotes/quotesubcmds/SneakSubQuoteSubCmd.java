@@ -65,11 +65,11 @@ public class SneakSubQuoteSubCmd extends ASubCommand {
     private int onCommand(@NotNull CommandContext<CommandSourceStack> context, boolean shouldRequireSneak) {
         if (checkPermission(context.getSource().getSender())) {
             //save the value to file and set the current value
-            quoteConfig.setRequireSneak(shouldRequireSneak);
-            //give feedback
-            plugin.getMessageManager().sendLang(context.getSource().getSender(), QuotesLangPath.CMD_SUB_SNEAK_SUCCESS,
-                Placeholder.unparsed(StandartPlaceHolders.BOOL.getPlaceholder(), String.valueOf(shouldRequireSneak)));
-
+            quoteConfig.setRequireSneak(shouldRequireSneak).thenRunAsync(() -> {
+                //give feedback
+                plugin.getMessageManager().sendLang(context.getSource().getSender(), QuotesLangPath.CMD_SUB_SNEAK_SUCCESS,
+                    Placeholder.unparsed(StandartPlaceHolders.BOOL.getPlaceholder(), String.valueOf(shouldRequireSneak)));
+            }, plugin.getServer().getScheduler().getMainThreadExecutor(plugin));
         } else {
             plugin.getMessageManager().sendLang(context.getSource().getSender(), StandardLangPath.NO_PERMISSION);
         }

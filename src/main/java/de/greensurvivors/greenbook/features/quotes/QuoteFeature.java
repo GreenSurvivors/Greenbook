@@ -63,7 +63,7 @@ public class QuoteFeature extends AFeature<QuoteConfigManager> implements Listen
             if (eBlock != null && getFeatureConfig().isQuoteBlockType(eBlock.getType().asBlockType())) {
 
                 //check requirements
-                Player ePlayer = event.getPlayer();
+                final @NotNull Player ePlayer = event.getPlayer();
                 if ((getFeatureConfig().isEmptyHandRequired() && !ePlayer.getInventory().getItemInMainHand().getType().isAir()) ||
                     (getFeatureConfig().isSneakingRequired() && !ePlayer.isSneaking())) {
                     return;

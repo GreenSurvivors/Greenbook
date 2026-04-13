@@ -73,10 +73,10 @@ public class HandSubQuoteSubCommand extends ASubCommand {
 
     private int onCommand(@NotNull CommandContext<CommandSourceStack> context, boolean shouldQuoteRequireEmptyHand) {
         if (checkPermission(context.getSource().getSender())) {
-            quoteConfig.setRequireEmptyHand(shouldQuoteRequireEmptyHand);
-
-            plugin.getMessageManager().sendLang(context.getSource().getSender(), QuotesLangPath.CMD_SUB_HAND_SUCCESS,
-                Placeholder.unparsed(StandartPlaceHolders.BOOL.getPlaceholder(), String.valueOf(shouldQuoteRequireEmptyHand)));
+            quoteConfig.setRequireEmptyHand(shouldQuoteRequireEmptyHand).thenRunAsync(() -> {
+                plugin.getMessageManager().sendLang(context.getSource().getSender(), QuotesLangPath.CMD_SUB_HAND_SUCCESS,
+                    Placeholder.unparsed(StandartPlaceHolders.BOOL.getPlaceholder(), String.valueOf(shouldQuoteRequireEmptyHand)));
+            }, plugin.getServer().getScheduler().getMainThreadExecutor(plugin));
         } else {
             plugin.getMessageManager().sendLang(context.getSource().getSender(), StandardLangPath.NO_PERMISSION);
         }

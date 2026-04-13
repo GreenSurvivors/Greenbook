@@ -17,7 +17,7 @@ public interface IFeatureConfigManager {
      * @return the enabled state of the feature
      */
     @Contract(pure = true)
-    boolean isEnabled(); // todo call for all features --> disable commands too!
+    boolean isEnabled();
 
     /**
      * Sets the enabled state of the feature. If the new state is different from the current state,

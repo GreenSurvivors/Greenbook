@@ -14,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
+import org.spongepowered.configurate.objectmapping.meta.PostProcess;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -25,23 +26,13 @@ public class QuoteConfigManager extends AYamlFeatureConfigManager<QuoteConfigMan
 
     protected QuoteConfigManager(final @NotNull GreenBook plugin) {
         super(plugin, FeatureType.QUOTES, TypeToken.get(QuoteConfigData.class));
-
-        //todo add freshly added keys to file load; save
     }
 
-    private void checkHighestId(final int otherId) {
-        if (otherId > configData.highestId) {
-            configData.highestId = otherId;
-        }
-    }
+    public @NotNull CompletableFuture<@NotNull Integer> addQuote(final @NotNull Component quoteText) {
+        final int id = configData.highestId++;
 
-    public int addQuote(final @NotNull Component quoteText) { // todo something doesn't work here!
-        configData.highestId++;
-
-        configData.quotes.put(configData.highestId, quoteText);
-        saveConfig().thenRun(this::reloadConfig);
-
-        return configData.highestId;
+        configData.quotes.put(id, quoteText);
+        return saveAndReload().thenApply(ignored -> id);
     }
 
     public boolean hasQuote(final int quoteID) {
@@ -73,7 +64,7 @@ public class QuoteConfigManager extends AYamlFeatureConfigManager<QuoteConfigMan
     public @NotNull CompletableFuture<@Nullable Component> removeQuote(final int quoteID) {
         Component result = configData.quotes.remove(quoteID);
 
-        return saveConfig().thenRun(this::reloadConfig).thenApply(ignored -> result);
+        return saveAndReload().thenApply(ignored -> result);
     }
 
     public @NotNull CompletableFuture<Void> setRequireEmptyHand(final boolean shouldQuoteRequireEmptyHand) {
@@ -92,16 +83,12 @@ public class QuoteConfigManager extends AYamlFeatureConfigManager<QuoteConfigMan
         return saveAndReload();
     }
 
-    public boolean isSneakRequired() {
-        return configData.requiresSneak;
-    }
-
-    public boolean isQuoteBlockType(final @NotNull BlockType type) {
-        return configData.clickableBlockTypes.contains(type);
-    }
-
     public boolean isSneakingRequired() {
         return configData.requiresSneak;
+    }
+
+    public boolean isQuoteBlockType(final @NotNull BlockType type) { // todo setter
+        return configData.clickableBlockTypes.contains(type);
     }
 
     @ConfigSerializable
@@ -112,5 +99,16 @@ public class QuoteConfigManager extends AYamlFeatureConfigManager<QuoteConfigMan
         protected boolean requiresEmptyHand = true;
         protected final @NotNull Set<@NotNull BlockType> clickableBlockTypes = new HashSet<>();
         protected final @NotNull SortedMap<@NotNull Integer, @NotNull Component> quotes = new Int2ObjectLinkedOpenHashMap<>();
+
+        @PostProcess
+        protected void checkHighestId() {
+            // note: even though Int2ObjectLinkedOpenHashMap is a sorted map, it doesn't have any comparator associated with it, meaning that integer ordering by size is not guaranteed.
+            // we have to check all qoutes if any of them have a higher id than we expect!
+            for (int id : quotes.sequencedKeySet()) {
+                if (id > highestId) {
+                    highestId = id;
+                }
+            }
+        }
     }
 }

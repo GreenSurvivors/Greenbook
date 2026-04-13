@@ -49,7 +49,7 @@ public class ListSubQuoteSubCmd extends ASubCommand {
     }
 
     @Override
-    public boolean checkPermission(@NotNull Permissible permissible) {
+    public boolean checkPermission(final @NotNull Permissible permissible) {
         return permissible.hasPermission(QuotePermissions.CMD_LIST.getPermission());
     }
 
