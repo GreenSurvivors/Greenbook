@@ -19,9 +19,9 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.jetbrains.annotations.NotNull;
 
-public class QuoteFeature extends AFeature<QuoteConfig> implements Listener { // todo Add Parent permissions per feature, so whoever has that has every cmd and normal permission of that feature.
+public class QuoteFeature extends AFeature<QuoteConfigManager> implements Listener { // todo Add Parent permissions per feature, so whoever has that has every cmd and normal permission of that feature.
     public QuoteFeature(@NotNull GreenBook plugin) {
-        super(plugin, FeatureType.QUOTES, new QuoteConfig(plugin));
+        super(plugin, FeatureType.QUOTES, new QuoteConfigManager(plugin));
 
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }

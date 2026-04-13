@@ -21,7 +21,7 @@ import java.util.Set;
 public class QuoteSubCmd extends ASubCommand {
     private static final @NotNull String SUBCOMMAND = "quote";
     private static final @NotNull String ALIAS1 = "shelf", ALIAS2 = "book";
-    private final QuoteConfig quoteConfig;
+    private final QuoteConfigManager quoteConfig;
 
     /**
      * contains all the registered subcommands
@@ -29,9 +29,9 @@ public class QuoteSubCmd extends ASubCommand {
      */
     private final Set<ASubCommand> subCommands = new HashSet<>();
 
-    public QuoteSubCmd(@NotNull GreenBook plugin,
-                       @NotNull QuoteConfig config,
-                       @NotNull Permission parentPerm) {
+    public QuoteSubCmd(final @NotNull GreenBook plugin,
+                       final @NotNull QuoteConfigManager config,
+                       final @NotNull Permission parentPerm) {
         super(plugin);
         quoteConfig = config;
 

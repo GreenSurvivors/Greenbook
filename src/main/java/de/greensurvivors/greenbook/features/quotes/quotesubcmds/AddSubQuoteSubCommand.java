@@ -5,7 +5,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import de.greensurvivors.greenbook.GreenBook;
 import de.greensurvivors.greenbook.commands.ASubCommand;
-import de.greensurvivors.greenbook.features.quotes.QuoteConfig;
+import de.greensurvivors.greenbook.features.quotes.QuoteConfigManager;
 import de.greensurvivors.greenbook.features.quotes.QuotePermissions;
 import de.greensurvivors.greenbook.features.quotes.QuotesLangPath;
 import de.greensurvivors.greenbook.language.StandardLangPath;
@@ -26,9 +26,11 @@ import java.util.Set;
 
 public class AddSubQuoteSubCommand extends ASubCommand {
     private static final String ADD = "add";
-    private final @NotNull QuoteConfig quoteConfig;
+    private final @NotNull QuoteConfigManager quoteConfig;
 
-    public AddSubQuoteSubCommand(@NotNull GreenBook plugin, @NotNull QuoteConfig config, @NotNull Permission parentPerm) {
+    public AddSubQuoteSubCommand(final @NotNull GreenBook plugin,
+                                 final @NotNull QuoteConfigManager config,
+                                 final @NotNull Permission parentPerm) {
         super(plugin);
         quoteConfig = config;
 
@@ -70,7 +72,7 @@ public class AddSubQuoteSubCommand extends ASubCommand {
         return Component.text("TODO");
     }
 
-    private void onCommand(@NotNull CommandContext<CommandSourceStack> context, @NotNull String arg) {
+    private void onCommand(final @NotNull CommandContext<CommandSourceStack> context, final @NotNull String arg) {
         //check permission
         if (checkPermission(context.getSource().getSender())) {
             //our quote was broken into an array of strings, we have to glue it back together

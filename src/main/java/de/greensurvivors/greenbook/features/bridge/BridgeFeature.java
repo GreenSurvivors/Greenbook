@@ -34,14 +34,14 @@ import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class BridgeFeature extends AFeature<BridgeConfig> implements Listener {
+public class BridgeFeature extends AFeature<BridgeConfigManager> implements Listener {
     private final static @NotNull EnumPersistentDataType<BlockFace> BRIDGE_EXPECTED_DIRECTION_DATA_TYPE = new EnumPersistentDataType<>(BlockFace.class);
     private final @NotNull NamespacedKey blockTypeKey, amountKey, stateKey, expectedBridgeDirectionKey, lastPowerStateKey;
     // save amount of stored blocks
     // save state (on/off)
 
     public BridgeFeature(@NotNull GreenBook plugin) {
-        super(plugin, FeatureType.BRIDGE, new BridgeConfig(plugin));
+        super(plugin, FeatureType.BRIDGE, new BridgeConfigManager(plugin));
 
         blockTypeKey = new NamespacedKey(plugin, "bridgeBlockType");
         amountKey = new NamespacedKey(plugin, "bridgeBlockAmount");

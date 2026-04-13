@@ -12,7 +12,7 @@ import de.greensurvivors.greenbook.GreenBook;
 import de.greensurvivors.greenbook.commands.ASubCommand;
 import de.greensurvivors.greenbook.commands.GreenBookCmd;
 import de.greensurvivors.greenbook.commands.ListBuilder;
-import de.greensurvivors.greenbook.features.quotes.QuoteConfig;
+import de.greensurvivors.greenbook.features.quotes.QuoteConfigManager;
 import de.greensurvivors.greenbook.features.quotes.QuotePermissions;
 import de.greensurvivors.greenbook.features.quotes.QuoteSubCmd;
 import de.greensurvivors.greenbook.features.quotes.QuotesLangPath;
@@ -21,6 +21,9 @@ import de.greensurvivors.greenbook.language.StandardLangPath;
 import de.greensurvivors.greenbook.language.StandartPlaceHolders;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectSortedMap;
+import it.unimi.dsi.fastutil.objects.ObjectBidirectionalIterator;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.permissions.Permissible;
@@ -32,6 +35,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
+import java.util.SortedMap;
 
 /**
  * /geenbook quote list < page > - list all known quotes (quotes) neatly arranged in pages.
@@ -40,9 +44,11 @@ public class ListSubQuoteSubCmd extends ASubCommand {
     private static final String LIST = "list";
     private static final int QUOTES_PER_PAGE = 5;
 
-    private final @NotNull QuoteConfig quoteConfig;
+    private final @NotNull QuoteConfigManager quoteConfig;
 
-    public ListSubQuoteSubCmd(@NotNull GreenBook plugin, @NotNull QuoteConfig config, @NotNull Permission parentPerm) {
+    public ListSubQuoteSubCmd(final @NotNull GreenBook plugin,
+                              final @NotNull QuoteConfigManager config,
+                              final @NotNull Permission parentPerm) {
         super(plugin);
         this.quoteConfig = config;
 
@@ -85,7 +91,7 @@ public class ListSubQuoteSubCmd extends ASubCommand {
 
     private int getNumberOfPages() {
         //get all currently active quotes
-        final List<QuoteConfig.Quote> quotes = quoteConfig.getQuotes();
+        final @NotNull SortedMap<@NotNull Integer, @NotNull Component> quotes = quoteConfig.getQuotes();
         //how many quotes are known. Needed to calculate how many pages there are and
         //how many there should be on the given page (if the page is not full)
         final int numOfQuotes = quotes.size();
@@ -96,7 +102,7 @@ public class ListSubQuoteSubCmd extends ASubCommand {
     private int onCommand(@NotNull CommandContext<CommandSourceStack> context, int page) {
         if (checkPermission(context.getSource().getSender())) { // todo do we need this check?
             //get all currently active quotes
-            final List<QuoteConfig.Quote> quotes = quoteConfig.getQuotes();
+            final @NotNull Int2ObjectSortedMap<@NotNull Component> quotes = (Int2ObjectSortedMap<@NotNull Component>)quoteConfig.getQuotes(); // todo check type casting
             //how many quotes are known. Needed to calculate how many pages there are and
             //how many there should be on the given page (if the page is not full)
             final int numOfQuotes = quotes.size();
@@ -117,12 +123,14 @@ public class ListSubQuoteSubCmd extends ASubCommand {
             listBuilder.pageLastCommand("/" + GreenBookCmd.getCommandName() + " " + QuoteSubCmd.getSubcommandName() + " " + LIST + " " + numOfPages);
 
             //add the quotes for the page
+            final @NotNull ObjectBidirectionalIterator<Int2ObjectMap.@NotNull Entry<@NotNull Component>> iterator = quotes.int2ObjectEntrySet().iterator();
+            iterator.skip(Math.max(0, (page - 1) * QUOTES_PER_PAGE - 1));
             for (int i = (page - 1) * QUOTES_PER_PAGE; i < maxQuotesThisPage; i++) {
-                QuoteConfig.Quote quote = quotes.get(i);
+                final @NotNull Int2ObjectMap.Entry<@NotNull Component> entry = iterator.next();
 
                 listBuilder.addEntry(messageManager.getLang(QuotesLangPath.CMD_SUB_LIST_ENTRY,
-                    Placeholder.unparsed(StandartPlaceHolders.NUMBER.getPlaceholder(), String.valueOf(quote.id())),
-                    Placeholder.component(StandartPlaceHolders.TEXT.getPlaceholder(), quote.content())));
+                    Placeholder.unparsed(StandartPlaceHolders.NUMBER.getPlaceholder(), String.valueOf(entry.getIntKey())),
+                    Placeholder.component(StandartPlaceHolders.TEXT.getPlaceholder(), entry.getValue())));
             }
 
             context.getSource().getSender().sendMessage(listBuilder.build());

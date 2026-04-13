@@ -10,7 +10,7 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import de.greensurvivors.greenbook.GreenBook;
 import de.greensurvivors.greenbook.features.FeatureType;
-import de.greensurvivors.greenbook.features.quotes.QuoteConfig;
+import de.greensurvivors.greenbook.features.quotes.QuoteConfigManager;
 import de.greensurvivors.greenbook.features.quotes.QuoteFeature;
 import io.papermc.paper.command.brigadier.MessageComponentSerializer;
 import io.papermc.paper.command.brigadier.argument.CustomArgumentType;
@@ -25,7 +25,7 @@ class BookIDArgument implements CustomArgumentType.Converted<Integer, Integer> {
     private static final DynamicCommandExceptionType UNKNOWN_ID = new DynamicCommandExceptionType(
         (found) -> new LiteralMessage("Integer must be a valid quote ID, found: " + found)); // todo translation!
 
-    private final @NotNull QuoteConfig quoteConfig;
+    private final @NotNull QuoteConfigManager quoteConfig;
 
     public BookIDArgument(@NotNull GreenBook plugin) {
         quoteConfig = ((QuoteFeature) plugin.getFeatureRegistry().getFeature(FeatureType.QUOTES)).getFeatureConfig();

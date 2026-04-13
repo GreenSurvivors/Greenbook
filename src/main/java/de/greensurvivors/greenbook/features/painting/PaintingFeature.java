@@ -28,13 +28,13 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Comparator;
 import java.util.UUID;
 
-public class PaintingFeature extends AFeature<PaintingConfig> implements Listener {
+public class PaintingFeature extends AFeature<PaintingConfigManager> implements Listener {
     //map holding every player uuid who's currently editing a painting
     //every player edits only one painting and every painting gets only edited by one player
     private final BidiMap<UUID, UUID> modifyingMap = new DualHashBidiMap<>(); //uuid player, uuid painting
 
     public PaintingFeature(@NotNull GreenBook plugin) {
-        super(plugin, FeatureType.PAINTING, new PaintingConfig(plugin));
+        super(plugin, FeatureType.PAINTING, new PaintingConfigManager(plugin));
     }
 
     @Override
@@ -60,13 +60,11 @@ public class PaintingFeature extends AFeature<PaintingConfig> implements Listene
                 plugin.getMessageManager().sendLang(player, PaintingLangPath.PAINTING_EDIT_STOPPED);
             }
         }
-        getFeatureConfig().setEnabled(false);
     }
 
     @Override
     public void onEnable() {
         Bukkit.getPluginManager().registerEvents(this, plugin);
-        getFeatureConfig().setEnabled(true);
     }
 
     /**

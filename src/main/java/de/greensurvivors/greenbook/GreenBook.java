@@ -51,6 +51,9 @@ public final class GreenBook extends JavaPlugin {
 
         // config
         configManager = new ConfigManager(this);
+        // note: since we don't join here and the async tasks will start later, this means we will register commands without any of the feature config loaded yet!
+        // it's ok, they can wait.
+        // the message manager however will get initializied before them!
         configManager.reload();
 
         // register Commands

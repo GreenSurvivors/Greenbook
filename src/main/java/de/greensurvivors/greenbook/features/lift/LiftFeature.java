@@ -34,9 +34,9 @@ import org.jetbrains.annotations.Nullable;
 /**
  * teleports a player up / down depending where on a lift sign they click to another lift sign
  */
-public class LiftFeature extends AFeature<LiftConfig> implements Listener {
+public class LiftFeature extends AFeature<LiftConfigManager> implements Listener {
     public LiftFeature(@NotNull GreenBook plugin) {
-        super(plugin, FeatureType.LIFT, new LiftConfig(plugin));
+        super(plugin, FeatureType.LIFT, new LiftConfigManager(plugin));
 
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }
@@ -129,7 +129,7 @@ public class LiftFeature extends AFeature<LiftConfig> implements Listener {
         final int maxSearchCoord = step > 0 ? world.getMaxHeight() - 1 : world.getMinHeight();
 
         //try to extract the floor from "to:<floor name>"
-        final LiftConfig.DestinationMatcher destinationMatcher = getFeatureConfig().getDeDestinationMatcher(originSign.getSide(Side.FRONT).line(2));
+        final LiftConfigManager.DestinationMatcher destinationMatcher = getFeatureConfig().getDeDestinationMatcher(originSign.getSide(Side.FRONT).line(2));
 
         //loop through the blocks in the world, trying to find a sign
         for (int y = starty; y != maxSearchCoord; y += step) {

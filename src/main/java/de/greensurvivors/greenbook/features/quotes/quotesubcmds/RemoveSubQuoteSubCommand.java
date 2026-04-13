@@ -5,7 +5,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import de.greensurvivors.greenbook.GreenBook;
 import de.greensurvivors.greenbook.commands.ASubCommand;
-import de.greensurvivors.greenbook.features.quotes.QuoteConfig;
+import de.greensurvivors.greenbook.features.quotes.QuoteConfigManager;
 import de.greensurvivors.greenbook.features.quotes.QuotePermissions;
 import de.greensurvivors.greenbook.features.quotes.QuotesLangPath;
 import de.greensurvivors.greenbook.language.StandardLangPath;
@@ -27,11 +27,11 @@ import java.util.Set;
 public class RemoveSubQuoteSubCommand extends ASubCommand {
     private static final String REMOVE_SHORT = "rm", REMOVE_LONG = "remove";
 
-    private final @NotNull QuoteConfig quoteConfig;
+    private final @NotNull QuoteConfigManager quoteConfig;
 
-    public RemoveSubQuoteSubCommand(@NotNull GreenBook plugin,
-                                    @NotNull QuoteConfig config,
-                                    @NotNull Permission parentPerm) {
+    public RemoveSubQuoteSubCommand(final @NotNull GreenBook plugin,
+                                    final @NotNull QuoteConfigManager config,
+                                    final @NotNull Permission parentPerm) {
         super(plugin);
         quoteConfig = config;
 

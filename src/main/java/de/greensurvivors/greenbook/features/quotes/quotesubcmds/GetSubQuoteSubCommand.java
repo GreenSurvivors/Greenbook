@@ -5,7 +5,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import de.greensurvivors.greenbook.GreenBook;
 import de.greensurvivors.greenbook.commands.ASubCommand;
-import de.greensurvivors.greenbook.features.quotes.QuoteConfig;
+import de.greensurvivors.greenbook.features.quotes.QuoteConfigManager;
 import de.greensurvivors.greenbook.features.quotes.QuotePermissions;
 import de.greensurvivors.greenbook.features.quotes.QuotesLangPath;
 import de.greensurvivors.greenbook.language.StandardLangPath;
@@ -27,9 +27,9 @@ import java.util.Set;
 public class GetSubQuoteSubCommand extends ASubCommand {
     private static final String GET = "get";
 
-    private final @NotNull QuoteConfig quoteConfig;
+    private final @NotNull QuoteConfigManager quoteConfig;
 
-    public GetSubQuoteSubCommand(@NotNull GreenBook plugin, @NotNull QuoteConfig config, @NotNull Permission parentPerm) {
+    public GetSubQuoteSubCommand(@NotNull GreenBook plugin, @NotNull QuoteConfigManager config, @NotNull Permission parentPerm) {
         super(plugin);
         quoteConfig = config;
 

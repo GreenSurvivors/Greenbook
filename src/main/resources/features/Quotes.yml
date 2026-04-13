@@ -1,0 +1,7 @@
+isEnabled: true
+configVersion: 1.0.0
+highestId: 0
+requiresSneak: false
+requiresEmptyHand: true
+clickableBlockTypes: []
+quotes: []

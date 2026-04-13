@@ -53,7 +53,7 @@ import java.util.concurrent.TimeUnit;
     "StringConcatenationArgumentToLogCall"
 })
 // todo create a queque / cooldown system; also link multible signs for the same gate together.
-public class GateFeature extends AFeature<GateConfig> implements Listener { // todo work with world edit if available
+public class GateFeature extends AFeature<GateConfigManager> implements Listener { // todo work with world edit if available
     private final static @NotNull EnumPersistentDataType<BlockFace> DIRECTION_DATA_TYPE = new EnumPersistentDataType<>(BlockFace.class);
     private final static @NotNull EnumPersistentDataType<Axis> AXIS_DATA_TYPE = new EnumPersistentDataType<>(Axis.class);
     private final static @NotNull Map<BlockFace, Axis> cartesianDirections;
@@ -83,7 +83,7 @@ public class GateFeature extends AFeature<GateConfig> implements Listener { // t
     private final @NotNull LoadingCache<@NotNull Location, @NotNull Integer> gateLastPowerStateSignCache;
 
     public GateFeature(@NotNull GreenBook plugin) {
-        super(plugin, FeatureType.BRIDGE, new GateConfig(plugin));
+        super(plugin, FeatureType.BRIDGE, new GateConfigManager(plugin));
 
         Bukkit.getPluginManager().registerEvents(this, plugin);
 

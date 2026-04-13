@@ -7,39 +7,55 @@ import io.papermc.paper.math.Position;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockCollisions;
 import net.minecraft.world.phys.AABB;
+import org.apache.maven.artifact.versioning.ComparableVersion;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockType;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.entity.Entity;
 import org.bukkit.util.BoundingBox;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.spongepowered.configurate.ConfigurateException;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.PostProcess;
+import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ForkJoinPool;
 import java.util.regex.Pattern;
 
+// todo clear this class of methods that do too much for a config class!
 @SuppressWarnings("UnstableApiUsage") // Block type
 public class ConfigManager {
-    private final static @NotNull String MC_NAMESPACE = NamespacedKey.MINECRAFT.toUpperCase(Locale.ENGLISH) + ":";
-    private final @NotNull GreenBook plugin;
+    protected final static @NotNull String MC_NAMESPACE = NamespacedKey.MINECRAFT.toUpperCase(Locale.ENGLISH) + ":";
+    protected final static @NotNull ComparableVersion DATA_VERSION = new ComparableVersion("1.0.0");
+    protected final @NotNull GreenBook plugin;
+    protected final @NotNull Path configPath;
+    protected final @NotNull YamlConfigurationLoader loader;
+    protected @MonotonicNonNull ConfigData configData;
 
-    // the point at the beginning is for bedrock player if the proxy supports them.
-    private final @NotNull ConfigOption<@NotNull Pattern> USERNAME_PATTERN = new ConfigOption<>("username_pattern",
-        Pattern.compile("^.?[a-zA-Z0-9_]{3,16}$")); // todo mind that a pattern in yaml should use '<pattern>' not "<pattern>"
-    private final @NotNull ConfigOption<@NotNull Set<@NotNull BlockType>> UNSAFE_MATS_STANDING_IN = new ConfigOption<>("unsafe_standing_in",
-        ConcurrentHashMap.newKeySet());
-    private final @NotNull ConfigOption<@NotNull Set<@NotNull BlockType>> UNSAFE_MATS_STANDING_ON = new ConfigOption<>("unsafe_standing_on",
-        ConcurrentHashMap.newKeySet());
-    private final @NotNull ConfigOption<@NotNull Boolean> IS_WATER_SAFE = new ConfigOption<>("is_water_safe", false);
-    private final @NotNull ConfigOption<@NotNull Locale> LOCALE = new ConfigOption<>("language", Locale.getDefault());
-
-    public ConfigManager(@NotNull GreenBook plugin) {
+    public ConfigManager(final @NotNull GreenBook plugin) {
         this.plugin = plugin;
+        configPath = plugin.getDataPath().resolve("config.yml");
+
+        final YamlConfigurationLoader.Builder configLoaderBuilder = YamlConfigurationLoader.builder();
+        configLoaderBuilder.path(configPath);
+        configLoaderBuilder.defaultOptions(configOptions ->
+            configOptions.serializers(serializerBuilder -> {
+                serializerBuilder.register(ComparableVersion.class, Serializers.ComparableVersionSerializer.INSTANCE);
+                serializerBuilder.register(Pattern.class, Serializers.PatternSerializer.INSTANCE);
+                serializerBuilder.register(Locale.class, Serializers.LocaleSerializer.INSTANCE);
+            })
+        );
+
+        loader = configLoaderBuilder.build();
 
         /*
         // maybe one day we can
@@ -50,56 +66,25 @@ public class ConfigManager {
 
         // define fallback for sets
         // we can't do this in the constructor because of Tag#getValues()
-        Set<BlockType> fallback_in = UNSAFE_MATS_STANDING_IN.getFallback();
-        //fallback_in.addAll(Tag.FIRE.getValues())
-        Tag.FIRE.getValues().stream().map(Material::asBlockType).forEach(fallback_in::add);
-        //fallback_in.addAll(Tag.CAMPFIRES.getValues());
-        Tag.CAMPFIRES.getValues().stream().map(Material::asBlockType).forEach(fallback_in::add);
-        fallback_in.add(BlockType.SWEET_BERRY_BUSH);
-        fallback_in.add(BlockType.WITHER_ROSE);
-        fallback_in.add(BlockType.CACTUS);
-        fallback_in.add(BlockType.POWDER_SNOW);
-        fallback_in.add(BlockType.LAVA);
-        //fallback_in.addAll(Tag.PORTALS.getValues());
-        Tag.PORTALS.getValues().stream().map(Material::asBlockType).forEach(fallback_in::add);
-
-        Set<BlockType> fallback_on = UNSAFE_MATS_STANDING_ON.getFallback();
-        //fallback_on.addAll(Tag.CAMPFIRES.getValues());
-        Tag.CAMPFIRES.getValues().stream().map(Material::asBlockType).forEach(fallback_on::add);
-        fallback_on.add(BlockType.CACTUS);
-        fallback_on.add(BlockType.MAGMA_BLOCK);
-        fallback_on.add(BlockType.POINTED_DRIPSTONE);
-    }
-
-    public static @NotNull Map<String, Object> getMapFromConfigObject(final @Nullable Object object, @NotNull Function<Object, Boolean> invalidKeyFunction) throws NullPointerException, IllegalArgumentException {
-        switch (object) {
-            case Map<?, ?> rawMap -> {
-                Map<String, Object> result = new HashMap<>(rawMap.size());
-
-                for (Map.Entry<?, ?> rawEntry : rawMap.entrySet()) {
-                    if (rawEntry.getKey() instanceof String key) {
-                        result.put(key, rawEntry.getValue());
-                    } else if (invalidKeyFunction.apply(rawEntry.getKey())) {
-                        throw new IllegalArgumentException("");
-                    }
-                }
-
-                return result;
-            }
-            case ConfigurationSection section -> {
-                Set<String> keys = section.getKeys(false);
-                Map<String, Object> result = new HashMap<>(keys.size());
-
-
-                for (String key : keys) {
-                    result.put(key, section.get(key));
-                }
-
-                return result;
-            }
-            case null -> throw new NullPointerException("");
-            default -> throw new IllegalArgumentException("");
-        }
+//        Set<BlockType> fallback_in = UNSAFE_MATS_STANDING_IN.getFallback();
+//        //fallback_in.addAll(Tag.FIRE.getValues())
+//        Tag.FIRE.getValues().stream().map(Material::asBlockType).forEach(fallback_in::add);
+//        //fallback_in.addAll(Tag.CAMPFIRES.getValues());
+//        Tag.CAMPFIRES.getValues().stream().map(Material::asBlockType).forEach(fallback_in::add);
+//        fallback_in.add(BlockType.SWEET_BERRY_BUSH);
+//        fallback_in.add(BlockType.WITHER_ROSE);
+//        fallback_in.add(BlockType.CACTUS);
+//        fallback_in.add(BlockType.POWDER_SNOW);
+//        fallback_in.add(BlockType.LAVA);
+//        //fallback_in.addAll(Tag.PORTALS.getValues());
+//        Tag.PORTALS.getValues().stream().map(Material::asBlockType).forEach(fallback_in::add);
+//
+//        Set<BlockType> fallback_on = UNSAFE_MATS_STANDING_ON.getFallback();
+//        //fallback_on.addAll(Tag.CAMPFIRES.getValues());
+//        Tag.CAMPFIRES.getValues().stream().map(Material::asBlockType).forEach(fallback_on::add);
+//        fallback_on.add(BlockType.CACTUS);
+//        fallback_on.add(BlockType.MAGMA_BLOCK);
+//        fallback_on.add(BlockType.POINTED_DRIPSTONE);
     }
 
     /**
@@ -186,119 +171,54 @@ public class ConfigManager {
         return null;
     }
 
-    public boolean isUserName(@NotNull String text) {
-        return USERNAME_PATTERN.getValueOrFallback().matcher(text).matches();
+    public boolean isUserName(final @NotNull String text) {
+        return configData.usernamePattern.matcher(text).matches();
     }
 
-    public void reload() {
-        @Nullable String langTag = plugin.getConfig().getString(LOCALE.getPath());
+    public @NotNull CompletableFuture<Void> reload() {
+        final @NotNull CompletableFuture<Void> result = new CompletableFuture<>();
 
-        if (langTag != null) {
-            Locale locale = Locale.forLanguageTag(langTag.replace("_", "-"));
-
-            // fall back if locale is undefined
-            if (locale.getLanguage().isEmpty()) {
-                LOCALE.setValue(null);
-            } else {
-                LOCALE.setValue(locale);
-            }
-        }
-
-        plugin.getMessageManager().reload(LOCALE.getValueOrFallback());
-
-        for (AFeature<?> feature : plugin.getFeatureRegistry().getAllFeatures()) {
-            feature.getFeatureConfig().reloadConfig();
-        }
-
-        Set<BlockType> temp = ConcurrentHashMap.newKeySet();
-        temp.addAll(getBlockTypesFromConfig(plugin.getConfig(), UNSAFE_MATS_STANDING_IN.getPath()));
-        UNSAFE_MATS_STANDING_IN.setValue(temp);
-
-        temp = ConcurrentHashMap.newKeySet();
-        temp.addAll(getBlockTypesFromConfig(plugin.getConfig(), UNSAFE_MATS_STANDING_ON.getPath()));
-        UNSAFE_MATS_STANDING_ON.setValue(temp);
-    }
-
-    public @NotNull Set<@NotNull BlockType> getBlockTypesFromConfig(final @NotNull FileConfiguration config, final @NotNull String key) {
-        // load BlockType set
-        List<?> objects = config.getList(key);
-        /* we need two sets, in case a remove entry happens before an add entry, like in case of:
-         - -STONE
-         - *
-        */
-
-        if (objects == null || objects.isEmpty()) {
-            return new HashSet<>();
-        }
-
-        Set<BlockType> addSet = new HashSet<>();
-        Set<BlockType> removeSet = new HashSet<>();
-
-        Iterable<Tag<BlockType>> tagCache = null;
-        for (Object object : objects) {
-            switch (object) {
-                case BlockType material -> addSet.add(material);
-                case String string -> {
-                    if (string.equals("*")) {
-                        Registry.BLOCK.forEach(addSet::add);
-                    } else {
-                        boolean add = true;
-
-                        if (string.startsWith("-")) {
-                            add = false;
-                            string = string.substring(1);
-                        }
-
-                        BlockType blockType = Registry.BLOCK.get(NamespacedKey.fromString(string));
-
-                        if (blockType != null) {
-                            if (add) {
-                                addSet.add(blockType);
-                            } else {
-                                removeSet.add(blockType);
-                            }
-                        } else { //try tags
-                            // lazy initialisation
-                            if (tagCache == null) {
-                                tagCache = plugin.getServer().getTags(Tag.REGISTRY_BLOCKS, BlockType.class);
-                            }
-
-                            string = string.toUpperCase(Locale.ENGLISH);
-                            string = string.replaceAll("\\s+", "_");
-
-                            if (!string.startsWith(MC_NAMESPACE)) {
-                                string = MC_NAMESPACE + string;
-                            }
-
-                            boolean found = false;
-
-                            for (Tag<BlockType> tag : tagCache) {
-                                if (tag.getKey().asString().equalsIgnoreCase(string)) {
-
-                                    if (add) {
-                                        addSet.addAll(tag.getValues());
-                                    } else {
-                                        removeSet.addAll(tag.getValues());
-                                    }
-                                    found = true;
-                                    break;
-                                }
-                            }
-
-                            if (!found) {
-                                plugin.getLogger().warning("Couldn't get BlockType \"" + string + "\" for block list. Ignoring.");
-                            }
-                        }
+        // use ForkJoinPool instead of Bukkits async scheduler, because the async threads aren't up and running before we register our commands.
+        ForkJoinPool.commonPool().execute(() -> {
+            synchronized(this) {
+                if (Files.exists(configPath)) {
+                    try (final InputStream inputStream = plugin.getResource("config.yml")){
+                        Files.copy(inputStream, configPath);
+                    } catch (final @NotNull IOException | NullPointerException e) {
+                        result.completeExceptionally(e);
+                        return;
                     }
                 }
-                case null -> plugin.getLogger().warning("Couldn't get empty BlockType for block list. Ignoring.");
-                default ->
-                    plugin.getLogger().warning("Couldn't get BlockType \"" + object + "\" for block list. Ignoring.");
-            }
-        }
-        addSet.removeAll(removeSet);
 
-        return addSet;
+                try {
+                    configData = loader.load().get(ConfigData.class);
+                } catch (final @NotNull ConfigurateException e) {
+                    result.completeExceptionally(e);
+                    return;
+                }
+
+                if (configData.configVersion.compareTo(DATA_VERSION) > 0) {
+                    result.completeExceptionally(new ConfigurateException("Version higher than expected: " + DATA_VERSION + " got: " + configData.configVersion));
+                    return;
+                }
+
+                plugin.getMessageManager().reload(configData.language);
+
+                final @NotNull Collection<@NotNull AFeature<?>> features = plugin.getFeatureRegistry().getAllFeatures();
+                final @NotNull CompletableFuture<Void> @NotNull [] futures = new CompletableFuture[features.size()];
+                final @NotNull Iterator<@NotNull AFeature<?>> featureIterator = features.iterator();
+
+                for (int i = 0; featureIterator.hasNext(); i++) {
+                    futures[i] = featureIterator.next().getFeatureConfig().reloadConfig();
+                }
+                // this thread will sleep until the server has loaded the async scheduler.
+                CompletableFuture.allOf(futures).join();
+
+                result.complete(null);
+            }
+        });
+
+        return result;
     }
 
     /**
@@ -310,7 +230,9 @@ public class ConfigManager {
      * @return
      * @see net.minecraft.world.level.CollisionGetter#getBlockCollisions(net.minecraft.world.entity.Entity, AABB)
      */
-    public boolean isEntitySafeAt(@NotNull Entity entity, @NotNull World world, double x, double y, double z) { // todo adapt to the new BlockCollisions system but still stay on API
+    public boolean isEntitySafeAt(final @NotNull Entity entity,
+                                  final @NotNull World world,
+                                  final double x, final double y, final double z) { // todo adapt to the new BlockCollisions system but still stay on API
         //start looking for unsafe blocks one Block under the entity.
         if (y - 1 < world.getMinHeight()) {
             return false;
@@ -331,13 +253,13 @@ public class ConfigManager {
         BlockPosition supportingBlock = findSupportingBlockAt(locToTest, entityBoundingBox.clone().shift(0, -1.0E-6D, 0));
         if (supportingBlock == null) {
             return false;
-        } else if (UNSAFE_MATS_STANDING_ON.getValueOrFallback().contains(world.getBlockAt(supportingBlock.blockX(), supportingBlock.blockY(), supportingBlock.blockZ()).getType().asBlockType())) {
+        } else if (configData.unsafeBlocksStandingOnUnpacked.contains(world.getBlockAt(supportingBlock.blockX(), supportingBlock.blockY(), supportingBlock.blockZ()).getType().asBlockType())) {
             return false;
         }
 
         // we just assume if water would be at eye height it would have flown down if there wasn't a block with collision
         final @NotNull Material matAtLoc = locToTest.getBlock().getType();
-        if ((matAtLoc == Material.WATER || matAtLoc == Material.BUBBLE_COLUMN) && !IS_WATER_SAFE.getValueOrFallback()) {
+        if ((matAtLoc == Material.WATER || matAtLoc == Material.BUBBLE_COLUMN) && !configData.isWaterSafe) {
             return false;
         }
 
@@ -356,7 +278,7 @@ public class ConfigManager {
                     final Block blockCheck = world.getBlockAt(xCheck, yCheck, zCheck);
                     final org.bukkit.util.VoxelShape blockVoxelShape = blockCheck.getCollisionShape();
 
-                    if (UNSAFE_MATS_STANDING_IN.getValueOrFallback().contains(blockCheck.getType().asBlockType())) {
+                    if (configData.unsafeBlocksStandingInUnpacked.contains(blockCheck.getType().asBlockType())) {
                         if (!blockCheck.isPassable()) {
                             // overlaps or border to border
                             // because you don't need to stand IN the cactus to take damage.
@@ -394,5 +316,99 @@ public class ConfigManager {
         }
 
         return true;
+    }
+
+    @ConfigSerializable
+    protected static class ConfigData {
+        protected final @NotNull ComparableVersion configVersion = DATA_VERSION;
+        // the point at the beginning is for bedrock player if the proxy supports them.
+        protected final @NotNull Pattern usernamePattern = Pattern.compile("^.?[a-zA-Z0-9_]{3,16}$"); // todo mind that a pattern in yaml should use '<pattern>' not "<pattern>"
+        protected final @NotNull Set<@NotNull String> unsafeBlocksStandingIn  = new HashSet<>();
+        protected final @NotNull Set<@NotNull String> unsafeBlocksStandingOn  = new HashSet<>();
+        protected boolean isWaterSafe = false;
+        protected @NotNull Locale language = Locale.getDefault();
+
+        protected transient @MonotonicNonNull Set<@NotNull BlockType> unsafeBlocksStandingInUnpacked;
+        protected transient @MonotonicNonNull Set<@NotNull BlockType> unsafeBlocksStandingOnUnpacked;
+
+        @PostProcess
+        protected void postProcess() {
+            unsafeBlocksStandingInUnpacked = unpackBlockTypes(unsafeBlocksStandingIn);
+            unsafeBlocksStandingOnUnpacked = unpackBlockTypes(unsafeBlocksStandingOn);
+        }
+
+        public @NotNull Set<@NotNull BlockType> unpackBlockTypes(final @NotNull Set<@NotNull String> rawBlockTypes) {
+            /* we need two sets, in case a remove entry happens before an add entry, like in case of:
+             - -STONE
+             - *
+            */
+
+            if (rawBlockTypes.isEmpty()) {
+                return new HashSet<>();
+            }
+
+            final @NotNull Set<@NotNull BlockType> addSet = new HashSet<>();
+            final @NotNull Set<@NotNull BlockType> removeSet = new HashSet<>();
+
+            @MonotonicNonNull Iterable<@NotNull Tag<@NotNull BlockType>> tagCache = null;
+
+            for (@NotNull String rawBlockType : rawBlockTypes) {
+                if (rawBlockType.equals("*")) {
+                    Registry.BLOCK.forEach(addSet::add);
+                } else {
+                    boolean add = true;
+
+                    if (rawBlockType.startsWith("-")) {
+                        add = false;
+                        rawBlockType = rawBlockType.substring(1);
+                    }
+
+                    final @Nullable BlockType blockType = Registry.BLOCK.get(NamespacedKey.fromString(rawBlockType));
+
+                    if (blockType != null) {
+                        if (add) {
+                            addSet.add(blockType);
+                        } else {
+                            removeSet.add(blockType);
+                        }
+                    } else { //try tags
+                        // lazy initialisation
+                        if (tagCache == null) {
+                            tagCache = Bukkit.getServer().getTags(Tag.REGISTRY_BLOCKS, BlockType.class);
+                        }
+
+                        rawBlockType = rawBlockType.toUpperCase(Locale.ENGLISH);
+                        rawBlockType = rawBlockType.replaceAll("\\s+", "_");
+
+                        if (!rawBlockType.startsWith(MC_NAMESPACE)) {
+                            rawBlockType = MC_NAMESPACE + rawBlockType;
+                        }
+
+                        boolean found = false;
+
+                        for (final @NotNull Tag<@NotNull BlockType> tag : tagCache) {
+                            if (tag.getKey().asString().equalsIgnoreCase(rawBlockType)) {
+
+                                if (add) {
+                                    addSet.addAll(tag.getValues());
+                                } else {
+                                    removeSet.addAll(tag.getValues());
+                                }
+                                found = true;
+                                break;
+                            }
+                        }
+
+                        if (!found) {
+                            Bukkit.getLogger().warning("[GreenBook] Couldn't get BlockType \"" + rawBlockType + "\" for block list. Ignoring.");
+                        }
+                    }
+                }
+            }
+
+            addSet.removeAll(removeSet);
+
+            return addSet;
+        }
     }
 }

@@ -2,7 +2,7 @@ package de.greensurvivors.greenbook.features;
 
 import de.greensurvivors.greenbook.GreenBook;
 import de.greensurvivors.greenbook.commands.GreenBookCmd;
-import de.greensurvivors.greenbook.config.AFeatureConfig;
+import de.greensurvivors.greenbook.config.IFeatureConfigManager;
 import io.papermc.paper.command.brigadier.Commands;
 import org.bukkit.event.Listener;
 import org.bukkit.permissions.Permission;
@@ -13,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Every feature should make use of {@link IPermissionHolder} to manage its permissions.
  */
-public abstract class AFeature<C extends AFeatureConfig> {
+public abstract class AFeature<C extends IFeatureConfigManager> {
     protected final @NotNull C featureConfig;
     protected final @NotNull GreenBook plugin;
     private final @NotNull FeatureType featureType;
@@ -52,14 +52,14 @@ public abstract class AFeature<C extends AFeatureConfig> {
 
     /**
      * A method called when the feature is disabled.
-     * Should call {@link AFeatureConfig#setEnabled(boolean)} with false.
+     * Should call {@link IFeatureConfigManager#setEnabled(boolean)} with false.
      * If the feature registers EventHandlers they should be disabled via {@link org.bukkit.event.HandlerList#unregisterAll(Listener)}
      */
     public abstract void onDisable();
 
     /**
      * A method called when the feature is enabled.
-     * Should call {@link AFeatureConfig#setEnabled(boolean)} with true.
+     * Should call {@link IFeatureConfigManager#setEnabled(boolean)} with true.
      * If the feature registers EventHandlers they should be enabled via {@link org.bukkit.plugin.PluginManager#registerEvents(Listener, Plugin)}
      */
     public abstract void onEnable();

@@ -54,7 +54,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-public class WirelessRedstoneFeature extends AFeature<WirelessConfig> implements Listener {
+public class WirelessRedstoneFeature extends AFeature<WirelessConfigManager> implements Listener {
     private static final @NotNull EnumPersistentDataType<WirelessNodeType> NODE_DATA_TYPE = new EnumPersistentDataType<>(WirelessNodeType.class);
     private final @NotNull NamespacedKey nodeTypeKey;
     private final @NotNull NamespacedKey networkChannelKey;
@@ -72,7 +72,7 @@ public class WirelessRedstoneFeature extends AFeature<WirelessConfig> implements
     private final @NotNull ChunkChecker provider;
 
     public WirelessRedstoneFeature(@NotNull GreenBook plugin) {
-        super(plugin, FeatureType.WIRELESS, new WirelessConfig(plugin));
+        super(plugin, FeatureType.WIRELESS, new WirelessConfigManager(plugin));
         this.provider = new ChunkChecker(plugin);
         this.nodeTypeKey = new NamespacedKey(plugin, "wirelessNodeType");
         this.networkChannelKey = new NamespacedKey(plugin, "wirelessChannel");

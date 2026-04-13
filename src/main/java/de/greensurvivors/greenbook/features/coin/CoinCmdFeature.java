@@ -21,12 +21,12 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class CoinCmdFeature extends AFeature<CoinConfig> {
+public class CoinCmdFeature extends AFeature<CoinConfigManager> {
     private static final String COMMAND = "coin";
     private static final String SET = "set";
 
     public CoinCmdFeature(@NotNull GreenBook plugin) {
-        super(plugin, FeatureType.COIN, new CoinConfig(plugin));
+        super(plugin, FeatureType.COIN, new CoinConfigManager(plugin));
     }
 
     @Override

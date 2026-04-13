@@ -2,7 +2,7 @@ package de.greensurvivors.greenbook.features.wireless.network;
 
 import de.greensurvivors.greenbook.GreenBook;
 import de.greensurvivors.greenbook.features.FeatureType;
-import de.greensurvivors.greenbook.features.wireless.WirelessConfig;
+import de.greensurvivors.greenbook.features.wireless.WirelessConfigManager;
 import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -107,7 +107,7 @@ public class WirelessNetwork {
         } else {
             if (obj instanceof WirelessNetwork that) {
                 if (this.getChannel().equalsIgnoreCase(that.getChannel())) {
-                    if (!((WirelessConfig) plugin.getFeatureRegistry().getFeature(FeatureType.WIRELESS).getFeatureConfig()).usePlayerSpecificChannels()) {
+                    if (!((WirelessConfigManager) plugin.getFeatureRegistry().getFeature(FeatureType.WIRELESS).getFeatureConfig()).usePlayerSpecificChannels()) {
                         return true;
                     } else {
                         return (Objects.equals(this.getOwnerUUIDStr(), that.getOwnerUUIDStr()) ||

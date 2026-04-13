@@ -3,7 +3,7 @@ package de.greensurvivors.greenbook.features.quotes.quotesubcmds;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import de.greensurvivors.greenbook.GreenBook;
 import de.greensurvivors.greenbook.commands.ASubCommand;
-import de.greensurvivors.greenbook.features.quotes.QuoteConfig;
+import de.greensurvivors.greenbook.features.quotes.QuoteConfigManager;
 import de.greensurvivors.greenbook.features.quotes.QuotePermissions;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
@@ -20,9 +20,9 @@ import java.util.Set;
 public class EditSubSubCommand extends ASubCommand { // todo this
     private static final String EDIT = "edit";
 
-    private final @NotNull QuoteConfig quoteConfig;
+    private final @NotNull QuoteConfigManager quoteConfig;
 
-    public EditSubSubCommand(@NotNull GreenBook plugin, @NotNull QuoteConfig config) {
+    public EditSubSubCommand(@NotNull GreenBook plugin, @NotNull QuoteConfigManager config) {
         super(plugin);
         quoteConfig = config;
     }
