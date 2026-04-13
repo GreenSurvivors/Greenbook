@@ -15,9 +15,8 @@ public class GreenPluginLoader implements PluginLoader {
         MavenLibraryResolver resolver = new MavenLibraryResolver();
 
         resolver.addRepository(new RemoteRepository.Builder("central", "default", MavenLibraryResolver.MAVEN_CENTRAL_DEFAULT_MIRROR).build());
-
-        resolver.addDependency(new Dependency(new DefaultArtifact("com.github.ben-manes.caffeine:caffeine:3.1.8"), null));
-        resolver.addDependency(new Dependency(new DefaultArtifact("org.apache.commons:commons-collections4:4.5.0-M1"), null));
+        
+        resolver.addDependency(new Dependency(new DefaultArtifact("com.github.ben-manes.caffeine:caffeine:${caffeine_version}"), null));
         classpathBuilder.addLibrary(resolver);
     }
 }

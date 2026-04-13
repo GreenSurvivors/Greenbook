@@ -1,5 +1,7 @@
 package de.greensurvivors.greenbook.features.painting;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import de.greensurvivors.greenbook.GreenBook;
 import de.greensurvivors.greenbook.commands.GreenBookCmd;
 import de.greensurvivors.greenbook.features.AFeature;
@@ -7,8 +9,6 @@ import de.greensurvivors.greenbook.features.FeatureType;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
-import org.apache.commons.collections4.BidiMap;
-import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import org.bukkit.Art;
 import org.bukkit.Bukkit;
 import org.bukkit.Registry;
@@ -31,7 +31,7 @@ import java.util.UUID;
 public class PaintingFeature extends AFeature<PaintingConfigManager> implements Listener {
     //map holding every player uuid who's currently editing a painting
     //every player edits only one painting and every painting gets only edited by one player
-    private final @NotNull BidiMap<@NotNull UUID, @NotNull UUID> modifyingMap = new DualHashBidiMap<>(); //uuid player, uuid painting
+    private final @NotNull BiMap<@NotNull UUID, @NotNull UUID> modifyingMap = HashBiMap.create(); //uuid player, uuid painting
 
     public PaintingFeature(@NotNull GreenBook plugin) {
         super(plugin, FeatureType.PAINTING, new PaintingConfigManager(plugin));
@@ -91,7 +91,7 @@ public class PaintingFeature extends AFeature<PaintingConfigManager> implements 
      * @return null if no player was found or the player is not in range any more
      */
     private @Nullable Player getEditingPlayer(final @NotNull Painting painting) {
-        final @Nullable UUID uuidPlayer = modifyingMap.inverseBidiMap().get(painting.getUniqueId());
+        final @Nullable UUID uuidPlayer = modifyingMap.inverse().get(painting.getUniqueId());
 
         if (uuidPlayer != null) {
             final @Nullable Player player = Bukkit.getPlayer(uuidPlayer);
@@ -121,7 +121,7 @@ public class PaintingFeature extends AFeature<PaintingConfigManager> implements 
             Player player = getEditingPlayer(painting);
 
             //removes the painting from the tracked ones
-            modifyingMap.inverseBidiMap().remove(painting.getUniqueId());
+            modifyingMap.inverse().remove(painting.getUniqueId());
 
             //message the player
             if (player != null) {

@@ -20,9 +20,6 @@
  */
 package de.greensurvivors.greenbook.utils;
 
-import org.apache.commons.collections4.OrderedIterator;
-import org.apache.commons.collections4.ResettableIterator;
-import org.apache.commons.collections4.iterators.EmptyOrderedIterator;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -557,7 +554,7 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
     public boolean removeAllFirstVal(final int value) {
         boolean modified = false;
         if (size > 0) {
-            final OrderedIterator<DoubleInt> it = iterator();
+            final SequencedIterator<DoubleInt> it = iterator();
             while (it.hasNext()) {
                 final DoubleInt next = it.next();
                 if (value == next.getValue1()) {
@@ -619,7 +616,7 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
 
             public @NotNull Iterator<DoubleInt> iterator() {
                 if (isEmpty()) {
-                    return EmptyOrderedIterator.emptyOrderedIterator();
+                    return EmptySequenceIterator.INSTANCE;
                 }
                 return new LinkIterator(LinkedDoubleIntHashSet.this, true);
             }
@@ -770,9 +767,9 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
      * @return an {@code Iterator} over the elements in this collection
      */
     @Override
-    public @NotNull OrderedIterator<@NotNull DoubleInt> iterator() {
+    public @NotNull SequencedIterator<@NotNull DoubleInt> iterator() {
         if (isEmpty()) {
-            return EmptyOrderedIterator.emptyOrderedIterator();
+            return EmptySequenceIterator.INSTANCE;
         }
         return new LinkIterator(this, false);
     }
@@ -1159,8 +1156,7 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
     /**
      * Base Iterator that iterates in link order.
      */
-    protected static class LinkIterator implements
-        OrderedIterator<DoubleInt>, ResettableIterator<DoubleInt> {
+    protected static class LinkIterator implements SequencedIterator<DoubleInt> {
         /// The parent set
         protected final @NotNull LinkedDoubleIntHashSet parent;
         protected final boolean reversed;
@@ -1380,5 +1376,78 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
         public DoubleInt clone() {
             return new DoubleInt(value1, value2, hashCode);
         }
+    }
+
+    public interface SequencedIterator<T> extends Iterator<T> {
+
+        /**
+         * Checks to see if there is a previous element that can be iterated to.
+         *
+         * @return {@code true} if the iterator has a previous element
+         */
+        boolean hasPrevious();
+
+        /**
+         * Gets the previous element of the sequence.
+         *
+         * @return the previous element in the iteration
+         * @throws java.util.NoSuchElementException if the iteration is finished
+         */
+        T previous();
+
+        /**
+         * Resets the iterator back to the position at which the iterator
+         * was created.
+         */
+        void reset();
+    }
+
+    protected static class EmptySequenceIterator<E> implements SequencedIterator<E> {
+        protected static SequencedIterator INSTANCE = new EmptySequenceIterator();
+
+        protected EmptySequenceIterator() {
+        }
+
+        @Override
+        public boolean hasNext() {
+            return false;
+        }
+
+        @Override
+        public boolean hasPrevious() {
+            return false;
+        }
+
+        @Override
+        public E next() {
+            throw new NoSuchElementException("Iterator contains no elements");
+        }
+
+//        public int nextIndex() {
+//            return 0;
+//        }
+
+        @Override
+        public E previous() {
+            throw new NoSuchElementException("Iterator contains no elements");
+        }
+
+//        public int previousIndex() {
+//            return -1;
+//        }
+
+        @Override
+        public void remove() {
+            throw new IllegalStateException("Iterator contains no elements");
+        }
+
+        @Override
+        public void reset() {
+            // do nothing
+        }
+
+//        public void set(final E obj) {
+//            throw new IllegalStateException("Iterator contains no elements");
+//        }
     }
 }

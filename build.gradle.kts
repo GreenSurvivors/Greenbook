@@ -2,17 +2,26 @@ plugins {
     `java-library`
     id("io.papermc.paperweight.userdev") version "2.0.0-beta.19"
     id("xyz.jpenilla.run-paper") version "2.3.1" // Adds runServer task for testing
+    id("net.raphimc.class-token-replacer") version "1.1.7" // replace tokens in java code
 }
 
 group = "de.greensurvivors"
-version = "0.0.3-SNAPSHOT"
 description = "Like Craftbook, but not a buggy dinosaur"
-// this is the minecraft. This is also used as the api version of the plugin.yml
-val mcVersion = "1.21.11"
+version = buildString {
+    append(project.properties["plugin_version"])
+
+    if ((project.properties["is_release"] as String).toBoolean().not()) {
+        append("-Snapshot")
+    }
+
+    append("+${project.properties["minecraft_version"]}")
+}
+
+// todo remove with 26.1
 // don't use spigots reobfused jar
 paperweight.reobfArtifactConfiguration = io.papermc.paperweight.userdev.ReobfArtifactConfiguration.MOJANG_PRODUCTION
 
-val targetJavaVersion = 21
+val targetJavaVersion = JavaLanguageVersion.of("${rootProject.properties["java_version"]}").asInt()
 java {
     val javaVersion = JavaVersion.toVersion(targetJavaVersion)
     sourceCompatibility = javaVersion
@@ -38,11 +47,17 @@ repositories {
 }
 
 dependencies {
-    paperweight.paperDevBundle("$mcVersion-R0.1-SNAPSHOT")
-    compileOnly("org.jetbrains:annotations:24.1.0")
-    api("com.github.ben-manes.caffeine:caffeine:3.1.8") // caches
-    api("org.apache.commons:commons-collections4:4.5.0-M2")
-    api("com.sk89q.worldedit:worldedit-bukkit:7.4.2-SNAPSHOT")
+    paperweight.paperDevBundle("${project.properties["minecraft_version"]}-R0.1-SNAPSHOT")
+    api("com.github.ben-manes.caffeine:caffeine:${project.properties["caffeine_version"]}") // caches
+    api("com.sk89q.worldedit:worldedit-bukkit:${project.properties["worldedit_version"]}")
+}
+
+sourceSets {
+    main {
+        classTokenReplacer {
+            property("\${caffeine_version}", project.properties["caffeine_version"].toString())
+        }
+    }
 }
 
 tasks {
@@ -52,7 +67,7 @@ tasks {
         expand(
             "version" to project.version,
             "description" to project.description as String,
-            "apiVersion" to mcVersion
+            "apiVersion" to project.properties["minecraft_version"].toString()
         )
     }
 
@@ -67,7 +82,7 @@ tasks {
     runServer {
         downloadPlugins {
             // make sure to double-check the version id on the Modrinth version page
-            modrinth("worldedit", "p8T2aZ8U" /*project.properties["worldEdit_runVersion"].toString()*/)
+            modrinth("worldedit", project.properties["worldEdit_runVersion"].toString())
         }
 
         // disable bstats, as it isn't needed for dev environment
