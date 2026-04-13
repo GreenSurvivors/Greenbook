@@ -164,7 +164,7 @@ public abstract class AFeatureConfigManager<
      * Apply the update transformations to a node.
      *
      * @param node the node to transform
-     * @param <N> node type
+     * @param <N>  node type
      * @return provided node, after transformation
      */
     private <N extends @NotNull ScopedConfigurationNode<?>> N updateNode(final N node) throws ConfigurateException {
@@ -188,7 +188,7 @@ public abstract class AFeatureConfigManager<
         final @NotNull CompletableFuture<Void> result = new CompletableFuture<>();
 
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            synchronized(this) {
+            synchronized (this) {
                 try {
                     loader.save(loader.createNode().set(typeToken, config));
                 } catch (final @NotNull ConfigurateException e) {

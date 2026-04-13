@@ -180,9 +180,9 @@ public class ConfigManager {
 
         // use ForkJoinPool instead of Bukkits async scheduler, because the async threads aren't up and running before we register our commands.
         ForkJoinPool.commonPool().execute(() -> {
-            synchronized(this) {
+            synchronized (this) {
                 if (Files.exists(configPath)) {
-                    try (final InputStream inputStream = plugin.getResource("config.yml")){
+                    try (final InputStream inputStream = plugin.getResource("config.yml")) {
                         Files.copy(inputStream, configPath);
                     } catch (final @NotNull IOException | NullPointerException e) {
                         result.completeExceptionally(e);
@@ -323,8 +323,8 @@ public class ConfigManager {
         protected final @NotNull ComparableVersion configVersion = DATA_VERSION;
         // the point at the beginning is for bedrock player if the proxy supports them.
         protected final @NotNull Pattern usernamePattern = Pattern.compile("^.?[a-zA-Z0-9_]{3,16}$"); // todo mind that a pattern in yaml should use '<pattern>' not "<pattern>"
-        protected final @NotNull Set<@NotNull String> unsafeBlocksStandingIn  = new HashSet<>();
-        protected final @NotNull Set<@NotNull String> unsafeBlocksStandingOn  = new HashSet<>();
+        protected final @NotNull Set<@NotNull String> unsafeBlocksStandingIn = new HashSet<>();
+        protected final @NotNull Set<@NotNull String> unsafeBlocksStandingOn = new HashSet<>();
         protected boolean isWaterSafe = false;
         protected @NotNull Locale language = Locale.getDefault();
 

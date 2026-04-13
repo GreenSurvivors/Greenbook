@@ -30,12 +30,12 @@ public class FeatureType { // todo make sure every feature can be disabled
     protected final @NotNull String featureName;
     protected final @Nullable Function<@NotNull GreenBook, @NotNull AFeature<?>> constructor;
 
-    protected FeatureType(@NotNull String featureName) {
+    protected FeatureType(final @NotNull String featureName) {
         this.featureName = featureName;
         this.constructor = null;
     }
 
-    protected FeatureType(@NotNull String featureName, @NotNull Function<@NotNull GreenBook, @NotNull AFeature<?>> constructor) {
+    protected FeatureType(final @NotNull String featureName, final @NotNull Function<@NotNull GreenBook, @NotNull AFeature<?>> constructor) {
         this.featureName = featureName;
         this.constructor = constructor;
     }

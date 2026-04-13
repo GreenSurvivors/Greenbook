@@ -31,14 +31,14 @@ import java.util.UUID;
 public class PaintingFeature extends AFeature<PaintingConfigManager> implements Listener {
     //map holding every player uuid who's currently editing a painting
     //every player edits only one painting and every painting gets only edited by one player
-    private final BidiMap<UUID, UUID> modifyingMap = new DualHashBidiMap<>(); //uuid player, uuid painting
+    private final @NotNull BidiMap<@NotNull UUID, @NotNull UUID> modifyingMap = new DualHashBidiMap<>(); //uuid player, uuid painting
 
     public PaintingFeature(@NotNull GreenBook plugin) {
         super(plugin, FeatureType.PAINTING, new PaintingConfigManager(plugin));
     }
 
     @Override
-    public void registerCommands(@NotNull Commands commandsRegistrar, @NotNull GreenBookCmd mainCommand) {
+    public void registerCommands(final @NotNull Commands commandsRegistrar, final @NotNull GreenBookCmd mainCommand) {
         PaintingSubCommand subCommand = new PaintingSubCommand(plugin, this, mainCommand.getPermission());
 
         mainCommand.registerSubcommand(subCommand, subCommand.getCmdNodes());
@@ -49,11 +49,10 @@ public class PaintingFeature extends AFeature<PaintingConfigManager> implements 
         HandlerList.unregisterAll(this);
 
         //remove all players who are currently editing a painting
-        for (UUID uuid : modifyingMap.values()) {
+        for (final @NotNull UUID uuid : modifyingMap.values()) {
             modifyingMap.remove(uuid);
 
-            Player player = plugin.getServer().getPlayer(uuid);
-
+            final @Nullable Player player = plugin.getServer().getPlayer(uuid);
             if (player != null) {
                 //message the player
 
@@ -74,7 +73,7 @@ public class PaintingFeature extends AFeature<PaintingConfigManager> implements 
      * @param painting painting to ReflectHelper for
      * @return true if player and painting are in the same world and in modifying range
      */
-    private boolean isInEditingRange(@NotNull Player player, @NotNull Painting painting) {
+    private boolean isInEditingRange(final @NotNull Player player, final @NotNull Painting painting) {
         if (player.getWorld() == painting.getWorld()) { //check world
             //check distance. Note: we compare the distance squared with the range squared, since it's faster than the root
             return player.getLocation().distanceSquared(painting.getLocation()) <= getFeatureConfig().getModifyRangeSqr();
@@ -91,11 +90,11 @@ public class PaintingFeature extends AFeature<PaintingConfigManager> implements 
      * @param painting the painting in question
      * @return null if no player was found or the player is not in range any more
      */
-    private @Nullable Player getEditingPlayer(@NotNull Painting painting) {
-        UUID uuidPlayer = modifyingMap.inverseBidiMap().get(painting.getUniqueId());
+    private @Nullable Player getEditingPlayer(final @NotNull Painting painting) {
+        final @Nullable UUID uuidPlayer = modifyingMap.inverseBidiMap().get(painting.getUniqueId());
 
         if (uuidPlayer != null) {
-            Player player = Bukkit.getPlayer(uuidPlayer);
+            final @Nullable Player player = Bukkit.getPlayer(uuidPlayer);
 
             //is still in editing range?
             if (player != null && isInEditingRange(player, painting)) {
@@ -117,8 +116,8 @@ public class PaintingFeature extends AFeature<PaintingConfigManager> implements 
      * stop editing a painting if it dies
      */
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
-    private void onPaintingDestroy(@NotNull HangingBreakByEntityEvent event) {
-        if (event.getEntity() instanceof Painting painting) {
+    private void onPaintingDestroy(final @NotNull HangingBreakByEntityEvent event) {
+        if (event.getEntity() instanceof final @NotNull Painting painting) {
             Player player = getEditingPlayer(painting);
 
             //removes the painting from the tracked ones
@@ -136,8 +135,8 @@ public class PaintingFeature extends AFeature<PaintingConfigManager> implements 
      * stop editing a painting if the editing player changes worlds
      */
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
-    private void onWorldChange(@NotNull PlayerChangedWorldEvent event) {
-        UUID uuidPlayer = event.getPlayer().getUniqueId();
+    private void onWorldChange(final @NotNull PlayerChangedWorldEvent event) {
+        final @NotNull UUID uuidPlayer = event.getPlayer().getUniqueId();
 
         //if the player is currently editing a painting remove them from beeing tracked
         if (modifyingMap.get(uuidPlayer) != null) {
@@ -152,7 +151,7 @@ public class PaintingFeature extends AFeature<PaintingConfigManager> implements 
      * stop editing a painting if the player quits
      */
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
-    private void onQuit(@NotNull PlayerQuitEvent event) {
+    private void onQuit(final @NotNull PlayerQuitEvent event) {
         modifyingMap.remove(event.getPlayer().getUniqueId());
     }
 
@@ -160,7 +159,7 @@ public class PaintingFeature extends AFeature<PaintingConfigManager> implements 
      * stop editing a painting if the player gets kicked
      */
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
-    private void onKick(@NotNull PlayerKickEvent event) {
+    private void onKick(final @NotNull PlayerKickEvent event) {
         modifyingMap.remove(event.getPlayer().getUniqueId());
     }
 
@@ -169,16 +168,16 @@ public class PaintingFeature extends AFeature<PaintingConfigManager> implements 
      * if they have the permission to do so
      */
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
-    private void onPaintingInteract(@NotNull PlayerInteractEntityEvent event) {
+    private void onPaintingInteract(final @NotNull PlayerInteractEntityEvent event) {
         //just listen to main hand and check if the right-clicked entity is a painting
         if (event.getHand() == EquipmentSlot.HAND &&
-            event.getRightClicked() instanceof Painting paint) {
+            event.getRightClicked() instanceof final @NotNull Painting paint) {
             //cache the player
-            Player ePlayer = event.getPlayer();
+            final @NotNull Player ePlayer = event.getPlayer();
 
             //check permission
             if (ePlayer.hasPermission(PaintingPermissions.CHANGE_PAINTING.getPermission())) {
-                Player other = getEditingPlayer(paint);
+                final @Nullable Player other = getEditingPlayer(paint);
 
                 if (other == null) { //no one is currently editing this painting
                     modifyingMap.put(ePlayer.getUniqueId(), paint.getUniqueId());
@@ -208,17 +207,17 @@ public class PaintingFeature extends AFeature<PaintingConfigManager> implements 
      * switch between motives of the linked painting when scrolling (changing hotbar slot)
      */
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
-    private void onItemHeldChange(@NotNull PlayerItemHeldEvent event) {
+    private void onItemHeldChange(final @NotNull PlayerItemHeldEvent event) {
         //the player who changed the item in their hand
-        Player ePlayer = event.getPlayer();
+        final @NotNull Player ePlayer = event.getPlayer();
 
         //try to get the uuid of the painting a player might be linked to
-        UUID paintingUUID = modifyingMap.get(ePlayer.getUniqueId());
+        final @Nullable UUID paintingUUID = modifyingMap.get(ePlayer.getUniqueId());
         if (paintingUUID != null) {
             //we got an entity. Just to be sure is it a painting or did bukkit spawned a new entity with the same uuid?
             //also is the player still in range?
-            Entity entity = Bukkit.getEntity(paintingUUID);
-            if (entity instanceof Painting painting && painting.isValid() &&
+            final @Nullable Entity entity = Bukkit.getEntity(paintingUUID);
+            if (entity instanceof final @NotNull Painting painting && painting.isValid() &&
                 isInEditingRange(ePlayer, painting)) {
                 //only do something if the selected hotbar slot changed
                 if (event.getNewSlot() != event.getPreviousSlot()) {

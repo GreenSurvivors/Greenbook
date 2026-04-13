@@ -53,7 +53,7 @@ public class ChunkChecker implements Listener {
         Set<ChunkGroup> trackedChunks = trackedWorlds.get(event.getWorld().getName());
 
         if (trackedChunks != null) {
-            trackedChunks.removeIf(a -> a.onChunkUnload(event.getChunk().getChunkKey()));
+            trackedChunks.removeIf(chunkGroup -> chunkGroup.onChunkUnload(event.getChunk().getChunkKey()));
 
             if (trackedChunks.isEmpty()) {
                 trackedWorlds.remove(event.getWorld().getName());

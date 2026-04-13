@@ -82,7 +82,7 @@ public class WirelessConfigManager extends AYamlFeatureConfigManager<WirelessCon
         protected WirelessNodeTypeSettings(final @NotNull Component id, final @NotNull Pattern idPattern, final @NotNull Component displayLabel) {
             this.id = id;
             this.idPattern = idPattern;
-            this.displayLabel =  displayLabel;
+            this.displayLabel = displayLabel;
         }
 
         // no parameter constructor for configurate
@@ -100,7 +100,7 @@ public class WirelessConfigManager extends AYamlFeatureConfigManager<WirelessCon
     protected static class WirelessConfigData extends AFeatureConfigData {
         protected final @NotNull Component invalidDisplayLabel = Component.text("ERROR");
         protected final boolean usePlayerChannels = true;
-        protected final @NotNull WirelessNodeTypeSettings  receiver = new WirelessConfigManager.WirelessNodeTypeSettings(
+        protected final @NotNull WirelessNodeTypeSettings receiver = new WirelessConfigManager.WirelessNodeTypeSettings(
             Component.text("[Mc1111]"),
             Pattern.compile("^\\s*(?i)\\[Mc1111]\\s*S?\\s*$"),
             Component.text("Repeater"));

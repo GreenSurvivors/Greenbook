@@ -18,6 +18,7 @@ import static java.util.Objects.requireNonNull;
 /**
  * Implements a number of child ConfigurationTransformations which are only applied if required,
  * according to the configurations current version.
+ *
  * @see org.spongepowered.configurate.transformation.VersionedTransformation
  */
 public class ComparableVersionedTransformation implements IComparableVersioned {

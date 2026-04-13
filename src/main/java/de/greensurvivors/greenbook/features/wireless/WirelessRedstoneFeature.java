@@ -383,7 +383,7 @@ public class WirelessRedstoneFeature extends AFeature<WirelessConfigManager> imp
 
             for (BlockState sign : signs) {
                 // since they are in ALL_SIGNS tag we can safely cast
-                PersistentDataContainer container = ((Sign)sign).getPersistentDataContainer();
+                PersistentDataContainer container = ((Sign) sign).getPersistentDataContainer();
 
                 sign.update(true, false);
 

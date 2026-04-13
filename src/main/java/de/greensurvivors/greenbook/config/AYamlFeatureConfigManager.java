@@ -18,6 +18,7 @@ public abstract class AYamlFeatureConfigManager<AFeatureConfigType extends AFeat
                                         final @NotNull ComparableVersion currentConfigVersion, final @Nullable ComparableVersionedTransformation updateTransformation) {
         super(plugin, featureType, configLoaderBuilder, ".yml", typeToken, currentConfigVersion, updateTransformation);
     }
+
     protected AYamlFeatureConfigManager(final @NotNull GreenBook plugin, final @NotNull FeatureType featureType,
                                         final AbstractConfigurationLoader.@NotNull Builder<YamlConfigurationLoader.Builder, YamlConfigurationLoader> configLoaderBuilder,
                                         final @NotNull TypeToken<AFeatureConfigType> typeToken) {

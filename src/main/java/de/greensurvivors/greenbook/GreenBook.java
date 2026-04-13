@@ -11,16 +11,17 @@ import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.jetbrains.annotations.NotNull;
 
 public final class GreenBook extends JavaPlugin {
-    private MessageManager messageManager;
-    private ConfigManager configManager;
-    private FeatureRegistry featureRegistry;
-    private DependencyManager dependencyManager;
+    private @MonotonicNonNull MessageManager messageManager;
+    private @MonotonicNonNull ConfigManager configManager;
+    private @MonotonicNonNull FeatureRegistry featureRegistry;
+    private @MonotonicNonNull DependencyManager dependencyManager;
 
     private void onLifeCycleCommandEvent(final @NotNull ReloadableRegistrarEvent<Commands> event) {
-        GreenBookCmd mainCommand = new GreenBookCmd(this);
+        final @NotNull GreenBookCmd mainCommand = new GreenBookCmd(this);
 
         for (AFeature<?> feature : featureRegistry.getAllFeatures()) {
             feature.registerCommands(event.registrar(), mainCommand);
@@ -65,20 +66,19 @@ public final class GreenBook extends JavaPlugin {
         featureRegistry.disableAll();
     }
 
-
-    public MessageManager getMessageManager() {
+    public @MonotonicNonNull MessageManager getMessageManager() {
         return messageManager;
     }
 
-    public ConfigManager getConfigManager() {
+    public @MonotonicNonNull ConfigManager getConfigManager() {
         return configManager;
     }
 
-    public FeatureRegistry getFeatureRegistry() {
+    public @MonotonicNonNull FeatureRegistry getFeatureRegistry() {
         return featureRegistry;
     }
 
-    public DependencyManager getDependencyManager() {
+    public @MonotonicNonNull DependencyManager getDependencyManager() {
         return dependencyManager;
     }
 }

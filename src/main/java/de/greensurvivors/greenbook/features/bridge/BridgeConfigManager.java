@@ -47,6 +47,6 @@ public class BridgeConfigManager extends AYamlFeatureConfigManager<BridgeConfigM
 
     @ConfigSerializable
     protected static class BridgeConfigData extends AFeatureConfigData {
-        protected final @NotNull Set<@NotNull BlockData>  allowedBridgeBlocks = new HashSet<>();
+        protected final @NotNull Set<@NotNull BlockData> allowedBridgeBlocks = new HashSet<>();
     }
 }

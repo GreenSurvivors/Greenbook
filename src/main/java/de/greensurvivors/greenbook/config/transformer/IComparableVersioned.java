@@ -9,6 +9,7 @@ import org.spongepowered.configurate.transformation.ConfigurationTransformation;
 
 /**
  * A transformation that is aware of node versions.
+ *
  * @see org.spongepowered.configurate.transformation.ConfigurationTransformation.Versioned
  */
 interface IComparableVersioned extends ConfigurationTransformation {

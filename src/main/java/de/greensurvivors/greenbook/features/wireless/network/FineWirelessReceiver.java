@@ -131,7 +131,7 @@ public class FineWirelessReceiver extends AWirelessReceiver {
                 }
             }
         } else { // how ??
-            plugin.getLogger().warning("FineWirelessReceiver was not attached to a lectern. This should never happen.");
+            plugin.getComponentLogger().warn("FineWirelessReceiver was not attached to a lectern. This should never happen.");
         }
     }
 

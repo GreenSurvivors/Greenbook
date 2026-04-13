@@ -39,14 +39,14 @@ public class LiftConfigManager extends AYamlFeatureConfigManager<LiftConfigManag
             return LiftType.DOWN;
         } else if (config.both.pattern.matcher(lineStr).matches()) {
             return LiftType.BOTH;
-        } else if (config.stop.pattern.matcher(lineStr).matches()){
+        } else if (config.stop.pattern.matcher(lineStr).matches()) {
             return LiftType.STOP;
         }
 
         return null;
     }
 
-    public @NotNull Component getLabel (final @NotNull LiftType liftType) {
+    public @NotNull Component getLabel(final @NotNull LiftType liftType) {
         return switch (liftType) {
             case UP -> config.up.label;
             case DOWN -> config.down.label;
@@ -113,11 +113,11 @@ public class LiftConfigManager extends AYamlFeatureConfigManager<LiftConfigManag
         protected final @NotNull LiftTypeLabel both = new LiftTypeLabel(Component.text("[Lift UpDown]"));
         protected final @NotNull LiftTypeLabel stop = new LiftTypeLabel(Component.text("[Lift]"));
 
-        protected LiftConfigData () {
+        protected LiftConfigData() {
             unpack();
         }
 
-        private static @NotNull Pattern buildLabelPattern (@NotNull String rawPatternStr) {
+        private static @NotNull Pattern buildLabelPattern(@NotNull String rawPatternStr) {
             //case-insensitive regex with all special characters escaped; nothing surrounding the label but optional whitespace
             return Pattern.compile(String.format("^\\s*(?i)%s\\s*$",
                 Pattern.quote(MiniMessage.miniMessage().stripTags(rawPatternStr))));

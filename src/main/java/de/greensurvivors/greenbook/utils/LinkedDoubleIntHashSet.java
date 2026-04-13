@@ -54,26 +54,26 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
     protected static final @NotNull String NO_NEXT_ENTRY = "No next() entry in the iteration";
     protected static final @NotNull String NO_PREVIOUS_ENTRY = "No previous() entry in the iteration";
     protected static final @NotNull String REMOVE_INVALID = "remove() can only be called once after next()";
-    /** The default capacity to use */
+    /// The default capacity to use
     protected static final int DEFAULT_CAPACITY = 16;
-    /** The default threshold to use */
+    /// The default threshold to use
     protected static final int DEFAULT_THRESHOLD = 12;
-    /** The default load factor to use */
+    /// The default load factor to use
     protected static final float DEFAULT_LOAD_FACTOR = 0.75f;
-    /** The maximum capacity allowed */
+    /// The maximum capacity allowed
     protected static final int MAXIMUM_CAPACITY = 1 << 30;
 
-    /** Load factor, normally 0.75 */
+    /// Load factor, normally 0.75
     private final transient float loadFactor;
-    /** Header in the linked list */
+    /// Header in the linked list
     protected transient @Nullable DoubleInt header;
-    /** The size of the set */
+    /// The size of the set
     private transient int size;
-    /** set entries */
+    /// set entries
     private @Nullable DoubleInt @NotNull [] data;
-    /** Size at which to rehash */
+    /// Size at which to rehash
     private int threshold;
-    /** Modification count for iterators */
+    /// Modification count for iterators
     private int modCount;
 
     /**
@@ -611,7 +611,7 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
      *
      * @return a reverse-ordered view of this collection, as a {@code SequencedSet}
      */
-    public SequencedSet<@NotNull DoubleInt> reversed() {
+    public @NotNull SequencedSet<@NotNull DoubleInt> reversed() {
         class ReverseLinkedDoubleHashSetView extends AbstractSet<DoubleInt> implements SequencedSet<DoubleInt> {
             public int size() {
                 return LinkedDoubleIntHashSet.this.size();
@@ -652,7 +652,7 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
                 return LinkedDoubleIntHashSet.this.removeFirst();
             }
 
-            public SequencedSet<DoubleInt> reversed() {
+            public @NotNull SequencedSet<DoubleInt> reversed() {
                 return LinkedDoubleIntHashSet.this;
             }
 
@@ -1161,14 +1161,14 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
      */
     protected static class LinkIterator implements
         OrderedIterator<DoubleInt>, ResettableIterator<DoubleInt> {
-        /** The parent set */
+        /// The parent set
         protected final @NotNull LinkedDoubleIntHashSet parent;
         protected final boolean reversed;
-        /** The current (last returned) entry */
+        /// The current (last returned) entry
         protected DoubleInt last;
-        /** The next entry */
+        /// The next entry
         protected DoubleInt next;
-        /** The modification count expected */
+        /// The modification count expected
         protected int expectedModCount;
 
         protected LinkIterator(final @NotNull LinkedDoubleIntHashSet parent, boolean reversed) {
@@ -1300,17 +1300,17 @@ public class LinkedDoubleIntHashSet extends AbstractSet<LinkedDoubleIntHashSet.D
      * </p>
      */
     public static class DoubleInt implements Cloneable {
-        /** The individual values */
+        /// The individual values
         private final int value1;
         private final int value2;
-        /** The entry before this one in the order */
+        /// The entry before this one in the order
         protected DoubleInt before;
-        /** The entry after this one in the order */
+        /// The entry after this one in the order
         protected DoubleInt after;
-        /** The next entry in the hash chain */
+        /// The next entry in the hash chain
         // next is an entry with the same hashIndex in the array
         protected @Nullable DoubleInt next;
-        /** The hash code of the value */
+        /// The hash code of the value
         protected final int hashCode;
 
         public DoubleInt(final int value1, final int value2) {

@@ -7,7 +7,6 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
-import net.kyori.adventure.util.UTF8ResourceBundleControl;
 import org.apache.commons.io.FileUtils;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
@@ -19,7 +18,6 @@ import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
 import java.security.CodeSource;
 import java.util.*;
-import java.util.logging.Level;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -55,7 +53,7 @@ public class MessageManager {
         try {
             return lang.getString(path.getPath());
         } catch (MissingResourceException | ClassCastException e) {
-            plugin.getLogger().log(Level.WARNING, "couldn't find path: \"" + path.getPath() + "\" in lang files using fallback.", e);
+            plugin.getComponentLogger().warn("couldn't find path: \"" + path.getPath() + "\" in lang files using fallback.", e);
             return path.getDefaultValue();
         }
     }
@@ -65,7 +63,7 @@ public class MessageManager {
         try {
             value = lang.getString(path.getPath());
         } catch (MissingResourceException | ClassCastException e) {
-            plugin.getLogger().log(Level.WARNING, "couldn't find path: \"" + path.getPath() + "\" in lang files using fallback.", e);
+            plugin.getComponentLogger().warn("couldn't find path: \"" + path.getPath() + "\" in lang files using fallback.", e);
             value = path.getDefaultValue();
         }
 
@@ -81,7 +79,7 @@ public class MessageManager {
         // save all missing keys
         initLangFiles();
 
-        plugin.getLogger().info("Locale set to language: " + locale.toLanguageTag());
+        plugin.getComponentLogger().info("Locale set to language: " + locale.toLanguageTag());
         File langDictionary = new File(plugin.getDataFolder(), BUNDLE_NAME);
 
         URL[] urls;
@@ -90,16 +88,16 @@ public class MessageManager {
             lang = ResourceBundle.getBundle(BUNDLE_NAME, locale, new URLClassLoader(urls));
 
         } catch (SecurityException | MalformedURLException e) {
-            plugin.getLogger().log(Level.WARNING, "Exception while reading lang bundle. Using internal", e);
+            plugin.getComponentLogger().warn("Exception while reading lang bundle. Using internal", e);
         } catch (MissingResourceException ignored) { // how? missing write access?
-            plugin.getLogger().log(Level.WARNING, "No translation file  for locale \"" + locale.toLanguageTag() + " found on disc. Using internal");
+            plugin.getComponentLogger().warn("No translation file  for locale \"" + locale.toLanguageTag() + " found on disc. Using internal");
         }
 
         if (lang == null) { // fallback, since we are always trying to save defaults this never should happen
             try {
                 lang = PropertyResourceBundle.getBundle(BUNDLE_NAME, locale, plugin.getClass().getClassLoader());
             } catch (MissingResourceException e) {
-                plugin.getLogger().log(Level.SEVERE, "Couldn't get Ressource bundle \"lang\" for locale \"" + locale.toLanguageTag() + "\". Messages WILL be broken!", e);
+                plugin.getComponentLogger().error("Couldn't get Ressource bundle \"lang\" for locale \"" + locale.toLanguageTag() + "\". Messages WILL be broken!", e);
             }
         }
 
@@ -198,7 +196,7 @@ public class MessageManager {
                             try (InputStreamReader reader = new InputStreamReader(new FileInputStream(langFile), StandardCharsets.UTF_8)) {
                                 current.load(reader);
                             } catch (Exception e) {
-                                plugin.getLogger().log(Level.WARNING, "couldn't get current properties file for " + entryName + "!", e);
+                                plugin.getComponentLogger().warn("couldn't get current properties file for " + entryName + "!", e);
                                 continue;
                             }
 
@@ -212,7 +210,7 @@ public class MessageManager {
                                             bw.write("# New Values where added. Is everything else up to date? Time of update: " + new Date());
                                             bw.newLine();
 
-                                            plugin.getLogger().fine("Updated langfile \"" + entryName + "\". Might want to check the new translation strings out!");
+                                            plugin.getComponentLogger().debug("Updated langfile \"" + entryName + "\". Might want to check the new translation strings out!");
 
                                             updated = true;
                                         }
@@ -231,10 +229,10 @@ public class MessageManager {
                     } // doesn't match
                 } // end of elements
             } catch (IOException e) {
-                plugin.getLogger().log(Level.WARNING, "Couldn't save lang files", e);
+                plugin.getComponentLogger().warn("Couldn't save lang files", e);
             }
         } else {
-            plugin.getLogger().warning("Couldn't save lang files: no CodeSource!");
+            plugin.getComponentLogger().warn("Couldn't save lang files: no CodeSource!");
         }
     }
 

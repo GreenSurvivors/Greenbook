@@ -19,7 +19,5 @@ public class GreenPluginLoader implements PluginLoader {
         resolver.addDependency(new Dependency(new DefaultArtifact("com.github.ben-manes.caffeine:caffeine:3.1.8"), null));
         resolver.addDependency(new Dependency(new DefaultArtifact("org.apache.commons:commons-collections4:4.5.0-M1"), null));
         classpathBuilder.addLibrary(resolver);
-
-        classpathBuilder.getContext().getLogger().info("loaded libaries caffeine and commons-collections4.");
     }
 }
