@@ -1,12 +1,8 @@
 package de.greensurvivors.greenbook.features.quotes.quotesubcmds;
 
 import com.mojang.brigadier.Command;
-import com.mojang.brigadier.StringReader;
-import com.mojang.brigadier.arguments.ArgumentType;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.suggestion.Suggestions;
-import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import de.greensurvivors.greenbook.GreenBook;
 import de.greensurvivors.greenbook.commands.ASubCommand;
@@ -30,11 +26,8 @@ import org.bukkit.permissions.Permissible;
 import org.bukkit.permissions.Permission;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Supplier;
 import java.util.SortedMap;
 
 /**
@@ -65,13 +58,14 @@ public class ListSubQuoteSubCmd extends ASubCommand {
     public List<LiteralCommandNode<CommandSourceStack>> getCmdNodes() {
         return List.of(Commands.literal(LIST).
             requires(commandSourceStack -> checkPermission(commandSourceStack.getSender())).
-            then(Commands.argument("pageNumber", new DynamicIntegerArgumentType(() -> 1, this::getNumberOfPages)).
-                requires(c -> getNumberOfPages() > 0). // only allow an argument if we have quotes at all.
-                    executes(context -> onCommand(context, DynamicIntegerArgumentType.getInteger(context, "pageNumber")))/*.
-                    suggests((context, suggestionsBuilder) -> { // todo check for suggestions on all other arguments
-
-                        return suggestionsBuilder.suggest().buildFuture();
-                    })*/
+            then(Commands.argument("pageNumber", IntegerArgumentType.integer(1)).
+                requires(stack -> getNumberOfPages() > 0). // only allow an argument if we have quotes at all.
+                suggests((context, builder) -> {
+                    for (int i = 1; i <= getNumberOfPages(); i++) {
+                        builder.suggest(String.valueOf(i));
+                    }
+                    return builder.buildFuture();
+                }).executes(context -> onCommand(context, IntegerArgumentType.getInteger(context, "pageNumber")))
             ).executes(
                 context -> onCommand(context, 1)
             ).build());
@@ -139,87 +133,5 @@ public class ListSubQuoteSubCmd extends ASubCommand {
         }
 
         return Command.SINGLE_SUCCESS;
-    }
-
-    private static class DynamicIntegerArgumentType implements ArgumentType<Integer> {
-        private final Supplier<Integer> minimum;
-        private final Supplier<Integer> maximum;
-
-        protected DynamicIntegerArgumentType(final @NotNull Supplier<@NotNull Integer> minimum,
-                                             final @NotNull Supplier<@NotNull Integer> maximum) {
-            this.minimum = minimum;
-            this.maximum = maximum;
-        }
-
-        public static int getInteger(final CommandContext<?> context, final String name) {
-            return context.getArgument(name, int.class);
-        }
-
-        public int getNumber(final CommandContext<?> context, final String name) {
-            return context.getArgument(name, int.class);
-        }
-
-        public int getMinimum() {
-            return minimum.get();
-        }
-
-        public int getMaximum() {
-            return maximum.get();
-        }
-
-        @Override
-        public <S> CompletableFuture<Suggestions> listSuggestions(final CommandContext<S> context, final SuggestionsBuilder builder) {
-            for (int i = getMinimum(), max = getMaximum(); i < max; i++) {
-                builder.suggest(i);
-            }
-
-            return builder.buildFuture();
-        }
-
-        @Override
-        public Integer parse(final StringReader reader) throws CommandSyntaxException {
-            final int start = reader.getCursor();
-            final int result = reader.readInt();
-            if (result < minimum.get()) {
-                reader.setCursor(start);
-                throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.integerTooLow().createWithContext(reader, result, minimum);
-            }
-            if (result > maximum.get()) {
-                reader.setCursor(start);
-                throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.integerTooHigh().createWithContext(reader, result, maximum);
-            }
-            return result;
-        }
-
-        @Override
-        public boolean equals(final Object o) {
-            if (this == o) return true;
-            if (o instanceof DynamicIntegerArgumentType that) {
-                return getMaximum() == that.getMaximum() && getMinimum() == that.getMinimum();
-            } else {
-                return false;
-            }
-        }
-
-        @Override
-        public int hashCode() {
-            return 31 * minimum.get() + maximum.get();
-        }
-
-        @Override
-        public String toString() {
-            if (minimum.get() == Integer.MIN_VALUE && maximum.hashCode() == Integer.MAX_VALUE) {
-                return "dynInteger()";
-            } else if (maximum.get() == Integer.MAX_VALUE) {
-                return "dynInteger(" + minimum + ")";
-            } else {
-                return "dynInteger(" + minimum + ", " + maximum + ")";
-            }
-        }
-
-        @Override
-        public Collection<String> getExamples() {
-            return List.of(String.valueOf(getMinimum()), String.valueOf(getMaximum()));
-        }
     }
 }

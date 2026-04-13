@@ -1,6 +1,7 @@
 package de.greensurvivors.greenbook.features.quotes.quotesubcmds;
 
 import com.mojang.brigadier.Command;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import de.greensurvivors.greenbook.GreenBook;
@@ -49,9 +50,12 @@ public class RemoveSubQuoteSubCommand extends ASubCommand {
         // create subcommand
         LiteralCommandNode<CommandSourceStack> subCmdNode = Commands.literal(REMOVE_LONG).
             requires(commandSourceStack -> checkPermission(commandSourceStack.getSender())).
-            then(Commands.argument("quoteId", new BookIDArgument(plugin)).
-                executes(context ->
-                    onCommand(context, BookIDArgument.getID(context, "quoteId")))
+            then(Commands.argument("quoteId", IntegerArgumentType.integer(0)).
+                suggests((context, builder) -> {
+                    quoteConfig.getIds().forEach(builder::suggest);
+                    return builder.buildFuture();
+                }).executes(context ->
+                    onCommand(context, IntegerArgumentType.getInteger(context, "quoteId")))
             ).build();
 
         // register subcommand and alias

@@ -1,6 +1,7 @@
 package de.greensurvivors.greenbook.features.quotes.quotesubcmds;
 
 import com.mojang.brigadier.Command;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import de.greensurvivors.greenbook.GreenBook;
@@ -46,8 +47,12 @@ public class GetSubQuoteSubCommand extends ASubCommand {
     public List<LiteralCommandNode<CommandSourceStack>> getCmdNodes() {
         return List.of(Commands.literal(GET).
             requires(commandSourceStack -> checkPermission(commandSourceStack.getSender())).
-            then(Commands.argument("quoteId", new BookIDArgument(plugin)).
-                executes(context -> onCommand(context, BookIDArgument.getID(context, "quoteId")))
+            then(Commands.argument("quoteId",  IntegerArgumentType.integer(0)).
+                suggests((context, builder) -> {
+                    quoteConfig.getIds().forEach(builder::suggest);
+
+                    return builder.buildFuture();
+                }).executes(context -> onCommand(context, IntegerArgumentType.getInteger(context, "quoteId")))
             ).build());
     }
 
@@ -63,7 +68,7 @@ public class GetSubQuoteSubCommand extends ASubCommand {
         return Component.text("TODO");
     }
 
-    private int onCommand(@NotNull CommandContext<CommandSourceStack> context, int quoteId) {
+    private int onCommand(final @NotNull CommandContext<CommandSourceStack> context, final int quoteId) {
         if (checkPermission(context.getSource().getSender())) {
 
             Component quote = quoteConfig.getQuote(quoteId);
