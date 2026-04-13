@@ -63,7 +63,7 @@ public class GreenBookCmd {
 
     public void finalizeSubCommands(final @NotNull Commands commandsRegistrar) {
         if (cmdBuilder != null) {
-            commandsRegistrar.register(cmdBuilder.build(), DESCRIPTION, List.of());
+            commandsRegistrar.register(plugin.getPluginMeta(), cmdBuilder.build(), DESCRIPTION, List.of());
 
             cmdBuilder = null;
         }
