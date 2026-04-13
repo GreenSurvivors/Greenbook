@@ -33,13 +33,13 @@ public class LiftConfigManager extends AYamlFeatureConfigManager<LiftConfigManag
     public @Nullable LiftType fromLabel(final @NotNull Component label) {
         final String lineStr = PlainTextComponentSerializer.plainText().serialize(label);
 
-        if (config.up.pattern.matcher(lineStr).matches()) {
+        if (configData.up.pattern.matcher(lineStr).matches()) {
             return LiftType.UP;
-        } else if (config.down.pattern.matcher(lineStr).matches()) {
+        } else if (configData.down.pattern.matcher(lineStr).matches()) {
             return LiftType.DOWN;
-        } else if (config.both.pattern.matcher(lineStr).matches()) {
+        } else if (configData.both.pattern.matcher(lineStr).matches()) {
             return LiftType.BOTH;
-        } else if (config.stop.pattern.matcher(lineStr).matches()) {
+        } else if (configData.stop.pattern.matcher(lineStr).matches()) {
             return LiftType.STOP;
         }
 
@@ -48,10 +48,10 @@ public class LiftConfigManager extends AYamlFeatureConfigManager<LiftConfigManag
 
     public @NotNull Component getLabel(final @NotNull LiftType liftType) {
         return switch (liftType) {
-            case UP -> config.up.label;
-            case DOWN -> config.down.label;
-            case BOTH -> config.both.label;
-            case STOP -> config.stop.label;
+            case UP -> configData.up.label;
+            case DOWN -> configData.down.label;
+            case BOTH -> configData.both.label;
+            case STOP -> configData.stop.label;
         };
     }
 
@@ -80,7 +80,7 @@ public class LiftConfigManager extends AYamlFeatureConfigManager<LiftConfigManag
          * @param expectedDestination the name of the destination component
          */
         protected DestinationMatcher(final @NotNull Component expectedDestination) {
-            matcher = config.destinationPattern.matcher(PlainTextComponentSerializer.plainText().serialize(expectedDestination));
+            matcher = configData.destinationPattern.matcher(PlainTextComponentSerializer.plainText().serialize(expectedDestination));
         }
 
         /**
@@ -136,11 +136,14 @@ public class LiftConfigManager extends AYamlFeatureConfigManager<LiftConfigManag
 
     @ConfigSerializable
     protected static class LiftTypeLabel {
-        protected @NotNull Component label;
+        protected @MonotonicNonNull Component label;
         protected transient @MonotonicNonNull Pattern pattern;
 
         protected LiftTypeLabel(final @NotNull Component label) {
             this.label = label;
         }
+
+        // private constructor for configurate
+        private LiftTypeLabel() {}
     }
 }

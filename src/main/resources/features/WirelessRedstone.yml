@@ -1,2 +1,16 @@
-isEnabled: true
-configVersion: 1.0.0
+config-version: '1.0.0'
+is-enabled: true
+use-player-channels: true
+invalid-display-label: ERROR
+receiver: {
+  id: '[Mc1111]',
+  id-pattern: '^\s*(?i)\[Mc1111]\s*S?\s*$',
+  display-label: Repeater,
+  version: 1.0.0
+}
+transmitter: {
+  id: '[Mc1110]',
+  id-pattern: '^\s*(?i)\[Mc1110]\s*S?\s*$',
+  display-label: Transmitter,
+  version: 1.0.0
+}

@@ -30,18 +30,18 @@ public class QuoteConfigManager extends AYamlFeatureConfigManager<QuoteConfigMan
     }
 
     private void checkHighestId(final int otherId) {
-        if (otherId > config.highestId) {
-            config.highestId = otherId;
+        if (otherId > configData.highestId) {
+            configData.highestId = otherId;
         }
     }
 
     public int addQuote(final @NotNull Component quoteText) { // todo something doesn't work here!
-        config.highestId++;
+        configData.highestId++;
 
-        config.quotes.put(config.highestId, quoteText);
+        configData.quotes.put(configData.highestId, quoteText);
         saveConfig().thenRun(this::reloadConfig);
 
-        return config.highestId;
+        return configData.highestId;
     }
 
     public boolean hasQuote(final int quoteID) {
@@ -55,53 +55,53 @@ public class QuoteConfigManager extends AYamlFeatureConfigManager<QuoteConfigMan
             return null;
         }
 
-        return config.quotes.get(ThreadLocalRandom.current().nextInt(config.quotes.size()));
+        return configData.quotes.get(ThreadLocalRandom.current().nextInt(configData.quotes.size()));
     }
 
     public @Nullable Component getQuote(final int quoteID) {
-        return config.quotes.get(quoteID);
+        return configData.quotes.get(quoteID);
     }
 
     public @NotNull SortedMap<@NotNull Integer, @NotNull Component> getQuotes() {
-        return config.quotes;
+        return configData.quotes;
     }
 
     public @NotNull IntSortedSet getIds() {
-        return (IntSortedSet)config.quotes.keySet();
+        return (IntSortedSet) configData.quotes.keySet();
     }
 
     public @NotNull CompletableFuture<@Nullable Component> removeQuote(final int quoteID) {
-        Component result = config.quotes.remove(quoteID);
+        Component result = configData.quotes.remove(quoteID);
 
         return saveConfig().thenRun(this::reloadConfig).thenApply(ignored -> result);
     }
 
     public @NotNull CompletableFuture<Void> setRequireEmptyHand(final boolean shouldQuoteRequireEmptyHand) {
-        config.requiresEmptyHand = shouldQuoteRequireEmptyHand;
+        configData.requiresEmptyHand = shouldQuoteRequireEmptyHand;
 
         return saveAndReload();
     }
 
     public boolean isEmptyHandRequired() {
-        return config.requiresEmptyHand;
+        return configData.requiresEmptyHand;
     }
 
     public @NotNull CompletableFuture<Void> setRequireSneak(final boolean shouldRequireSneak) {
-        config.requiresSneak = shouldRequireSneak;
+        configData.requiresSneak = shouldRequireSneak;
 
         return saveAndReload();
     }
 
     public boolean isSneakRequired() {
-        return config.requiresSneak;
+        return configData.requiresSneak;
     }
 
     public boolean isQuoteBlockType(final @NotNull BlockType type) {
-        return config.clickableBlockTypes.contains(type);
+        return configData.clickableBlockTypes.contains(type);
     }
 
     public boolean isSneakingRequired() {
-        return config.requiresSneak;
+        return configData.requiresSneak;
     }
 
     @ConfigSerializable

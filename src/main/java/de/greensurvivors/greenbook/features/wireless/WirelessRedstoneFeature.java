@@ -90,7 +90,6 @@ public class WirelessRedstoneFeature extends AFeature<WirelessConfigManager> imp
 
     @Override
     public void onDisable() {
-        getFeatureConfig().setEnabled(false);
         loadedNodes.clear();
         networks.invalidateAll();
         networks.cleanUp();

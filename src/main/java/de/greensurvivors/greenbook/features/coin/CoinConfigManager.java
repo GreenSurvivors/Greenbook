@@ -19,11 +19,11 @@ public class CoinConfigManager extends AYamlFeatureConfigManager<CoinConfigManag
     }
 
     public @NotNull ItemStack getCoinItem() {
-        return config.coinItem.clone();
+        return configData.coinItem.clone();
     }
 
     public @NotNull CompletableFuture<Void> setCoinItem(final @NotNull ItemStack item) {
-        config.coinItem = item;
+        configData.coinItem = item;
         return saveAndReload();
     }
 

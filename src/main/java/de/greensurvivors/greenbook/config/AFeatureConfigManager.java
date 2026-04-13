@@ -43,7 +43,7 @@ public abstract class AFeatureConfigManager<
     private final @NotNull ComparableVersion expectedVersion;
     private final @Nullable ComparableVersionedTransformation updateTransformation;
     private final @NotNull TypeToken<AFeatureConfigType> typeToken;
-    protected @MonotonicNonNull AFeatureConfigType config = null;
+    protected volatile @MonotonicNonNull AFeatureConfigType configData = null;
 
     protected AFeatureConfigManager(final @NotNull GreenBook plugin, final @NotNull FeatureType featureType,
                                     final @NotNull AbstractConfigurationLoader.Builder<BuilderType, LoaderType> configLoaderBuilder, final @NotNull String configFileExtension,
@@ -75,7 +75,7 @@ public abstract class AFeatureConfigManager<
                 serializerBuilder.register(BlockType.class, Serializers.BlockTypeSerializer.INSTANCE);
                 serializerBuilder.register(BlockData.class, Serializers.BlockDataSerializer.INSTANCE);
                 serializerBuilder.register(ItemStack.class, Serializers.ItemStackSerializer.INSTANCE);
-            })
+            }).shouldCopyDefaults(true)
         );
 
         loader = configLoaderBuilder.build();
@@ -92,12 +92,12 @@ public abstract class AFeatureConfigManager<
     @Contract(pure = true)
     @Override
     public boolean isEnabled() {
-        return config.isEnabled;
+        return configData.isEnabled;
     } // todo call for all features --> disable commands too!
 
     @Override
     public @NotNull CompletableFuture<Void> setEnabled(final boolean isEnabled) {
-        config.isEnabled = isEnabled;
+        configData.isEnabled = isEnabled;
         return saveAndReload();
     }
 
@@ -113,70 +113,74 @@ public abstract class AFeatureConfigManager<
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
         //ForkJoinPool.commonPool().execute(() -> { // in case the features need to get loaded before the commands
             synchronized (this) {
+                boolean wasModified = false;
+
                 if (!Files.exists(featureConfigPath)) {
                     try (final InputStream inputStream = plugin.getResource(jarPath)) {
                         Files.createDirectories(featureConfigPath.getParent());
                         Files.copy(inputStream, featureConfigPath);
+                        wasModified = true;
                     } catch (final @NotNull IOException e) {
                         result.completeExceptionally(e);
                         return;
                     }
                 }
 
-                final boolean wasEnabled = config != null && config.isEnabled;
+                final boolean wasEnabled = configData != null && configData.isEnabled;
 
+                // Apply the update transformations to our node
                 try {
-                    config = updateNode(loader.load()).get(typeToken);
+                    final @NotNull ScopedConfigurationNode<? extends ScopedConfigurationNode<?>> node = loader.load();
+
+                    if (updateTransformation != null && !node.virtual()) { // we only want to migrate existing data
+                        final @NotNull ComparableVersion startVersion = updateTransformation.version(node);
+                        updateTransformation.apply(node);
+                        final @NotNull ComparableVersion endVersion = updateTransformation.version(node);
+                        if (startVersion != endVersion) { // we might not have made any changes
+                            plugin.getComponentLogger().debug("Updated config schema for {} from {} to {}", featureType.getFeatureName(), startVersion, endVersion);
+                            wasModified = true;
+                        }
+                    }
+
+                    configData = node.get(typeToken);
                 } catch (final @NotNull ConfigurateException e) {
                     result.completeExceptionally(e);
                     return;
                 }
 
-                 if (config.configVersion.compareTo(expectedVersion) > 0) {
-                    result.completeExceptionally(new ConfigurateException("Version higher than expected: " + expectedVersion + " got: " + config.configVersion));
+                if (configData.configVersion.compareTo(expectedVersion) > 0) {
+                    result.completeExceptionally(new ConfigurateException("Version higher than expected: " + expectedVersion + " got: " + configData.configVersion));
                     return;
                 }
 
-                 if (config.isEnabled != wasEnabled) {
+                // save our potentially updated or missing config to disk after we are done
+                if (wasModified) {
+                    result.thenRun(this::saveConfig);
+                }
+
+                 if (configData.isEnabled != wasEnabled) {
                      Bukkit.getScheduler().runTask(plugin, () -> {
                          final @Nullable AFeature<?> feature = plugin.getFeatureRegistry().getFeature(featureType);
 
                          if (feature != null) {
-                             if (config.isEnabled) {
+                             if (configData.isEnabled) {
                                  feature.onEnable();
                              } else {
                                  feature.onDisable();
                              }
+                             result.complete(null);
                          } else {
                              plugin.getComponentLogger().error("Feature Config for type " + featureType.getFeatureName() + " Tried to toggle enabled status, but the feature wasn't registered! Was Async reloading behind on time?");
+                             result.completeExceptionally(new IllegalStateException("Couldn't toggle enabled status because the feature wasn't registered!"));
                          }
                      });
+                 } else {
+                     result.complete(null);
                  }
-
-                result.complete(null);
             }
         });
 
         return result;
-    }
-
-    /**
-     * Apply the update transformations to a node.
-     *
-     * @param node the node to transform
-     * @param <N>  node type
-     * @return provided node, after transformation
-     */
-    private <N extends @NotNull ScopedConfigurationNode<?>> N updateNode(final N node) throws ConfigurateException {
-        if (updateTransformation != null && !node.virtual()) { // we only want to migrate existing data
-            final @NotNull ComparableVersion startVersion = updateTransformation.version(node);
-            updateTransformation.apply(node);
-            final @NotNull ComparableVersion endVersion = updateTransformation.version(node);
-            if (startVersion != endVersion) { // we might not have made any changes
-                plugin.getComponentLogger().debug("Updated config schema for {} from {} to {}", featureType.getFeatureName(), startVersion, endVersion);
-            }
-        }
-        return node;
     }
 
     /**
@@ -190,7 +194,7 @@ public abstract class AFeatureConfigManager<
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             synchronized (this) {
                 try {
-                    loader.save(loader.createNode().set(typeToken, config));
+                    loader.save(loader.createNode().set(typeToken, configData));
                 } catch (final @NotNull ConfigurateException e) {
                     plugin.getComponentLogger().error("Could not set config for feature {}", featureType.getFeatureName(), e);
 

@@ -9,16 +9,20 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class FeatureRegistry {
+    protected final @NotNull GreenBook plugin;
     private final @NotNull Map<@NotNull FeatureType, @NotNull AFeature<?>> registeredFeatures = new HashMap<>(FeatureType.getStandardTypes().size());
 
     /**
      * Creates a new FeatureRegistry.
-     * The standard features are registered automatically.
      *
      * @param plugin the plugin to be used
      */
     public FeatureRegistry(final @NotNull GreenBook plugin) {
-        for (FeatureType standardType : FeatureType.getStandardTypes()) {
+        this.plugin = plugin;
+    }
+
+    public void registerStandardFeatures() {
+        for (final @NotNull FeatureType standardType : FeatureType.getStandardTypes()) {
             final @Nullable AFeature<?> newFeature = standardType.createNewInstance(plugin);
 
             if (newFeature != null) {
@@ -41,6 +45,7 @@ public class FeatureRegistry {
         }
 
         registeredFeatures.put(newFeature.getFeatureType(), newFeature);
+        newFeature.featureConfig.reloadConfig();
     }
 
     /**

@@ -17,12 +17,12 @@ public class PaintingConfigManager extends AYamlFeatureConfigManager<PaintingCon
     }
 
     public @NotNull CompletableFuture<Void> setPaintingModifyRange(final int newRange) {
-        config.editingRange = newRange;
+        configData.editingRange = newRange;
         return saveAndReload();
     }
 
     public double getModifyRangeSqr() {
-        return config.editingRange * config.editingRange;
+        return configData.editingRange * configData.editingRange;
     }
 
     @ConfigSerializable

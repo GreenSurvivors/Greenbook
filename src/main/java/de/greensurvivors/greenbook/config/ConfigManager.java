@@ -39,7 +39,7 @@ public class ConfigManager {
     protected final @NotNull GreenBook plugin;
     protected final @NotNull Path configPath;
     protected final @NotNull YamlConfigurationLoader loader;
-    protected @MonotonicNonNull ConfigData configData;
+    protected volatile @MonotonicNonNull ConfigData configData;
 
     public ConfigManager(final @NotNull GreenBook plugin) {
         this.plugin = plugin;
@@ -204,21 +204,25 @@ public class ConfigManager {
 
                 plugin.getMessageManager().reload(configData.language);
 
-                final @NotNull Collection<@NotNull AFeature<?>> features = plugin.getFeatureRegistry().getAllFeatures();
-                final @NotNull CompletableFuture<Void> @NotNull [] futures = new CompletableFuture[features.size()];
-                final @NotNull Iterator<@NotNull AFeature<?>> featureIterator = features.iterator();
-
-                for (int i = 0; featureIterator.hasNext(); i++) {
-                    futures[i] = featureIterator.next().getFeatureConfig().reloadConfig();
-                }
-                // this thread will sleep until the server has loaded the async scheduler.
-                CompletableFuture.allOf(futures).join();
-
                 result.complete(null);
             }
         });
 
         return result;
+    }
+
+    public @NotNull CompletableFuture<Void> reloadAll() {
+        return reload().thenCompose(ignored -> {
+            final @NotNull Collection<@NotNull AFeature<?>> features = plugin.getFeatureRegistry().getAllFeatures();
+            final @NotNull CompletableFuture<Void> @NotNull [] futures = new CompletableFuture[features.size()];
+            final @NotNull Iterator<@NotNull AFeature<?>> featureIterator = features.iterator();
+
+            for (int i = 0; featureIterator.hasNext(); i++) {
+                futures[i] = featureIterator.next().getFeatureConfig().reloadConfig();
+            }
+            // this thread will sleep until the server has loaded the async scheduler.
+            return CompletableFuture.allOf(futures);
+        });
     }
 
     /**

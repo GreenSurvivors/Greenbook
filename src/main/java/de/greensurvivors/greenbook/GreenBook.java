@@ -37,7 +37,7 @@ public final class GreenBook extends JavaPlugin {
         if (craftBook != null) {
             Bukkit.getPluginManager().disablePlugin(craftBook);
 
-            getComponentLogger().warn("Shoot Craftbook down. Dinosaurs did go extinct, please remove it from your plugins folder!");
+            getComponentLogger().warn("Shot CraftBook down. Dinosaurs did go extinct, please remove it from your plugins folder!");
         }
 
         //language
@@ -46,16 +46,16 @@ public final class GreenBook extends JavaPlugin {
         // dependencies
         dependencyManager = new DependencyManager(this);
 
-        // features
-        featureRegistry = new FeatureRegistry(this);
-        //redstoneFeature = new WirelessRedstoneFeature(this);
-
         // config
         configManager = new ConfigManager(this);
         // note: since we don't join here and the async tasks will start later, this means we will register commands without any of the feature config loaded yet!
         // it's ok, they can wait.
         // the message manager however will get initializied before them!
         configManager.reload();
+
+        // features
+        featureRegistry = new FeatureRegistry(this);
+        featureRegistry.registerStandardFeatures();
 
         // register Commands
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, this::onLifeCycleCommandEvent);

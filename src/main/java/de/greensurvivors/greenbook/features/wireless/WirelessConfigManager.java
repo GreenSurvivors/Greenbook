@@ -27,7 +27,7 @@ public class WirelessConfigManager extends AYamlFeatureConfigManager<WirelessCon
      * or if everyone should use the global one
      */
     public boolean usePlayerSpecificChannels() {
-        return config.usePlayerChannels;
+        return configData.usePlayerChannels;
     }
 
     /**
@@ -40,19 +40,19 @@ public class WirelessConfigManager extends AYamlFeatureConfigManager<WirelessCon
      */
     public @NotNull Component getLabel(final @NotNull WirelessNodeType nodeType) {
         return switch (nodeType) {
-            case RECEIVER -> config.receiver.displayLabel;
-            case TRANSMITTER -> config.transmitter.displayLabel;
-            case NONE -> config.invalidDisplayLabel;
+            case RECEIVER -> configData.receiver.displayLabel;
+            case TRANSMITTER -> configData.transmitter.displayLabel;
+            case NONE -> configData.invalidDisplayLabel;
         };
     }
 
     public @NotNull WirelessNodeType fromID(final @NotNull Component line) {
         final @NotNull String strLine = PlainTextComponentSerializer.plainText().serialize(line);
 
-        if (config.receiver.idPattern.matcher(strLine).matches()) {
+        if (configData.receiver.idPattern.matcher(strLine).matches()) {
             return WirelessNodeType.RECEIVER;
         }
-        if (config.transmitter.idPattern.matcher(strLine).matches()) {
+        if (configData.transmitter.idPattern.matcher(strLine).matches()) {
             return WirelessNodeType.TRANSMITTER;
         }
 
@@ -63,8 +63,8 @@ public class WirelessConfigManager extends AYamlFeatureConfigManager<WirelessCon
         return switch (wirelessNodeType) {
             case NONE ->
                 throw new IllegalArgumentException("Invalid WirelessNodeType to get ID for: " + WirelessNodeType.NONE + " has no ID!");
-            case RECEIVER -> config.receiver.id;
-            case TRANSMITTER -> config.transmitter.id;
+            case RECEIVER -> configData.receiver.id;
+            case TRANSMITTER -> configData.transmitter.id;
         };
     }
 

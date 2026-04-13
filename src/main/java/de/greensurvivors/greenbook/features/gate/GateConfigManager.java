@@ -29,7 +29,7 @@ public class GateConfigManager extends AYamlFeatureConfigManager<GateConfigManag
     @MustBeInvokedByOverriders
     public @NotNull CompletableFuture<Void> reloadConfig() {
         return super.reloadConfig().thenRun(() ->
-            config.signLabelRaw = PlainTextComponentSerializer.plainText().serialize(config.signLabel)
+            configData.signLabelRaw = PlainTextComponentSerializer.plainText().serialize(configData.signLabel)
         );
     }
 
@@ -40,15 +40,15 @@ public class GateConfigManager extends AYamlFeatureConfigManager<GateConfigManag
         }
 
         return PlainTextComponentSerializer.plainText().serialize(line). // get string from component without any format
-            equalsIgnoreCase(config.signLabelRaw); // get expected string without format
+            equalsIgnoreCase(configData.signLabelRaw); // get expected string without format
     }
 
     public @NotNull Component getLabel() {
-        return config.signLabel;
+        return configData.signLabel;
     }
 
     protected boolean isGateBlock(final @NotNull BlockData blockData) {
-        for (BlockData allowedBlock : config.allowedGateBlocks) {
+        for (BlockData allowedBlock : configData.allowedGateBlocks) {
             if (blockData.matches(allowedBlock)) {
                 return true;
             }
@@ -58,7 +58,7 @@ public class GateConfigManager extends AYamlFeatureConfigManager<GateConfigManag
     }
 
     protected boolean isEmptyBlock(final @NotNull BlockData blockData) {
-        for (final @NotNull BlockData allowedBlock : config.allowedReplaceableBlocks) {
+        for (final @NotNull BlockData allowedBlock : configData.allowedReplaceableBlocks) {
             if (blockData.matches(allowedBlock)) {
                 return true;
             }
@@ -68,7 +68,7 @@ public class GateConfigManager extends AYamlFeatureConfigManager<GateConfigManag
     }
 
     public int getMaxArea() {
-        return config.maxArea;
+        return configData.maxArea;
     }
 
     @ConfigSerializable

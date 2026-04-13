@@ -64,11 +64,13 @@ tasks {
     processResources {
         filteringCharset = Charsets.UTF_8.name() // We want UTF-8 for everything
 
-        expand(
-            "version" to project.version,
-            "description" to project.description as String,
-            "apiVersion" to project.properties["minecraft_version"].toString()
-        )
+        filesNotMatching("**/WirelessRedstone.yml") { // the complex pattern doesn't play nicely with the expand task
+            expand(
+                "version" to project.version,
+                "description" to project.description as String,
+                "apiVersion" to project.properties["minecraft_version"].toString()
+            )
+        }
     }
 
     compileJava {

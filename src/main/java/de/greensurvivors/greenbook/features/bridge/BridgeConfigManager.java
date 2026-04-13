@@ -28,7 +28,7 @@ public class BridgeConfigManager extends AYamlFeatureConfigManager<BridgeConfigM
      * @return true if the block data is allowed, false otherwise
      */
     protected boolean isAllowedBlock(@NotNull BlockData blockData) {
-        for (final @NotNull BlockData allowedBlock : config.allowedBridgeBlocks) {
+        for (final @NotNull BlockData allowedBlock : configData.allowedBridgeBlocks) {
             if (blockData.matches(allowedBlock)) {
                 return true;
             }
