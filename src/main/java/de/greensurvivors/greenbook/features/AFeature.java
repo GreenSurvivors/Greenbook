@@ -13,12 +13,13 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Every feature should make use of {@link IPermissionHolder} to manage its permissions.
  */
-public abstract class AFeature<C extends IFeatureConfigManager> {
-    protected final @NotNull C featureConfig;
+public abstract class AFeature<ConfigManagerType extends IFeatureConfigManager> {
+    protected final @NotNull ConfigManagerType featureConfig;
     protected final @NotNull GreenBook plugin;
-    private final @NotNull FeatureType featureType;
+    private final @NotNull FeatureType<ConfigManagerType> featureType;
 
-    public AFeature(@NotNull GreenBook plugin, @NotNull FeatureType featureType, @NotNull C featureConfig) {
+    public AFeature(final @NotNull GreenBook plugin,
+                    final @NotNull FeatureType<ConfigManagerType> featureType, final @NotNull ConfigManagerType featureConfig) {
         this.plugin = plugin;
         this.featureType = featureType;
         this.featureConfig = featureConfig;
@@ -30,14 +31,14 @@ public abstract class AFeature<C extends IFeatureConfigManager> {
      * @return the feature type (not null)
      */
     @Contract(pure = true)
-    public @NotNull FeatureType getFeatureType() {
+    public @NotNull FeatureType<ConfigManagerType> getFeatureType() {
         return featureType;
     }
 
     /**
      * Returns the FeatureConfig of this feature.
      */
-    public @NotNull C getFeatureConfig() {
+    public @NotNull ConfigManagerType getFeatureConfig() {
         return featureConfig;
     }
 

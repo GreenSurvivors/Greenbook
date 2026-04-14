@@ -1,17 +1,10 @@
 package de.greensurvivors.greenbook.utils;
 
 import org.jetbrains.annotations.NotNull;
+import org.spongepowered.configurate.serialize.SerializationException;
 
-public class VersionMissMatchException extends IllegalArgumentException {
-    public VersionMissMatchException(@NotNull String message) {
+public class VersionMissMatchException extends SerializationException {
+    public VersionMissMatchException(final @NotNull String message) {
         super(message);
-    }
-
-    public VersionMissMatchException(@NotNull String message, @NotNull Throwable cause) {
-        super(message, cause);
-    }
-
-    public VersionMissMatchException(@NotNull Throwable cause) {
-        super(cause);
     }
 }

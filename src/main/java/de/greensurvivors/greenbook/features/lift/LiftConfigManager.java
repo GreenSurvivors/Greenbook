@@ -9,11 +9,14 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.Comment;
 import org.spongepowered.configurate.objectmapping.meta.PostProcess;
+import org.spongepowered.configurate.objectmapping.meta.Setting;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -107,43 +110,41 @@ public class LiftConfigManager extends AYamlFeatureConfigManager<LiftConfigManag
 
     @ConfigSerializable
     protected static class LiftConfigData extends AFeatureConfigData {
+        @Comment("How a valid floor name, a player will be  is defined. Has to contain a group named 'floorName'.")
         protected final @NotNull Pattern destinationPattern = Pattern.compile("^(?i)\\s*to\\s*:\\s*(?<floorName>.*?)\\s*$");
         protected final @NotNull LiftTypeLabel up = new LiftTypeLabel(Component.text("[Lift Up]"));
         protected final @NotNull LiftTypeLabel down = new LiftTypeLabel(Component.text("[Lift Down]"));
         protected final @NotNull LiftTypeLabel both = new LiftTypeLabel(Component.text("[Lift UpDown]"));
         protected final @NotNull LiftTypeLabel stop = new LiftTypeLabel(Component.text("[Lift]"));
+    }
 
-        protected LiftConfigData() {
+    // no version associated here, since this is just a string from the config file point of view.
+    @ConfigSerializable
+    protected static class LiftTypeLabel {
+        @Setting(nodeFromParent = true) // since this is the only exposed option, no need to write a 'label' node to config.
+        protected @MonotonicNonNull Component label;
+        protected transient @MonotonicNonNull Pattern pattern;
+
+        protected LiftTypeLabel(final @NotNull Component label) {
+            this.label = label;
             unpack();
         }
 
-        private static @NotNull Pattern buildLabelPattern(@NotNull String rawPatternStr) {
+        // private constructor for configurate
+        @ApiStatus.Internal
+        private LiftTypeLabel() {}
+
+        protected static @NotNull Pattern buildLabelPattern(@NotNull String rawPatternStr) {
             //case-insensitive regex with all special characters escaped; nothing surrounding the label but optional whitespace
             return Pattern.compile(String.format("^\\s*(?i)%s\\s*$",
                 Pattern.quote(MiniMessage.miniMessage().stripTags(rawPatternStr))));
         }
 
         @PostProcess
-        private void unpack() {
+        protected void unpack() {
             final @NotNull PlainTextComponentSerializer serializer = PlainTextComponentSerializer.plainText();
 
-            up.pattern = buildLabelPattern(serializer.serialize(up.label));
-            down.pattern = buildLabelPattern(serializer.serialize(down.label));
-            both.pattern = buildLabelPattern(serializer.serialize(both.label));
-            stop.pattern = buildLabelPattern(serializer.serialize(stop.label));
+            pattern = buildLabelPattern(serializer.serialize(label));
         }
-    }
-
-    @ConfigSerializable
-    protected static class LiftTypeLabel {
-        protected @MonotonicNonNull Component label;
-        protected transient @MonotonicNonNull Pattern pattern;
-
-        protected LiftTypeLabel(final @NotNull Component label) {
-            this.label = label;
-        }
-
-        // private constructor for configurate
-        private LiftTypeLabel() {}
     }
 }

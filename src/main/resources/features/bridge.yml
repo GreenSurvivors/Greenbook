@@ -1,0 +1,12 @@
+# Internal data version.
+# Used to migrate changes in data structure.
+# If you are so touch starved to change this, please go and find some grass.
+config-version: 1.0.0
+# Whenever this feature is enabled.
+is-enabled: true
+# The Blocks a bridge can created out of.
+# Block data (spigot name) aka the block state is defined by https://minecraft.wiki/w/Block_states
+# syntax is block_id[block_states]{data_tags} as defined by https://minecraft.wiki/w/Argument_types#block_state
+allowed-bridge-blocks:
+  - minecraft:stone
+  - minecraft:oak_planks

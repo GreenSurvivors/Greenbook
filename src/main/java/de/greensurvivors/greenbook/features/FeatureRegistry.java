@@ -1,6 +1,7 @@
 package de.greensurvivors.greenbook.features;
 
 import de.greensurvivors.greenbook.GreenBook;
+import de.greensurvivors.greenbook.config.IFeatureConfigManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -10,7 +11,7 @@ import java.util.Map;
 
 public class FeatureRegistry {
     protected final @NotNull GreenBook plugin;
-    private final @NotNull Map<@NotNull FeatureType, @NotNull AFeature<?>> registeredFeatures = new HashMap<>(FeatureType.getStandardTypes().size());
+    private final @NotNull Map<@NotNull FeatureType<?>, @NotNull AFeature<?>> registeredFeatures = new HashMap<>(FeatureType.getStandardTypes().size());
 
     /**
      * Creates a new FeatureRegistry.
@@ -22,7 +23,7 @@ public class FeatureRegistry {
     }
 
     public void registerStandardFeatures() {
-        for (final @NotNull FeatureType standardType : FeatureType.getStandardTypes()) {
+        for (final @NotNull FeatureType<?> standardType : FeatureType.getStandardTypes()) {
             final @Nullable AFeature<?> newFeature = standardType.createNewInstance(plugin);
 
             if (newFeature != null) {
@@ -53,8 +54,8 @@ public class FeatureRegistry {
      *
      * @param type the type of the feature to be unregistered
      */
-    public void unregisterFeature(final @NotNull FeatureType type) {
-        AFeature<?> feature = registeredFeatures.get(type);
+    public void unregisterFeature(final @NotNull FeatureType<?> type) {
+        final @Nullable AFeature<?> feature = registeredFeatures.get(type);
 
         if (feature != null) {
             feature.onDisable();
@@ -78,8 +79,8 @@ public class FeatureRegistry {
      * @param type the type of the feature to retrieve
      * @return the registered feature of the specified type, or null if not found
      */
-    public @Nullable AFeature<?> getFeature(final @NotNull FeatureType type) {
-        return registeredFeatures.get(type);
+    public <ConfigManagerType extends IFeatureConfigManager> @Nullable AFeature<ConfigManagerType> getFeature(final @NotNull FeatureType<ConfigManagerType> type) {
+        return (AFeature<ConfigManagerType>) registeredFeatures.get(type);
     }
 
     /**

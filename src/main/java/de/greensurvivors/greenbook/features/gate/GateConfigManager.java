@@ -13,6 +13,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.Comment;
 import org.spongepowered.configurate.objectmapping.meta.PostProcess;
 
 import java.util.HashSet;
@@ -63,11 +64,23 @@ public class GateConfigManager extends AYamlFeatureConfigManager<GateConfigManag
     }
 
     @ConfigSerializable
-    protected static class GateConfigData extends AFeatureConfigData {
+    protected static class GateConfigData extends AFeatureConfigData { // todo ponder about tags
+        @Comment("""
+            The blocks that are a valid part of a gate (and therefore not a valid frame block).
+            Block data (spigot name) aka the block state is defined by https://minecraft.wiki/w/Block_states
+            syntax is block_id[block_states]{data_tags} as defined by https://minecraft.wiki/w/Argument_types#block_state
+            """)
         protected final @NotNull Set<@NotNull BlockData> allowedGateBlocks = new HashSet<>();
+        @Comment("""
+            The blocks a gate sees as 'empty' and can replace.
+            Block data (spigot name) aka the block state is defined by https://minecraft.wiki/w/Block_states
+            syntax is block_id[block_states]{data_tags} as defined by https://minecraft.wiki/w/Argument_types#block_state
+            """)
         protected @NotNull Set<@NotNull BlockData> allowedReplaceableBlocks = new HashSet<>();
+        @Comment("The second line of a sign that determines if a sign is part of a gate.")
         protected @NotNull Component signLabel = Component.text("[Gate]");
         protected transient @MonotonicNonNull String signLabelRaw = "[Gate]";
+        @Comment("Amount of blocks a gate may span. Lower this, if gates start to cause lags!")
         protected int maxArea = 100;
 
         @PostProcess

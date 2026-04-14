@@ -1,0 +1,12 @@
+# Internal data version.
+# Used to migrate changes in data structure.
+# If you are so touch starved to change this, please go and find some grass.
+config-version: 1.0.0
+# Whenever this feature is enabled.
+is-enabled: true
+# How a valid floor name, a player will be  is defined. Has to contain a group named 'floorName'.
+destination-pattern: '^(?i)\s*to\s*:\s*(?<floorName>.*?)\s*$'
+up: "[Lift Up]"
+down: "[Lift Down]"
+both: "[Lift UpDown]"
+stop: "[Lift]"

@@ -1,0 +1,8 @@
+# Internal data version.
+# Used to migrate changes in data structure.
+# If you are so touch starved to change this, please go and find some grass.
+config-version: 1.0.0
+# Whenever this feature is enabled.
+is-enabled: true
+# The item a player may "toss" (gift) to another.
+coin-item: '{"id":"minecraft:gold_nugget","count":1,"DataVersion":4671}'

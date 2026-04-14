@@ -1,0 +1,21 @@
+# Internal data version.
+# Used to migrate changes in data structure.
+# If you are so touch starved to change this, please go and find some grass.
+config-version: 1.0.0
+# Whenever this feature is enabled.
+is-enabled: true
+# The blocks that are a valid part of a gate (and therefore not a valid frame block).
+# Block data (spigot name) aka the block state is defined by https://minecraft.wiki/w/Block_states
+# syntax is block_id[block_states]{data_tags} as defined by https://minecraft.wiki/w/Argument_types#block_state
+allowed-gate-blocks:
+  - minecraft:oak_fence
+  - minecraft:glass_pane
+# The blocks a gate sees as 'empty' and can replace.
+# Block data (spigot name) aka the block state is defined by https://minecraft.wiki/w/Block_states
+# Syntax is block_id[block_states]{data_tags} as defined by https://minecraft.wiki/w/Argument_types#block_state
+allowed-replaceable-blocks:
+  - minecraft:oak_leaves
+# The second line of a sign that determines if a sign is part of a gate.
+sign-label: "[Gate]"
+# Amount of blocks a gate may span. Lower this, if gates start to cause lags!
+max-area: 100

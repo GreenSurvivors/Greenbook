@@ -11,6 +11,7 @@ import org.bukkit.block.data.BlockData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.Comment;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -37,7 +38,7 @@ public class BridgeConfigManager extends AYamlFeatureConfigManager<BridgeConfigM
         return false;
     }
 
-    protected @Nullable BlockFace getExpectedBridgeDirectionFromComponent(@NotNull Component line) {
+    protected @Nullable BlockFace getExpectedBridgeDirectionFromComponent(final @NotNull Component line) {
         return null; // todo
     }
 
@@ -46,7 +47,11 @@ public class BridgeConfigManager extends AYamlFeatureConfigManager<BridgeConfigM
     }
 
     @ConfigSerializable
-    protected static class BridgeConfigData extends AFeatureConfigData {
+    protected static class BridgeConfigData extends AFeatureConfigData { // todo ponder about Tags
+        @Comment("""
+            The Blocks a bridge can created out of.
+            Block data (spigot name) aka the block state is defined by https://minecraft.wiki/w/Block_states
+            syntax is block_id[block_states]{data_tags} as defined by https://minecraft.wiki/w/Argument_types#block_state""")
         protected final @NotNull Set<@NotNull BlockData> allowedBridgeBlocks = new HashSet<>();
     }
 }

@@ -9,6 +9,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ItemType;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.Comment;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -31,6 +32,7 @@ public class CoinConfigManager extends AYamlFeatureConfigManager<CoinConfigManag
     protected static class CoinConfigData extends AFeatureConfigData {
         // Set default itemstack, so we should not run into null exceptions.
         // However, it should never come into play, since at least the config should provide a default value itself.
+        @Comment("The item a player may \"toss\" (gift) to another.")
         protected @NotNull ItemStack coinItem = ItemType.GOLD_NUGGET.createItemStack(1);
     }
 }

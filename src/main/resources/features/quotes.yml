@@ -1,0 +1,19 @@
+# Internal data version.
+# Used to migrate changes in data structure.
+# If you are so touch starved to change this, please go and find some grass.
+config-version: 1.0.0
+# Whenever this feature is enabled.
+is-enabled: true
+# Internal used highest id. If you really have to touch it (trust me you don't), set it to the highest number of the quotes option.
+highest-id: 1
+# If players need to sneak in order to get a quote.
+requires-sneak: false
+# If players need to click with an empty hand to get a quote.
+requires-empty-hand: true
+# The block types a player may click in order to get a quote.
+clickable-block-types:
+  - minecraft:bookshelf
+# All the quotes with their id in Minimessage format docs.papermc.io/adventure/minimessage/format/
+quotes:
+  0: Yeah a quote!
+  1: Another quote!

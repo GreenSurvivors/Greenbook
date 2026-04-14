@@ -1,6 +1,0 @@
-config-version: 1.0.0
-is-enabled: true
-allowed-gate-blocks: []
-allowed-replaceable-blocks: []
-sign-label: "[Gate]"
-max-area: 100

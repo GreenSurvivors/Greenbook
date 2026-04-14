@@ -82,8 +82,8 @@ public class GateFeature extends AFeature<GateConfigManager> implements Listener
     private final @NotNull NamespacedKey blockTypeKey, directionKey, axisKey, amountKey, lastPowerStateKey;
     private final @NotNull LoadingCache<@NotNull Location, @NotNull Integer> gateLastPowerStateSignCache;
 
-    public GateFeature(@NotNull GreenBook plugin) {
-        super(plugin, FeatureType.BRIDGE, new GateConfigManager(plugin));
+    public GateFeature(final @NotNull GreenBook plugin) {
+        super(plugin, FeatureType.GATE, new GateConfigManager(plugin));
 
         Bukkit.getPluginManager().registerEvents(this, plugin);
 

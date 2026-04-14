@@ -64,7 +64,7 @@ tasks {
     processResources {
         filteringCharset = Charsets.UTF_8.name() // We want UTF-8 for everything
 
-        filesNotMatching("**/WirelessRedstone.yml") { // the complex pattern doesn't play nicely with the expand task
+        filesNotMatching("**features/*.yml") { // the complex pattern doesn't play nicely with the task
             expand(
                 "version" to project.version,
                 "description" to project.description as String,

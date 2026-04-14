@@ -4,8 +4,12 @@ import de.greensurvivors.greenbook.GreenBook;
 import de.greensurvivors.greenbook.config.transformer.ComparableVersionedTransformation;
 import de.greensurvivors.greenbook.features.AFeature;
 import de.greensurvivors.greenbook.features.FeatureType;
+import de.greensurvivors.greenbook.utils.VersionMissMatchException;
 import io.leangen.geantyref.TypeToken;
-import net.kyori.adventure.text.Component;
+import io.papermc.paper.configuration.serializer.ComponentSerializer;
+import io.papermc.paper.configuration.serializer.collection.map.FastutilMapSerializer;
+import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectSortedMap;
 import org.apache.maven.artifact.versioning.ComparableVersion;
 import org.bukkit.Bukkit;
 import org.bukkit.block.BlockType;
@@ -30,31 +34,33 @@ import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 
 public abstract class AFeatureConfigManager<
-        AFeatureConfigType extends AFeatureConfigData,
+        AFeatureConfigDataType extends AFeatureConfigData,
         BuilderType extends AbstractConfigurationLoader.Builder<BuilderType, LoaderType>,
         LoaderType extends AbstractConfigurationLoader<?>> implements IFeatureConfigManager {
 
-    private static final String CONFIG_FOLDER_NAME = "features";
+    private static final @NotNull String CONFIG_DIRECTORY_NAME = "features";
     protected final @NotNull GreenBook plugin;
-    private final @NotNull FeatureType featureType;
+    private final @NotNull FeatureType<? extends AFeatureConfigManager<AFeatureConfigDataType, BuilderType, LoaderType>> featureType; // the generic is the child of this class
     private final @NotNull String jarPath;
     private final @NotNull Path featureConfigPath;
     private final @NotNull LoaderType loader;
     private final @NotNull ComparableVersion expectedVersion;
     private final @Nullable ComparableVersionedTransformation updateTransformation;
-    private final @NotNull TypeToken<AFeatureConfigType> typeToken;
-    protected volatile @MonotonicNonNull AFeatureConfigType configData = null;
+    private final @NotNull TypeToken<AFeatureConfigDataType> typeToken;
+    protected volatile @MonotonicNonNull AFeatureConfigDataType configData = null;
 
-    protected AFeatureConfigManager(final @NotNull GreenBook plugin, final @NotNull FeatureType featureType,
+    protected AFeatureConfigManager(final @NotNull GreenBook plugin,
+                                    final @NotNull FeatureType<? extends AFeatureConfigManager<AFeatureConfigDataType, BuilderType, LoaderType>> featureType,
                                     final @NotNull AbstractConfigurationLoader.Builder<BuilderType, LoaderType> configLoaderBuilder, final @NotNull String configFileExtension,
-                                    final @NotNull TypeToken<AFeatureConfigType> typeToken,
+                                    final @NotNull TypeToken<AFeatureConfigDataType> typeToken,
                                     final @NotNull ComparableVersion currentConfigVersion, final @Nullable ComparableVersionedTransformation updateTransformation) {
-        this(plugin, featureType, configLoaderBuilder, Path.of(CONFIG_FOLDER_NAME, featureType.getFeatureName() + configFileExtension), typeToken, currentConfigVersion, updateTransformation);
+        this(plugin, featureType, configLoaderBuilder, createSubPath(plugin, featureType, configFileExtension), typeToken, currentConfigVersion, updateTransformation);
     }
 
-    protected AFeatureConfigManager(final @NotNull GreenBook plugin, final @NotNull FeatureType featureType,
+    protected AFeatureConfigManager(final @NotNull GreenBook plugin,
+                                    final @NotNull FeatureType<? extends AFeatureConfigManager<AFeatureConfigDataType, BuilderType, LoaderType>> featureType,
                                     final @NotNull AbstractConfigurationLoader.Builder<BuilderType, LoaderType> configLoaderBuilder, final @NotNull Path subPath,
-                                    final @NotNull TypeToken<AFeatureConfigType> typeToken,
+                                    final @NotNull TypeToken<AFeatureConfigDataType> typeToken,
                                     final @NotNull ComparableVersion currentConfigVersion, final @Nullable ComparableVersionedTransformation updateTransformation) {
         this.plugin = plugin;
         this.featureType = featureType;
@@ -68,14 +74,15 @@ public abstract class AFeatureConfigManager<
 
         configLoaderBuilder.path(featureConfigPath);
         configLoaderBuilder.defaultOptions(configOptions ->
-            configOptions.serializers(serializerBuilder -> {
-                serializerBuilder.register(ComparableVersion.class, Serializers.ComparableVersionSerializer.INSTANCE);
-                serializerBuilder.register(Component.class, Serializers.ComponentSerializer.INSTANCE);
-                serializerBuilder.register(Pattern.class, Serializers.PatternSerializer.INSTANCE);
-                serializerBuilder.register(BlockType.class, Serializers.BlockTypeSerializer.INSTANCE);
-                serializerBuilder.register(BlockData.class, Serializers.BlockDataSerializer.INSTANCE);
-                serializerBuilder.register(ItemStack.class, Serializers.ItemStackSerializer.INSTANCE);
-            }).shouldCopyDefaults(true)
+            configOptions.serializers(serializerBuilder -> serializerBuilder
+                .register(ComparableVersion.class, Serializers.ComparableVersionSerializer.INSTANCE)
+                .register(new ComponentSerializer())
+                .register(Pattern.class, Serializers.PatternSerializer.INSTANCE)
+                .register(BlockType.class, Serializers.BlockTypeSerializer.INSTANCE)
+                .register(BlockData.class, Serializers.BlockDataSerializer.INSTANCE)
+                .register(ItemStack.class, Serializers.ItemStackSerializer.INSTANCE)
+                .register(new TypeToken<>() {}, new FastutilMapSerializer.PrimitiveToSomething<Int2ObjectSortedMap<?>>(Int2ObjectLinkedOpenHashMap::new, Integer.TYPE))
+            ).shouldCopyDefaults(true)
         );
 
         loader = configLoaderBuilder.build();
@@ -83,16 +90,24 @@ public abstract class AFeatureConfigManager<
         reloadConfig();
     }
 
+    protected static @NotNull Path createSubPath (final @NotNull GreenBook plugin, final @NotNull FeatureType<?> featureType, final @NotNull String configFileExtension) {
+        if (featureType.getFeatureKey().namespace().equals(plugin.namespace())) {
+            return Path.of(CONFIG_DIRECTORY_NAME, featureType.getFeatureKey().value() + configFileExtension);
+        } else {
+            return Path.of(CONFIG_DIRECTORY_NAME, featureType.getFeatureKey().namespace(), featureType.getFeatureKey().value() + configFileExtension);
+        }
+    }
+
     @Contract(pure = true)
     @Override
-    public @NotNull FeatureType getFeatureType() {
+    public @NotNull FeatureType<? extends AFeatureConfigManager<AFeatureConfigDataType, BuilderType, LoaderType>> getFeatureType() {
         return featureType;
     }
 
     @Contract(pure = true)
     @Override
     public boolean isEnabled() {
-        return configData.isEnabled;
+        return configData != null && configData.isEnabled;
     } // todo call for all features --> disable commands too!
 
     @Override
@@ -121,6 +136,7 @@ public abstract class AFeatureConfigManager<
                         Files.copy(inputStream, featureConfigPath);
                         wasModified = true;
                     } catch (final @NotNull IOException e) {
+                        plugin.getComponentLogger().warn("failed to save default data for {}", getFeatureType().getFeatureKey(), e);
                         result.completeExceptionally(e);
                         return;
                     }
@@ -137,19 +153,21 @@ public abstract class AFeatureConfigManager<
                         updateTransformation.apply(node);
                         final @NotNull ComparableVersion endVersion = updateTransformation.version(node);
                         if (startVersion != endVersion) { // we might not have made any changes
-                            plugin.getComponentLogger().debug("Updated config schema for {} from {} to {}", featureType.getFeatureName(), startVersion, endVersion);
+                            plugin.getComponentLogger().debug("Updated config schema for {} from {} to {}", featureType.getFeatureKey(), startVersion, endVersion);
                             wasModified = true;
                         }
                     }
 
                     configData = node.get(typeToken);
                 } catch (final @NotNull ConfigurateException e) {
+                    plugin.getComponentLogger().warn("failed to load config for {}", getFeatureType().getFeatureKey(), e);
                     result.completeExceptionally(e);
                     return;
                 }
 
                 if (configData.configVersion.compareTo(expectedVersion) > 0) {
-                    result.completeExceptionally(new ConfigurateException("Version higher than expected: " + expectedVersion + " got: " + configData.configVersion));
+                    plugin.getComponentLogger().warn("Version for feature " + featureType.getFeatureKey() + " higher than expected: " + expectedVersion + " got: " + configData.configVersion);
+                    result.completeExceptionally(new VersionMissMatchException("Version higher than expected: " + expectedVersion + " got: " + configData.configVersion));
                     return;
                 }
 
@@ -170,7 +188,7 @@ public abstract class AFeatureConfigManager<
                              }
                              result.complete(null);
                          } else {
-                             plugin.getComponentLogger().error("Feature Config for type " + featureType.getFeatureName() + " Tried to toggle enabled status, but the feature wasn't registered! Was Async reloading behind on time?");
+                             plugin.getComponentLogger().error("Feature Config for type " + featureType.getFeatureKey() + " Tried to toggle enabled status, but the feature wasn't registered! Was Async reloading behind on time?");
                              result.completeExceptionally(new IllegalStateException("Couldn't toggle enabled status because the feature wasn't registered!"));
                          }
                      });
@@ -196,7 +214,7 @@ public abstract class AFeatureConfigManager<
                 try {
                     loader.save(loader.createNode().set(typeToken, configData));
                 } catch (final @NotNull ConfigurateException e) {
-                    plugin.getComponentLogger().error("Could not set config for feature {}", featureType.getFeatureName(), e);
+                    plugin.getComponentLogger().error("Could not set config for feature {}", featureType.getFeatureKey(), e);
 
                     throw new RuntimeException(e);
                 }

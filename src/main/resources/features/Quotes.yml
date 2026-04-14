@@ -1,7 +1,0 @@
-config-version: 1.0.0
-is-enabled: true
-highest-id: 0
-requires-sneak: false
-requires-empty-hand: true
-clickable-block-types: []
-quotes: []

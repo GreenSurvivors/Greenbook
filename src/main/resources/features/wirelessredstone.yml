@@ -1,0 +1,37 @@
+# Internal data version.
+# Used to migrate changes in data structure.
+# If you are so touch starved to change this, please go and find some grass.
+config-version: 1.0.0
+# Whenever this feature is enabled.
+is-enabled: true
+# If this is true, a transmitter / receiver is 'owned' by the last player who edited the sign.
+# Every player has their own network and every receiver owned by a player only outputs a signal, when triggered by a transmitter of the same player.
+use-player-channels: true
+# What the 2. line of a sign should display, in case a receiver / transmitter is invalid
+invalid-display-label: <red>ERROR
+# Inputs redstone signals into the network.
+transmitter:
+  # Internal data version.
+  # Used to migrate changes in data structure.
+  # Don't touch! Or do and suffer the consequences. I'm not your real dad anyway.
+  data-version: 1.0.0
+  # The 2. line of the sign, the plugin corrects the user input to.
+  # Must match the id pattern!
+  id: '[Mc1110]'
+  # Pattern to match the 2nd line of the sign. Determines the type of wireless redstone.
+  id-pattern: '^\s*(?i)\[Mc1110]\s*S?\s*$'
+  # Unfriendly name, displayed on the first line of the sign
+  display-label: Transmitter
+# Outputs redstone signals from the network.
+receiver:
+  # Internal data version.
+  # Used to migrate changes in data structure.
+  # Don't touch! Or do and suffer the consequences. I'm not your real dad anyway.
+  data-version: 1.0.0
+  # The 2. line of the sign, the plugin corrects the user input to.
+  # Must match the id pattern!
+  id: '[Mc1111]'
+  # Pattern to match the 2nd line of the sign. Determines the type of wireless redstone.
+  id-pattern: '^\s*(?i)\[Mc1111]\s*S?\s*$'
+  # Unfriendly name, displayed on the first line of the sign
+  display-label: Receiver

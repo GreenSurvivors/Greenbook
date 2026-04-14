@@ -6,6 +6,7 @@ import de.greensurvivors.greenbook.config.AYamlFeatureConfigManager;
 import de.greensurvivors.greenbook.features.FeatureType;
 import io.leangen.geantyref.TypeToken;
 import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectSortedMap;
 import it.unimi.dsi.fastutil.ints.IntSortedSet;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
@@ -28,8 +29,13 @@ public class QuoteConfigManager extends AYamlFeatureConfigManager<QuoteConfigMan
         super(plugin, FeatureType.QUOTES, TypeToken.get(QuoteConfigData.class));
     }
 
+    /**
+     *
+     * @param quoteText
+     * @return the id of the freshly added quote.
+     */
     public @NotNull CompletableFuture<@NotNull Integer> addQuote(final @NotNull Component quoteText) {
-        final int id = configData.highestId++;
+        final int id = ++configData.highestId;
 
         configData.quotes.put(id, quoteText);
         return saveAndReload().thenApply(ignored -> id);
@@ -58,7 +64,7 @@ public class QuoteConfigManager extends AYamlFeatureConfigManager<QuoteConfigMan
     }
 
     public @NotNull IntSortedSet getIds() {
-        return (IntSortedSet) configData.quotes.keySet();
+        return configData.quotes.keySet();
     }
 
     public @NotNull CompletableFuture<@Nullable Component> removeQuote(final int quoteID) {
@@ -93,12 +99,16 @@ public class QuoteConfigManager extends AYamlFeatureConfigManager<QuoteConfigMan
 
     @ConfigSerializable
     protected static class QuoteConfigData extends AFeatureConfigData {
-        @Comment("Internal used highest id. No touchies. Or do and suffer, I'm not your real dad anyways.")
+        @Comment("Internal used highest id. If you really have to touch it (trust me you don't), set it to the highest number of the quotes option.")
         protected int highestId = 0;
+        @Comment("If players need to sneak in order to get a quote.")
         protected boolean requiresSneak = false;
+        @Comment("If players need to click with an empty hand to get a quote.")
         protected boolean requiresEmptyHand = true;
+        @Comment("The block types a player may click in order to get a quote.")
         protected final @NotNull Set<@NotNull BlockType> clickableBlockTypes = new HashSet<>();
-        protected final @NotNull SortedMap<@NotNull Integer, @NotNull Component> quotes = new Int2ObjectLinkedOpenHashMap<>();
+        @Comment("All the quotes with their id in Minimessage format docs.papermc.io/adventure/minimessage/format/")
+        protected final @NotNull Int2ObjectSortedMap<@NotNull Component> quotes = new Int2ObjectLinkedOpenHashMap<>();
 
         @PostProcess
         protected void checkHighestId() {
