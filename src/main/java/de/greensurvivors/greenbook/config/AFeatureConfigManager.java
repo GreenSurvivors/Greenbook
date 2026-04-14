@@ -198,7 +198,13 @@ public abstract class AFeatureConfigManager<
             }
         });
 
-        return result;
+        // don't try to work in a broken state
+        return result.whenComplete((ignored, ex) -> {
+            if (ex != null) {
+                plugin.getFeatureRegistry().unregisterFeature(getFeatureType());
+                plugin.getComponentLogger().warn("Disabling feature " + getFeatureType().getFeatureKey() + " because reloading it failed!", ex);
+            }
+        });
     }
 
     /**
@@ -214,7 +220,7 @@ public abstract class AFeatureConfigManager<
                 try {
                     loader.save(loader.createNode().set(typeToken, configData));
                 } catch (final @NotNull ConfigurateException e) {
-                    plugin.getComponentLogger().error("Could not set config for feature {}", featureType.getFeatureKey(), e);
+                    plugin.getComponentLogger().error("Could not save config for feature {}. Data may be lost!", featureType.getFeatureKey(), e);
 
                     throw new RuntimeException(e);
                 }
