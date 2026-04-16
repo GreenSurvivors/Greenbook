@@ -23,6 +23,7 @@ import org.bukkit.block.sign.Side;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockPhysicsEvent;
@@ -49,8 +50,6 @@ public class BridgeFeature extends AFeature<BridgeConfigManager> implements List
         expectedBridgeDirectionKey = new NamespacedKey(plugin, "expectedBridgeDirection");
 
         lastPowerStateKey = new NamespacedKey(plugin, "bridgeLastPowerStateKey");
-
-        Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
     @Override
@@ -60,12 +59,12 @@ public class BridgeFeature extends AFeature<BridgeConfigManager> implements List
 
     @Override
     public void onDisable() {
-
+        HandlerList.unregisterAll(this);
     }
 
     @Override
     public void onEnable() {
-
+        Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
     @EventHandler(ignoreCancelled = true)

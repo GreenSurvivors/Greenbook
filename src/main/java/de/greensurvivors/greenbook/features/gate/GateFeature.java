@@ -30,6 +30,7 @@ import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockPhysicsEvent;
@@ -85,8 +86,6 @@ public class GateFeature extends AFeature<GateConfigManager> implements Listener
     public GateFeature(final @NotNull GreenBook plugin) {
         super(plugin, FeatureType.GATE, new GateConfigManager(plugin));
 
-        Bukkit.getPluginManager().registerEvents(this, plugin);
-
         blockTypeKey = new NamespacedKey(plugin, "gateBlockType");
         axisKey = new NamespacedKey(plugin, "gateAxis");
         directionKey = new NamespacedKey(plugin, "gateDirection");
@@ -110,12 +109,8 @@ public class GateFeature extends AFeature<GateConfigManager> implements Listener
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
-    private void onSignChange(@NotNull SignChangeEvent event) {
-        if (!getFeatureConfig().isEnabled()) { // todo
-            return;
-        }
-
-        Player ePlayer = event.getPlayer();
+    private void onSignChange(final @NotNull SignChangeEvent event) {
+        final @NotNull Player ePlayer = event.getPlayer();
 
         //if the 2nd line exists
         if (getFeatureConfig().isGate(event.line(1))) {
@@ -142,10 +137,6 @@ public class GateFeature extends AFeature<GateConfigManager> implements Listener
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
     private void onRightClickSign(@NotNull PlayerInteractEvent event) {
-        if (!getFeatureConfig().isEnabled()) {
-            return;
-        }
-
         //don't fire for offhand
         if (event.getHand() == EquipmentSlot.HAND &&
             //right-clicked a block. Should ensure the getBlock() is not null
@@ -199,12 +190,12 @@ public class GateFeature extends AFeature<GateConfigManager> implements Listener
 
     @Override
     public void onDisable() { // todo
-
+        HandlerList.unregisterAll(this);
     }
 
     @Override
     public void onEnable() { // todo
-
+        Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
     private void doToggleWork(final @NotNull Sign sign, final @NotNull FrameFloodFill frameFloodFill, @Nullable Audience audience) { // todo optional open / close message

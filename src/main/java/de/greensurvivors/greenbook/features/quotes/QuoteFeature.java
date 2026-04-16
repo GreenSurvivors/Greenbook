@@ -13,6 +13,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -22,8 +23,6 @@ import org.jetbrains.annotations.NotNull;
 public class QuoteFeature extends AFeature<QuoteConfigManager> implements Listener { // todo Add Parent permissions per feature, so whoever has that has every cmd and normal permission of that feature.
     public QuoteFeature(@NotNull GreenBook plugin) {
         super(plugin, FeatureType.QUOTES, new QuoteConfigManager(plugin));
-
-        Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
     @Override
@@ -35,12 +34,12 @@ public class QuoteFeature extends AFeature<QuoteConfigManager> implements Listen
 
     @Override
     public void onDisable() {
-
+        HandlerList.unregisterAll(this);
     }
 
     @Override
     public void onEnable() {
-
+        Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
     /**

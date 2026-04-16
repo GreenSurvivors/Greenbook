@@ -22,6 +22,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.SignChangeEvent;
@@ -37,8 +38,6 @@ import org.jetbrains.annotations.Nullable;
 public class LiftFeature extends AFeature<LiftConfigManager> implements Listener {
     public LiftFeature(@NotNull GreenBook plugin) {
         super(plugin, FeatureType.LIFT, new LiftConfigManager(plugin));
-
-        Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
     @Override
@@ -47,12 +46,12 @@ public class LiftFeature extends AFeature<LiftConfigManager> implements Listener
 
     @Override
     public void onDisable() {
-
+        HandlerList.unregisterAll(this);
     }
 
     @Override
     public void onEnable() {
-
+        Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
     /**

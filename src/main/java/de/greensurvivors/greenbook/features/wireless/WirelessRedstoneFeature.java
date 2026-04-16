@@ -4,6 +4,7 @@ import com.destroystokyo.paper.event.block.BlockDestroyEvent;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.sk89q.worldedit.EditSession;
+import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.event.extent.EditSessionEvent;
@@ -39,6 +40,7 @@ import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPhysicsEvent;
@@ -77,11 +79,6 @@ public class WirelessRedstoneFeature extends AFeature<WirelessConfigManager> imp
         this.nodeTypeKey = new NamespacedKey(plugin, "wirelessNodeType");
         this.networkChannelKey = new NamespacedKey(plugin, "wirelessChannel");
         this.ownerUUIDKey = new NamespacedKey(plugin, "ownerUUID");
-
-        // register listener
-        Bukkit.getPluginManager().registerEvents(this, plugin);
-
-        plugin.getDependencyManager().registerEditSessionEvent(this);
     }
 
     @Override
@@ -93,20 +90,19 @@ public class WirelessRedstoneFeature extends AFeature<WirelessConfigManager> imp
         loadedNodes.clear();
         networks.invalidateAll();
         networks.cleanUp();
+
+        HandlerList.unregisterAll(this);
+        WorldEdit.getInstance().getEventBus().unregister(this);
     }
 
     @Override
     public void onEnable() {
         Bukkit.getPluginManager().registerEvents(this, plugin);
-        getFeatureConfig().setEnabled(true);
+        WorldEdit.getInstance().getEventBus().register(this);
     }
 
     @EventHandler(ignoreCancelled = true)
     private void onSignChange(@NotNull SignChangeEvent event) {
-        if (!getFeatureConfig().isEnabled()) {
-            return;
-        }
-
         Component line1Comp = event.line(1);
         Component line2Comp = event.line(2);
         Component line3Comp = event.line(3);
@@ -249,12 +245,8 @@ public class WirelessRedstoneFeature extends AFeature<WirelessConfigManager> imp
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
-    private void onSignPowerChange(@NotNull BlockPhysicsEvent event) {
-        if (!getFeatureConfig().isEnabled()) { // todo (de) register listener just with dis-/ enable methods
-            return;
-        }
-
-        Block eBlock = event.getBlock();
+    private void onSignPowerChange(final @NotNull BlockPhysicsEvent event) {
+        final @NotNull Block eBlock = event.getBlock();
         if (Tag.ALL_SIGNS.isTagged(event.getChangedType())) { // fast check to "fail" fast for non-relevant changes
             AWirelessNode node = loadedNodes.get(eBlock.getLocation());
 
@@ -272,11 +264,7 @@ public class WirelessRedstoneFeature extends AFeature<WirelessConfigManager> imp
 
     @Subscribe(priority = com.sk89q.worldedit.util.eventbus.EventHandler.Priority.VERY_LATE)
     @SuppressWarnings("unused")
-    private void onEditSessionEvent(@NotNull EditSessionEvent event) {
-        if (!getFeatureConfig().isEnabled()) {
-            return;
-        }
-
+    private void onEditSessionEvent(final @NotNull EditSessionEvent event) {
         if (event.getStage() == EditSession.Stage.BEFORE_CHANGE) {
 
             final World world;
@@ -295,11 +283,7 @@ public class WirelessRedstoneFeature extends AFeature<WirelessConfigManager> imp
      * This event gets fired, if the sign gets broken indirectly
      */
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
-    private void onSignDestroy(@NotNull BlockDestroyEvent event) {
-        if (!getFeatureConfig().isEnabled()) {
-            return;
-        }
-
+    private void onSignDestroy(final @NotNull BlockDestroyEvent event) {
         if (Tag.ALL_SIGNS.isTagged(event.getBlock().getType())) {
             AWirelessNode node = loadedNodes.get(event.getBlock().getLocation());
 
@@ -317,11 +301,7 @@ public class WirelessRedstoneFeature extends AFeature<WirelessConfigManager> imp
      * This gets fired when the sign gets broken directly.
      */
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
-    private void onPlayerSignBreak(@NotNull BlockBreakEvent event) {
-        if (!getFeatureConfig().isEnabled()) {
-            return;
-        }
-
+    private void onPlayerSignBreak(final @NotNull BlockBreakEvent event) {
         if (Tag.ALL_SIGNS.isTagged(event.getBlock().getType())) {
             removeNodeAt(event.getBlock().getLocation());
         }
@@ -340,11 +320,7 @@ public class WirelessRedstoneFeature extends AFeature<WirelessConfigManager> imp
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
-    private void onChunkLoad(@NotNull ChunkLoadEvent event) {
-        if (!getFeatureConfig().isEnabled()) {
-            return;
-        }
-
+    private void onChunkLoad(final @NotNull ChunkLoadEvent event) {
         if (!event.isNewChunk()) { // ignore fresh chunks
             provider.whenAllNeighboursLoaded(event.getChunk()).
                 thenAccept(this::onChunkCompletelyLoaded);
@@ -352,11 +328,7 @@ public class WirelessRedstoneFeature extends AFeature<WirelessConfigManager> imp
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
-    private void onChunkUnload(@NotNull ChunkUnloadEvent event) { // this should also be called when a world unloads
-        if (!getFeatureConfig().isEnabled()) {
-            return;
-        }
-
+    private void onChunkUnload(final @NotNull ChunkUnloadEvent event) { // this should also be called when a world unloads
         if (Bukkit.isPrimaryThread()) { // only ever call on main thread!
             if (chunkOfInterest.remove(event.getChunk().getChunkKey())) {
                 Collection<BlockState> signs = event.getChunk().getTileEntities(tileEntity -> Tag.ALL_SIGNS.isTagged(tileEntity.getType()), false); // danger, not a snapshot!
@@ -370,11 +342,7 @@ public class WirelessRedstoneFeature extends AFeature<WirelessConfigManager> imp
         }
     }
 
-    private void onChunkCompletelyLoaded(@NotNull Chunk chunk) {
-        if (!getFeatureConfig().isEnabled()) {
-            return;
-        }
-
+    private void onChunkCompletelyLoaded(final @NotNull Chunk chunk) {
         if (Bukkit.isPrimaryThread()) { // only ever call on main thread!
             chunkOfInterest.add(chunk.getChunkKey());
 
@@ -489,13 +457,9 @@ public class WirelessRedstoneFeature extends AFeature<WirelessConfigManager> imp
         }
 
         @Override
-        public <T extends BlockStateHolder<T>> boolean setBlock(@NotNull BlockVector3 position, @NotNull T block) throws WorldEditException {
-            if (!getFeatureConfig().isEnabled()) {
-                return super.setBlock(position, block);
-            }
-
-            Material oldType = BukkitAdapter.adapt(super.getBlock(position).getBlockType());
-            Material newType = BukkitAdapter.adapt(block.getBlockType());
+        public <T extends BlockStateHolder<T>> boolean setBlock(final @NotNull BlockVector3 position, final @NotNull T block) throws WorldEditException {
+            final @NotNull Material oldType = BukkitAdapter.adapt(super.getBlock(position).getBlockType());
+            final @NotNull Material newType = BukkitAdapter.adapt(block.getBlockType());
 
             if (super.setBlock(position, block)) {
                 if (Bukkit.isPrimaryThread()) {
